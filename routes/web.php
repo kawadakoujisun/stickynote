@@ -14,3 +14,7 @@
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/tasks', function () {
+    event(new \App\Events\TaskAdded);
+});
