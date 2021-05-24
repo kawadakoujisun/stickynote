@@ -26,6 +26,7 @@ Route::group(['middleware' => ['auth']], function () {
     });
     
     Route::get('/tasks', function () {
+        print 'tasks';
         $task = ['id' => 1, 'name' => 'メールの確認'];
         event(new \App\Events\TaskAdded($task));
     });
