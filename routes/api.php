@@ -24,6 +24,8 @@ Route::get('/todos',function(){
 Route::post('/todos',function(){
 
 	$todo = \App\Todo::create(request()->all());
+	
+	event(new \App\Events\TodoAdded($todo));
 
 	return $todo;
 	
