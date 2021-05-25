@@ -25,7 +25,7 @@ Route::post('/todos',function(){
 
 	$todo = \App\Todo::create(request()->all());
 	
-	event(new \App\Events\TodoAdded($todo));
+	event((new \App\Events\TodoAdded($todo))->dontBroadcastToCurrentUser());
 
 	return $todo;
 	

@@ -22,6 +22,11 @@
         },
         mounted(){
             axios.get('/api/todos').then(response => (this.todos = response.data));                                      
+        
+            window.Echo.channel('todo-added-channel')
+                        .listen('TodoAdded',response => {
+                            this.todos.push(response.todo);
+                        });  
         },
         methods:{
             addTodo(){
