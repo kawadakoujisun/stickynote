@@ -20,3 +20,11 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 Route::get('/todos',function(){
 	return \App\Todo::all();
 });
+
+Route::post('/todos',function(){
+
+	$todo = \App\Todo::create(request()->all());
+
+	return $todo;
+	
+});

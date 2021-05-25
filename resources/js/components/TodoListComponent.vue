@@ -6,6 +6,7 @@
                 <ul>
                 <li v-for="todo in todos">{{ todo['name'] }}</li>
                 </ul>
+                <input type="text" v-model="newTodo" @blur="addTodo">
             </div>
         </div>
     </div>
@@ -15,11 +16,23 @@
     export default {
         data(){
             return {
-                todos : []
+                todos : [],
+                newTodo : ''
             }
         },
         mounted(){
             axios.get('/api/todos').then(response => (this.todos = response.data));                                      
         },
+        methods:{
+            addTodo(){
+                axios.post('/api/todos',{
+                    name : this.newTodo
+                })
+                .then(response => this.todos.push(response.data));         
+    
+                this.newTodo = '';
+    
+            }
+        }
     }
 </script>

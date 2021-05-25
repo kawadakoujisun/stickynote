@@ -1921,10 +1921,12 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
-      todos: []
+      todos: [],
+      newTodo: ''
     };
   },
   mounted: function mounted() {
@@ -1933,6 +1935,18 @@ __webpack_require__.r(__webpack_exports__);
     axios.get('/api/todos').then(function (response) {
       return _this.todos = response.data;
     });
+  },
+  methods: {
+    addTodo: function addTodo() {
+      var _this2 = this;
+
+      axios.post('/api/todos', {
+        name: this.newTodo
+      }).then(function (response) {
+        return _this2.todos.push(response.data);
+      });
+      this.newTodo = '';
+    }
   }
 });
 
@@ -37610,7 +37624,29 @@ var render = function() {
             return _c("li", [_vm._v(_vm._s(todo["name"]))])
           }),
           0
-        )
+        ),
+        _vm._v(" "),
+        _c("input", {
+          directives: [
+            {
+              name: "model",
+              rawName: "v-model",
+              value: _vm.newTodo,
+              expression: "newTodo"
+            }
+          ],
+          attrs: { type: "text" },
+          domProps: { value: _vm.newTodo },
+          on: {
+            blur: _vm.addTodo,
+            input: function($event) {
+              if ($event.target.composing) {
+                return
+              }
+              _vm.newTodo = $event.target.value
+            }
+          }
+        })
       ])
     ])
   ])
