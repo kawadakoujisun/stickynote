@@ -31,4 +31,8 @@ Route::group(['middleware' => ['auth']], function () {
         event(new \App\Events\TaskAdded($task));
     });
 
+    Route::get('/todos', function(){
+    	return view('todos.index');
+    });
+
 });
