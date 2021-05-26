@@ -23,17 +23,16 @@
         mounted(){
             axios.get('/api/todos').then(response => (this.todos = response.data));                                      
         
-            window.Echo.channel('todo-added-channel')
+            window.Echo.private('todo-added-channel.' + window.laravel.user['id'])
                         .listen('TodoAdded',response => {
                             this.todos.push(response.todo);
                         });  
         },
         methods:{
             addTodo(){
-                console.log(window.laravel.user);
-                
                 axios.post('/api/todos',{
-                    name : this.newTodo
+                    name : this.newTodo,
+                    user_id : window.laravel.user['id']
                 })
                 .then(response => this.todos.push(response.data));         
     

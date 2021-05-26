@@ -1935,7 +1935,7 @@ __webpack_require__.r(__webpack_exports__);
     axios.get('/api/todos').then(function (response) {
       return _this.todos = response.data;
     });
-    window.Echo.channel('todo-added-channel').listen('TodoAdded', function (response) {
+    window.Echo["private"]('todo-added-channel.' + window.laravel.user['id']).listen('TodoAdded', function (response) {
       _this.todos.push(response.todo);
     });
   },
@@ -1944,7 +1944,8 @@ __webpack_require__.r(__webpack_exports__);
       var _this2 = this;
 
       axios.post('/api/todos', {
-        name: this.newTodo
+        name: this.newTodo,
+        user_id: window.laravel.user['id']
       }).then(function (response) {
         return _this2.todos.push(response.data);
       });

@@ -34,6 +34,7 @@ class TodoAdded implements ShouldBroadcast
     public function broadcastOn()
     {
         // return new PrivateChannel('channel-name');
-        return new Channel('todo-added-channel',$this->todo);
+        // return new Channel('todo-added-channel',$this->todo);
+        return new PrivateChannel('todo-added-channel.'.$this->todo->user_id);
     }
 }
