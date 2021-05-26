@@ -14,6 +14,14 @@
 
         </div>
 
+        <script>
+            // console.log(window);
+            if (window.laravel === undefined) {
+                window.laravel = {};
+            }
+            window.laravel.user = {!! Auth::user() !!};
+        </script>
+
         <script src="/js/app.js"></script>
     </body>
 </html>

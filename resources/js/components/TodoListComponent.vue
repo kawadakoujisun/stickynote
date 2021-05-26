@@ -30,6 +30,8 @@
         },
         methods:{
             addTodo(){
+                console.log(window.laravel.user);
+                
                 axios.post('/api/todos',{
                     name : this.newTodo
                 })
