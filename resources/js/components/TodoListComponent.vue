@@ -27,7 +27,7 @@
         },
         mounted(){
             // axios.get('/api/todos').then(response => (this.todos = response.data));                                      
-            axios.get('/api/todos', {user_id : window.laravel.user['id']}).then(response => {
+            axios.get(window.laravel.asset + '/api/todos').then(response => {
                 this.todos = [];
                 response.data.forEach(elem => {
                     if (elem['user_id'] == window.laravel.user['id']) {
@@ -43,7 +43,7 @@
         },
         methods:{
             addTodo(){
-                axios.post('/api/todos',{
+                axios.post(window.laravel.asset + '/api/todos', {
                     name : this.newTodo,
                     user_id : window.laravel.user['id']
                 })

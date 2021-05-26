@@ -1938,9 +1938,7 @@ __webpack_require__.r(__webpack_exports__);
     var _this = this;
 
     // axios.get('/api/todos').then(response => (this.todos = response.data));                                      
-    axios.get('/api/todos', {
-      user_id: window.laravel.user['id']
-    }).then(function (response) {
+    axios.get(window.laravel.asset + '/api/todos').then(function (response) {
       _this.todos = [];
       response.data.forEach(function (elem) {
         if (elem['user_id'] == window.laravel.user['id']) {
@@ -1956,7 +1954,7 @@ __webpack_require__.r(__webpack_exports__);
     addTodo: function addTodo() {
       var _this2 = this;
 
-      axios.post('/api/todos', {
+      axios.post(window.laravel.asset + '/api/todos', {
         name: this.newTodo,
         user_id: window.laravel.user['id']
       }).then(function (response) {

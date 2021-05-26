@@ -22,6 +22,7 @@
                 window.laravel = {};
             }
             window.laravel.user = {!! Auth::user() !!};
+            window.laravel.asset = "{!! asset('') !!}";
         </script>
 
         <script src="{{ asset('/js/app.js') }}"></script>
