@@ -1922,18 +1922,31 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
       todos: [],
-      newTodo: ''
+      newTodo: '',
+      user: {
+        name: window.laravel.user['name'],
+        id: window.laravel.user['id']
+      }
     };
   },
   mounted: function mounted() {
     var _this = this;
 
-    axios.get('/api/todos').then(function (response) {
-      return _this.todos = response.data;
+    // axios.get('/api/todos').then(response => (this.todos = response.data));                                      
+    axios.get('/api/todos', {
+      user_id: window.laravel.user['id']
+    }).then(function (response) {
+      _this.todos = [];
+      response.data.forEach(function (elem) {
+        if (elem['user_id'] == window.laravel.user['id']) {
+          _this.todos.push(elem);
+        }
+      });
     });
     window.Echo["private"]('todo-added-channel.' + window.laravel.user['id']).listen('TodoAdded', function (response) {
       _this.todos.push(response.todo);
@@ -43738,6 +43751,12 @@ var render = function() {
     _c("div", { staticClass: "row justify-content-center" }, [
       _c("div", { staticClass: "col-md-8" }, [
         _c("h1", [_vm._v("Todoリスト")]),
+        _vm._v(" "),
+        _c("p", [
+          _vm._v(
+            "name = " + _vm._s(_vm.user.name) + ", id = " + _vm._s(_vm.user.id)
+          )
+        ]),
         _vm._v(" "),
         _c(
           "ul",

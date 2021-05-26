@@ -8,6 +8,8 @@
         <title>Todos</title>
     </head>
     <body>
+        <p>name = {{ Auth::user()->name }}, id = {{ Auth::id() }}</p>
+        
         <div id="app">
 
         <todos-list></todos-list>
@@ -22,6 +24,6 @@
             window.laravel.user = {!! Auth::user() !!};
         </script>
 
-        <script src="/js/app.js"></script>
+        <script src="{{ asset('/js/app.js') }}"></script>
     </body>
 </html>
