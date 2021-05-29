@@ -34,5 +34,9 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/todos', function(){
     	return view('todos.index');
     });
+    
+    Route::get('/color-rects', function(){
+    	return view('color-rects.index');
+    });
 
 });
