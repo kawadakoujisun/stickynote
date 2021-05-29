@@ -30,3 +30,7 @@ Route::post('/todos',function(){
 	return $todo;
 	
 });
+
+Route::get('/color-rects', function(){
+	return \App\ColorRect::all();
+});

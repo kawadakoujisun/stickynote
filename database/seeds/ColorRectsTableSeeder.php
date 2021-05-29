@@ -24,7 +24,7 @@ class ColorRectsTableSeeder extends Seeder
         DB::table('color_rects')->insert([
             'pos_top'  => 300,
             'pos_left' => 500,
-            'color'    => 0xaaFFaa,
+            'color'    => 0xaaaaFF,
         ]);
     }
 }

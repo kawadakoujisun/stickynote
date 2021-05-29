@@ -1913,10 +1913,41 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      colorRects: []
+    };
+  },
   mounted: function mounted() {
+    var _this = this;
+
     var targetElement = this.$el;
     console.log('mounted ', targetElement);
+    axios.get(window.laravel.asset + '/api/color-rects').then(function (response) {
+      _this.colorRects = response.data;
+    });
+  },
+  directives: {
+    colorRectCustomDirective: {
+      bind: function bind(el, binding) {
+        var colorHex = '000000' + binding.value.color.toString(16);
+        colorHex = colorHex.substr(colorHex.length - 6);
+        console.log('bind ', el, binding);
+        console.log(binding.value.pos_top, binding.value.pos_left);
+        console.log(colorHex);
+        el.style.top = "".concat(binding.value.pos_top, "px");
+        el.style.left = "".concat(binding.value.pos_left, "px");
+        el.style.backgroundColor = '#' + colorHex; // background-color
+      }
+    }
   }
 });
 
@@ -6600,7 +6631,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n#color-rect-mount-id[data-v-79d82e90] {\n    width:  200px;\n    height: 200px;\n    border: 1px solid #000;\n    background-color: #ff0000;\n}\n", ""]);
+exports.push([module.i, "\n.color-rect-mount-class[data-v-79d82e90] {\n    width:  200px;\n    height: 200px;\n    border: 1px solid #000;\n    background-color: #ff0000;\n}\n.color-rect-class[data-v-79d82e90] {\n    position: relative;\n    width:  200px;\n    height: 200px;\n    border: 1px solid #000;\n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n", ""]);
 
 // exports
 
@@ -44618,7 +44649,25 @@ var render = function() {
   var _vm = this
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
-  return _c("div", { attrs: { id: "color-rect-mount-id" } })
+  return _c(
+    "div",
+    { staticClass: "color-rect-mount-class" },
+    _vm._l(_vm.colorRects, function(colorRect, index) {
+      return _c("div", {
+        directives: [
+          {
+            name: "colorRectCustomDirective",
+            rawName: "v-colorRectCustomDirective",
+            value: colorRect,
+            expression: "colorRect"
+          }
+        ],
+        key: index,
+        staticClass: "color-rect-class"
+      })
+    }),
+    0
+  )
 }
 var staticRenderFns = []
 render._withStripped = true
