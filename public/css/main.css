@@ -1,0 +1,49 @@
+@charset "UTF-8";
+
+
+
+
+/*
+ * RectTest
+ */
+
+.el_contextArea {
+    width: 80%;
+    height: 200px;
+    margin: 2rem auto;
+    border: 1px solid #000;
+    position: relative;
+}
+
+.el_contextMenu {
+    position: absolute;
+}
+
+.el_contextMenu.el_contextMenu__colorful > li {
+    list-style: none;
+    transition: box-shadow 0.1s;
+}
+
+.el_contextMenu.el_contextMenu__colorful > li:hover {
+    box-shadow: 0 0 4px #000;
+}
+
+.el_contextMenu.el_contextMenu__colorful > li:nth-child(3n + 1) {
+    background-color: #3e979b;
+}
+
+.el_contextMenu.el_contextMenu__colorful > li:nth-child(3n + 2) {
+    background-color: #6db464;
+}
+
+.el_contextMenu.el_contextMenu__colorful > li:nth-child(3n) {
+    background-color: #f3c14e;
+}
+
+.el_contextMenu.el_contextMenu__colorful > li > a {
+    padding: 0.5em 2em;
+    color: #fff;
+    text-decoration: none;
+    display: block;
+    height: 100%;
+}

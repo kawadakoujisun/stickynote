@@ -21,6 +21,8 @@ window.Vue = require('vue');
 
 // Vue.component('example-component', require('./components/ExampleComponent.vue').default);
 Vue.component('todos-list', require('./components/TodoListComponent.vue').default);
+Vue.component('rect-test', require('./components/RectTestComponent.vue').default);
+Vue.component('rect-test-2', require('./components/RectTest2Component.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to
