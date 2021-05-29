@@ -34,3 +34,33 @@ Route::post('/todos',function(){
 Route::get('/color-rects', function(){
 	return \App\ColorRect::all();
 });
+
+/*
+// 有効にしている書き方
+// Route::put('/color-rects', function(Request $request) {
+// はもちろんOKだが、
+// このコメントアウトしている書き方でもOKだった。
+Route::put('/color-rects', function() {
+	$colorRect = \App\ColorRect::findOrFail(request()->id);
+
+	if ($colorRect) {
+		$colorRect->pos_top  = request()->mountPos['y'];
+		$colorRect->pos_left = request()->mountPos['x'];
+
+		// データベースに保存する
+    	$colorRect->save();
+	}
+});
+*/
+
+Route::put('/color-rects', function(Request $request) {
+	$colorRect = \App\ColorRect::findOrFail($request->id);
+
+	if ($colorRect) {
+		$colorRect->pos_top  = $request->mountPos['y'];
+		$colorRect->pos_left = $request->mountPos['x'];
+
+		// データベースに保存する
+    	$colorRect->save();
+	}
+});

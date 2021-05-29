@@ -1930,29 +1930,33 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       colorRects: [],
-      // targetId: null,
+      // targetId: null,  // コメントアウトしているテストコードでしか使っていない
       // debugMouseDownCount: 0,
       // debugMouseMoveCount: 0,
       // debugMouseLeaveCount: 0,
       // debugMouseUpCount: 0,
       targetElem: null,
       targetElemMountPos: {
+        // targetElemがnullでないとき、有効な値が入っている。
         x: 0,
         // px（数値だけで単位の文字列は付けていない）
         y: 0
       },
       targetElemSize: {
+        // targetElemがnullでないとき、有効な値が入っている。
         width: 0,
         // px（数値だけで単位の文字列は付けていない）
         height: 0 // 枠の太さの分も込みの大きさ
 
       },
       moveStartTargetElemMountPos: {
+        // targetElemがnullでないとき、有効な値が入っている。
         x: 0,
         // px（数値だけで単位の文字列は付けていない）
         y: 0
       },
       moveStartMousePagePos: {
+        // targetElemがnullでないとき、有効な値が入っている。
         x: 0,
         // px（数値だけで単位の文字列は付けていない）
         y: 0
@@ -1979,8 +1983,10 @@ __webpack_require__.r(__webpack_exports__);
         el.style.top = "".concat(binding.value.pos_top, "px");
         el.style.left = "".concat(binding.value.pos_left, "px");
         el.style.backgroundColor = '#' + colorHex; // background-color
+        // const idBaseName = this.getColorRectIdBaseName();  // directives内はthisが使えない？
 
-        el.id = "color-rect-id-".concat(binding.value.id);
+        var idBaseName = 'color-rect-id-';
+        el.id = "".concat(idBaseName).concat(binding.value.id);
         var divTextElem = document.createElement('div');
         divTextElem.innerHTML = "id=".concat(binding.value.id, "<br>background-color=#").concat(colorHex);
         el.appendChild(divTextElem);
@@ -2042,7 +2048,7 @@ __webpack_require__.r(__webpack_exports__);
       // console.log('onChildMouseDownLeft', ++this.debugMouseDownCount, e, e.target, e.target.id);  return;
       if (this.targetElem === null) {
         console.log('onChildMouseDownLeft', e, e.target, e.target.id);
-        var idBaseName = 'color-rect-id-';
+        var idBaseName = this.getColorRectIdBaseName();
         var target = e.target;
 
         while (target) {
@@ -2098,15 +2104,34 @@ __webpack_require__.r(__webpack_exports__);
       // console.log('onMouseLeave', ++this.debugMouseLeaveCount, e, e.target, e.target.id);  return;
       if (this.targetElem) {
         console.log('onMouseLeave');
-        this.targetElem = null;
+        this.releaseTargetElem();
       }
     },
     onMouseUpLeft: function onMouseUpLeft(e) {
       // console.log('onMouseUpLeft', ++this.debugMouseUpCount, e, e.target, e.target.id);  return;
       if (this.targetElem) {
         console.log('onMouseUpLeft');
-        this.targetElem = null;
+        this.releaseTargetElem();
       }
+    },
+    releaseTargetElem: function releaseTargetElem() {
+      var idBaseName = this.getColorRectIdBaseName();
+      var id = this.targetElem.id.substr(idBaseName.length);
+      console.log(id, this.targetElemMountPos);
+      this.updateColorRect(id, this.targetElemMountPos);
+      this.targetElem = null;
+    },
+    // mountPos = {
+    //     x: 0,  // px（数値だけで単位の文字列は付けていない）
+    //     y: 0,
+    // };
+    // mountPosは台紙内における座標。            
+    updateColorRect: function updateColorRect(id, mountPos) {
+      axios.put(window.laravel.asset + '/api/color-rects', {
+        id: id,
+        mountPos: mountPos
+      }).then(function (response) {// 特にすることなし
+      });
     },
     // pagePos = {
     //     x: 0,  // px（数値だけで単位の文字列は付けていない）
@@ -2121,7 +2146,7 @@ __webpack_require__.r(__webpack_exports__);
         y: 0
       }; // 台紙の枠の太さ
 
-      var mountBorderWidth = 1;
+      var mountBorderWidth = this.getMountBorderWidth();
       var mountElem = this.$el; // 台紙の現在の画面内における座標
 
       var mountElemRect = mountElem.getBoundingClientRect(); // 台紙のページ内における座標
@@ -2133,13 +2158,21 @@ __webpack_require__.r(__webpack_exports__);
       mountPos.y = pagePos.y - mountElemPagePos.y - mountBorderWidth;
       return mountPos;
     },
+    // mountPos = {
+    //     x: 0,  // px（数値だけで単位の文字列は付けていない）
+    //     y: 0,
+    // };
+    // size = {
+    //     width:  0,  // px（数値だけで単位の文字列は付けていない）
+    //     height: 0,  // 枠の太さの分も込みの大きさにしておくのがいい
+    // };
     // mountPosは台紙内における座標。
     // sizeは大きさ。
     // modifiedMountPosは台紙内における座標。
     modifyPosInMount: function modifyPosInMount(mountPos, size) {
       var modifiedMountPos = mountPos; // 台紙の枠の太さ
 
-      var mountBorderWidth = 1;
+      var mountBorderWidth = this.getMountBorderWidth();
       var mountElem = this.$el; // 台紙の現在の画面内における座標
 
       var mountElemRect = mountElem.getBoundingClientRect(); // 台紙のサイズ
@@ -2154,6 +2187,12 @@ __webpack_require__.r(__webpack_exports__);
       if (mountPos.y < 0) modifiedMountPos.y = 0;
       if (mountPos.y + size.height > mountElemSize.height) modifiedMountPos.y = mountElemSize.height - size.height;
       return modifiedMountPos;
+    },
+    getColorRectIdBaseName: function getColorRectIdBaseName() {
+      return 'color-rect-id-';
+    },
+    getMountBorderWidth: function getMountBorderWidth() {
+      return 1;
     }
   }
 });
