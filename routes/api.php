@@ -17,9 +17,38 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
+
+
+
+/*
 Route::get('/todos',function(){
 	return \App\Todo::all();
 });
+*/
+
+/*
+// 有効にしている書き方
+// Route::get('/todos', function(Request $request) {
+// はもちろんOKだが、
+// このコメントアウトしている書き方でもOKだった。
+Route::get('/todos', function() {
+	$user_id = request()->user_id;
+	return \App\Todo::where('user_id', $user_id)->get();
+});
+*/
+
+Route::get('/todos', function(Request $request) {
+	// ここで\Auth::user()->idを使うとエラーになる。
+	// web.phpのRoute::get('/todos', function(){内では大丈夫だったので、
+	// ここで\Auth::user()->idを使うには何かが足りないのだろうか？
+	// $auth_user_id = \Auth::user()->id;
+
+	$user_id = $request->user_id;
+	return \App\Todo::where('user_id', $user_id)->get();
+});
+
+
+
 
 Route::post('/todos',function(){
 
@@ -31,9 +60,15 @@ Route::post('/todos',function(){
 	
 });
 
+
+
+
 Route::get('/color-rects', function(){
 	return \App\ColorRect::all();
 });
+
+
+
 
 /*
 // 有効にしている書き方

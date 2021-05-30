@@ -27,13 +27,24 @@
         },
         mounted(){
             // axios.get('/api/todos').then(response => (this.todos = response.data));                                      
-            axios.get(window.laravel.asset + '/api/todos').then(response => {
+            // axios.get(window.laravel.asset + '/api/todos').then(response => {
+            axios.get(window.laravel.asset + '/api/todos', {
+                params: {
+                    user_id : window.laravel.user['id'],
+                },
+            })
+            .then(response => {
+                /*
+                // paramsでユーザーIDを渡しマッチしたTodoしか返さないようにしたので、ここではユーザーIDのチェックはしなくてよい。
                 this.todos = [];
                 response.data.forEach(elem => {
                     if (elem['user_id'] == window.laravel.user['id']) {
                         this.todos.push(elem);
                     }
                 });
+                */
+                
+                this.todos = response.data;
             });
             
             window.Echo.private('todo-added-channel.' + window.laravel.user['id'])

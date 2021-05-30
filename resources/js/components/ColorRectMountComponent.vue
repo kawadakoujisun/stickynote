@@ -218,11 +218,15 @@
             },            
             
             releaseTargetElem() {
+                this.updateColorRect();
+                this.targetElem = null;
+            },
+            
+            updateColorRect: function () {
                 const idBaseName = this.getColorRectIdBaseName();
                 const id = this.targetElem.id.substr(idBaseName.length);
                 console.log(id, this.targetElemMountPos);
-                this.updateColorRect(id, this.targetElemMountPos);
-                this.targetElem = null;
+                this.updateColorRectInner(id, this.targetElemMountPos);
             },
             
             // mountPos = {
@@ -230,7 +234,7 @@
             //     y: 0,
             // };
             // mountPosは台紙内における座標。            
-            updateColorRect: function (id, mountPos) {
+            updateColorRectInner: function (id, mountPos) {
                 axios.put(window.laravel.asset + '/api/color-rects', {
                     id: id,
                     mountPos: mountPos,

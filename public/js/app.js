@@ -2115,18 +2115,21 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     releaseTargetElem: function releaseTargetElem() {
+      this.updateColorRect();
+      this.targetElem = null;
+    },
+    updateColorRect: function updateColorRect() {
       var idBaseName = this.getColorRectIdBaseName();
       var id = this.targetElem.id.substr(idBaseName.length);
       console.log(id, this.targetElemMountPos);
-      this.updateColorRect(id, this.targetElemMountPos);
-      this.targetElem = null;
+      this.updateColorRectInner(id, this.targetElemMountPos);
     },
     // mountPos = {
     //     x: 0,  // px（数値だけで単位の文字列は付けていない）
     //     y: 0,
     // };
     // mountPosは台紙内における座標。            
-    updateColorRect: function updateColorRect(id, mountPos) {
+    updateColorRectInner: function updateColorRectInner(id, mountPos) {
       axios.put(window.laravel.asset + '/api/color-rects', {
         id: id,
         mountPos: mountPos
@@ -2394,13 +2397,22 @@ __webpack_require__.r(__webpack_exports__);
     var _this = this;
 
     // axios.get('/api/todos').then(response => (this.todos = response.data));                                      
-    axios.get(window.laravel.asset + '/api/todos').then(function (response) {
-      _this.todos = [];
-      response.data.forEach(function (elem) {
-        if (elem['user_id'] == window.laravel.user['id']) {
-          _this.todos.push(elem);
-        }
+    // axios.get(window.laravel.asset + '/api/todos').then(response => {
+    axios.get(window.laravel.asset + '/api/todos', {
+      params: {
+        user_id: window.laravel.user['id']
+      }
+    }).then(function (response) {
+      /*
+      // paramsでユーザーIDを渡しマッチしたTodoしか返さないようにしたので、ここではユーザーIDのチェックはしなくてよい。
+      this.todos = [];
+      response.data.forEach(elem => {
+          if (elem['user_id'] == window.laravel.user['id']) {
+              this.todos.push(elem);
+          }
       });
+      */
+      _this.todos = response.data;
     });
     window.Echo["private"]('todo-added-channel.' + window.laravel.user['id']).listen('TodoAdded', function (response) {
       _this.todos.push(response.todo);

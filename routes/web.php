@@ -32,6 +32,10 @@ Route::group(['middleware' => ['auth']], function () {
     });
 
     Route::get('/todos', function(){
+        // ここで\Auth::user()->idを使うのはエラーにはならない。
+        // $auth_user_id = \Auth::user()->id;
+        // dd($auth_user_id);
+        
     	return view('todos.index');
     });
     
