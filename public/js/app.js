@@ -1981,6 +1981,21 @@ __webpack_require__.r(__webpack_exports__);
     axios.get(window.laravel.asset + '/api/color-rects').then(function (response) {
       _this.colorRects = response.data;
     });
+    window.Echo["private"]('color-rect-update-channel.' + window.laravel.user['id']).listen('ColorRectUpdate', function (response) {
+      var idBaseName = _this.getColorRectIdBaseName();
+
+      var updateId = "".concat(idBaseName).concat(response.colorRectUpdateParam.id);
+      var updateElem = document.getElementById(updateId); // console.log('listen out', response, response.colorRectUpdateParam.id, updateElem);
+
+      if (updateElem) {
+        // console.log('listen in');
+        if (_this.targetElem !== updateElem) {
+          // 操作中の要素でなかったら更新する
+          updateElem.style.top = "".concat(response.colorRectUpdateParam.pos_top, "px");
+          updateElem.style.left = "".concat(response.colorRectUpdateParam.pos_left, "px"); // console.log('listen last');
+        }
+      }
+    });
   },
   directives: {
     colorRectCustomDirective: {
@@ -1995,7 +2010,8 @@ __webpack_require__.r(__webpack_exports__);
         el.style.backgroundColor = '#' + colorHex; // background-color
         // const idBaseName = this.getColorRectIdBaseName();  // directives内はthisが使えない？
 
-        var idBaseName = 'color-rect-id-';
+        var idBaseName = 'color-rect-id-'; // 調べている時間がないので直書きしておく。
+
         el.id = "".concat(idBaseName).concat(binding.value.id);
         var divTextElem = document.createElement('div');
         divTextElem.innerHTML = "id=".concat(binding.value.id, "<br>background-color=#").concat(colorHex);
@@ -2094,6 +2110,7 @@ __webpack_require__.r(__webpack_exports__);
           this.moveIntervalId = setInterval(function () {
             _this2.updateColorRect();
           }, 500); // mili seconds
+          //100);  // 100ミリ秒だと「429 Too Many Requests」エラーになってしまう
           // 確認
           // ターゲットのページ内における座標
 
@@ -2160,7 +2177,8 @@ __webpack_require__.r(__webpack_exports__);
     // mountPosは台紙内における座標。            
     updateColorRectInner: function updateColorRectInner(updateColorRectParam) {
       axios.put(window.laravel.asset + '/api/color-rects', {
-        updateColorRectParam: updateColorRectParam
+        updateColorRectParam: updateColorRectParam,
+        user_id: window.laravel.user['id']
       }).then(function (response) {// 特にすることなし
       });
     },

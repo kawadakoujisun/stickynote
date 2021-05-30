@@ -126,6 +126,16 @@ Route::put('/color-rects', function(Request $request) {
 
 		// データベースに保存する
     	$colorRect->save();
+    	
+    	// イベント
+    	$colorRectUpdateParam = [
+    		'id'       => $colorRect->id,
+    		'pos_top'  => $colorRect->pos_top,
+    		'pos_left' => $colorRect->pos_left,
+    		'user_id'  => $request->user_id,
+    	];
+    	
+    	event((new \App\Events\ColorRectUpdate($colorRectUpdateParam))->dontBroadcastToCurrentUser());
 	}
 });
 

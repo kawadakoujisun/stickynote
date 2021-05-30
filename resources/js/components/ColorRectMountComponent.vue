@@ -65,6 +65,24 @@
                 .then(response => {
                     this.colorRects = response.data;
                 });
+                
+            window.Echo.private('color-rect-update-channel.' + window.laravel.user['id'])
+                .listen('ColorRectUpdate', response => {
+                    const idBaseName = this.getColorRectIdBaseName();
+                    const updateId = `${idBaseName}${response.colorRectUpdateParam.id}`; 
+                    
+                    const updateElem = document.getElementById(updateId);
+                    // console.log('listen out', response, response.colorRectUpdateParam.id, updateElem);
+                    
+                    if (updateElem) {
+                        // console.log('listen in');
+                        if (this.targetElem !== updateElem) {  // 操作中の要素でなかったら更新する
+                            updateElem.style.top  = `${response.colorRectUpdateParam.pos_top}px`;
+                            updateElem.style.left = `${response.colorRectUpdateParam.pos_left}px`;
+                            // console.log('listen last');
+                        }
+                    }
+                });
         },
         
         directives: {
@@ -82,7 +100,7 @@
                     el.style.backgroundColor = '#'+colorHex;  // background-color
                     
                     // const idBaseName = this.getColorRectIdBaseName();  // directives内はthisが使えない？
-                    const idBaseName = 'color-rect-id-';
+                    const idBaseName = 'color-rect-id-';                  // 調べている時間がないので直書きしておく。
                     el.id = `${idBaseName}${binding.value.id}`;
                     
                     const divTextElem = document.createElement('div');
@@ -185,6 +203,7 @@
                             this.updateColorRect();
                         },
                         500);  // mili seconds
+                        //100);  // 100ミリ秒だと「429 Too Many Requests」エラーになってしまう
                         
                         // 確認
                         // ターゲットのページ内における座標
@@ -264,6 +283,7 @@
             updateColorRectInner: function (updateColorRectParam) {
                 axios.put(window.laravel.asset + '/api/color-rects', {
                     updateColorRectParam: updateColorRectParam,
+                    user_id: window.laravel.user['id'],
                 })
                     .then(response => {
                         // 特にすることなし
