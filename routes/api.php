@@ -71,10 +71,17 @@ Route::get('/color-rects', function(){
 
 
 /*
-// 有効にしている書き方
+// もう一方の書き方
 // Route::put('/color-rects', function(Request $request) {
 // はもちろんOKだが、
 // このコメントアウトしている書き方でもOKだった。
+//
+// 引数が
+// axios.put(window.laravel.asset + '/api/color-rects', {
+//     id: id,
+//     mountPos: mountPos,
+// })
+// だった頃の書き方
 Route::put('/color-rects', function() {
 	$colorRect = \App\ColorRect::findOrFail(request()->id);
 
@@ -88,6 +95,15 @@ Route::put('/color-rects', function() {
 });
 */
 
+/*
+// この書き方もOK。
+//
+// 引数が
+// axios.put(window.laravel.asset + '/api/color-rects', {
+//     id: id,
+//     mountPos: mountPos,
+// })
+// だった頃の書き方
 Route::put('/color-rects', function(Request $request) {
 	$colorRect = \App\ColorRect::findOrFail($request->id);
 
@@ -99,3 +115,17 @@ Route::put('/color-rects', function(Request $request) {
     	$colorRect->save();
 	}
 });
+*/
+
+Route::put('/color-rects', function(Request $request) {
+	$colorRect = \App\ColorRect::findOrFail($request->updateColorRectParam['id']);
+
+	if ($colorRect) {
+		$colorRect->pos_top  = $request->updateColorRectParam['mountPos']['y'];
+		$colorRect->pos_left = $request->updateColorRectParam['mountPos']['x'];
+
+		// データベースに保存する
+    	$colorRect->save();
+	}
+});
+

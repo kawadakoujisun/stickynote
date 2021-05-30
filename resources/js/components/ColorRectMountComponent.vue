@@ -46,6 +46,14 @@
                     x: 0,  // px（数値だけで単位の文字列は付けていない）
                     y: 0,
                 },
+                moveIntervalId: null,  // targetElemがnullでないとき、有効な値が入っている。
+                lastUpdateColorRectParam: {
+                    id: null,
+                    mountPos: {
+                        x: null,  // px（数値だけで単位の文字列は付けていない）
+                        y: null,
+                    },
+                },
             };
         },
         
@@ -173,6 +181,11 @@
                         this.moveStartMousePagePos.x = e.pageX;
                         this.moveStartMousePagePos.y = e.pageY;
                         
+                        this.moveIntervalId = setInterval(() => {
+                            this.updateColorRect();
+                        },
+                        500);  // mili seconds
+                        
                         // 確認
                         // ターゲットのページ内における座標
                         const targetElemPagePos = {};
@@ -219,29 +232,70 @@
             
             releaseTargetElem() {
                 this.updateColorRect();
+                clearInterval(this.moveIntervalId);
+                this.resetLastUpdateColorRectParam();
                 this.targetElem = null;
             },
             
             updateColorRect: function () {
                 const idBaseName = this.getColorRectIdBaseName();
                 const id = this.targetElem.id.substr(idBaseName.length);
-                console.log(id, this.targetElemMountPos);
-                this.updateColorRectInner(id, this.targetElemMountPos);
+                const updateColorRectParam = {
+                    id: id,
+                    mountPos: this.targetElemMountPos,
+                };
+                
+                const isEqual = this.isEqualToUpdateColorRectParam(this.lastUpdateColorRectParam, updateColorRectParam);
+                console.log(isEqual, updateColorRectParam);
+                if (isEqual) return;  // 同じなら更新しない
+                this.setLastUpdateColorRectParam(updateColorRectParam);
+                
+                this.updateColorRectInner(updateColorRectParam);
             },
             
-            // mountPos = {
-            //     x: 0,  // px（数値だけで単位の文字列は付けていない）
-            //     y: 0,
+            // updateColorRectParam = {
+            //     id: null,
+            //     mountPos: {
+            //         x: null,  // px（数値だけで単位の文字列は付けていない）
+            //         y: null,
+            //     },
             // };
             // mountPosは台紙内における座標。            
-            updateColorRectInner: function (id, mountPos) {
+            updateColorRectInner: function (updateColorRectParam) {
                 axios.put(window.laravel.asset + '/api/color-rects', {
-                    id: id,
-                    mountPos: mountPos,
+                    updateColorRectParam: updateColorRectParam,
                 })
                     .then(response => {
                         // 特にすることなし
                     });
+            },
+            
+            isEqualToUpdateColorRectParam: function (paramA, paramB) {
+                return (paramA.id === paramB.id
+                    && paramA.mountPos.x === paramB.mountPos.x
+                    && paramA.mountPos.y === paramB.mountPos.y); 
+            },
+            
+            setLastUpdateColorRectParam: function (param) {
+                // 代入に気を付ける
+                this.lastUpdateColorRectParam.id = param.id;
+                this.lastUpdateColorRectParam.mountPos.x = param.mountPos.x;
+                this.lastUpdateColorRectParam.mountPos.y = param.mountPos.y;
+            },
+            
+            resetLastUpdateColorRectParam: function () {
+                // 代入に気を付ける
+                const oldParam = {
+                    id: this.lastUpdateColorRectParam.id,
+                    mountPos: {
+                        x: this.lastUpdateColorRectParam.mountPos.x,
+                        y: this.lastUpdateColorRectParam.mountPos.y,
+                    },
+                };
+                this.lastUpdateColorRectParam.id = null;
+                this.lastUpdateColorRectParam.mountPos.x = null;
+                this.lastUpdateColorRectParam.mountPos.y = null;
+                return oldParam;
             },
             
             // pagePos = {
@@ -286,7 +340,10 @@
             // sizeは大きさ。
             // modifiedMountPosは台紙内における座標。
             modifyPosInMount: function (mountPos, size) {
-                const modifiedMountPos = mountPos;
+                const modifiedMountPos = {
+                    x: mountPos.x,
+                    y: mountPos.y,
+                };
                 
                 // 台紙の枠の太さ
                 const mountBorderWidth = this.getMountBorderWidth();
