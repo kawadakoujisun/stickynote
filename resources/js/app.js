@@ -24,6 +24,7 @@ Vue.component('todos-list', require('./components/TodoListComponent.vue').defaul
 Vue.component('rect-test', require('./components/RectTestComponent.vue').default);
 Vue.component('rect-test-2', require('./components/RectTest2Component.vue').default);
 Vue.component('color-rect-mount', require('./components/ColorRectMountComponent.vue').default);
+Vue.component('color-rect-context-menu', require('./components/ColorRectContextMenuComponent.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

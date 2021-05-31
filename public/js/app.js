@@ -1899,6 +1899,55 @@ module.exports = {
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=script&lang=js&":
+/*!****************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=script&lang=js& ***!
+  \****************************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: {
+    showProps: Object
+  },
+  data: function data() {
+    return {
+      isShow: this.showProps.isShow
+    };
+  },
+  watch: {
+    'showProps.isShow': function showPropsIsShow(newValue, oldValue) {
+      // showProps: functionでは変更を検知できなかった。Objectの変更は検知できないのだろうか？
+      console.log('newValue', newValue);
+      console.log('oldvalue', oldValue);
+      console.log('this', this.showProps);
+      this.isShow = this.showProps.isShow;
+    }
+  },
+  methods: {
+    onClickLeft: function onClickLeft(e) {
+      var param = {
+        pagePos: {
+          x: e.pageX,
+          y: e.pageY
+        },
+        event: e
+      };
+      this.$emit('hide-context-menu-custom-event', param);
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColorRectMountComponent.vue?vue&type=script&lang=js&":
 /*!**********************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColorRectMountComponent.vue?vue&type=script&lang=js& ***!
@@ -1908,6 +1957,9 @@ module.exports = {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
+//
 //
 //
 //
@@ -1970,6 +2022,13 @@ __webpack_require__.r(__webpack_exports__);
           // px（数値だけで単位の文字列は付けていない）
           y: null
         }
+      },
+      showContextMenu: {
+        isShow: false,
+        mountPos: {
+          x: 0,
+          y: 0
+        }
       }
     };
   },
@@ -1998,7 +2057,7 @@ __webpack_require__.r(__webpack_exports__);
     });
   },
   directives: {
-    colorRectCustomDirective: {
+    'color-rect-custom-directive': {
       bind: function bind(el, binding) {
         var colorHex = '000000' + binding.value.color.toString(16);
         colorHex = colorHex.substr(colorHex.length - 6);
@@ -2093,9 +2152,9 @@ __webpack_require__.r(__webpack_exports__);
 
         if (this.targetElem) {
           // ターゲットの台紙内における座標
-          this.targetElemMountPos.x = parseInt(this.targetElem.style.left); // 単位を取り除く
+          this.targetElemMountPos.x = parseInt(this.targetElem.style.left, 10); // 単位を取り除く
 
-          this.targetElemMountPos.y = parseInt(this.targetElem.style.top); // ターゲットの現在の画面内における座標
+          this.targetElemMountPos.y = parseInt(this.targetElem.style.top, 10); // ターゲットの現在の画面内における座標
 
           var targetElemRect = this.targetElem.getBoundingClientRect(); // ターゲットのサイズ
 
@@ -2123,6 +2182,16 @@ __webpack_require__.r(__webpack_exports__);
         }
       }
     },
+    onChildClickRight: function onChildClickRight(e) {
+      console.log('onChildClickRight');
+      var pagePos = {};
+      pagePos.x = e.pageX;
+      pagePos.y = e.pageY;
+      var mountPos = this.convertPosFromPageToMount(pagePos);
+      this.showContextMenu.isShow = true;
+      this.showContextMenu.mountPos.x = mountPos.x;
+      this.showContextMenu.mountPos.y = mountPos.y;
+    },
     onMouseMove: function onMouseMove(e) {
       // console.log('onMouseMove', ++this.debugMouseMoveCount, e, e.target, e.target.id);  return;
       if (this.targetElem) {
@@ -2146,6 +2215,13 @@ __webpack_require__.r(__webpack_exports__);
         console.log('onMouseUpLeft');
         this.releaseTargetElem();
       }
+    },
+    onHideContextMenu: function onHideContextMenu(param) {
+      console.log('onHideContextMenu');
+      console.log(param);
+      this.showContextMenu.isShow = false;
+      this.showContextMenu.mountPos.x = 0;
+      this.showContextMenu.mountPos.y = 0;
     },
     releaseTargetElem: function releaseTargetElem() {
       this.updateColorRect();
@@ -6945,6 +7021,25 @@ __webpack_require__.r(__webpack_exports__);
 
 })));
 //# sourceMappingURL=bootstrap.js.map
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=style&index=0&id=b95393ca&scoped=true&lang=css&":
+/*!***********************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=style&index=0&id=b95393ca&scoped=true&lang=css& ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n.color-rect-context-menu-class[data-v-b95393ca] {\n    position: absolute;\n    width:  150px;\n    height: 300px;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  300;\n    left: 300;\n}\n", ""]);
+
+// exports
 
 
 /***/ }),
@@ -44320,6 +44415,36 @@ runtime.setup(pusher_Pusher);
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=style&index=0&id=b95393ca&scoped=true&lang=css&":
+/*!***************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=style&index=0&id=b95393ca&scoped=true&lang=css& ***!
+  \***************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./ColorRectContextMenuComponent.vue?vue&type=style&index=0&id=b95393ca&scoped=true&lang=css& */ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=style&index=0&id=b95393ca&scoped=true&lang=css&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColorRectMountComponent.vue?vue&type=style&index=0&id=79d82e90&scoped=true&lang=css&":
 /*!*********************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColorRectMountComponent.vue?vue&type=style&index=0&id=79d82e90&scoped=true&lang=css& ***!
@@ -44964,6 +45089,61 @@ exports.clearImmediate = (typeof self !== "undefined" && self.clearImmediate) ||
 
 /***/ }),
 
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=template&id=b95393ca&scoped=true&":
+/*!********************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=template&id=b95393ca&scoped=true& ***!
+  \********************************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    {
+      directives: [
+        {
+          name: "show",
+          rawName: "v-show",
+          value: _vm.isShow,
+          expression: "isShow"
+        }
+      ],
+      staticClass: "color-rect-context-menu-class",
+      on: {
+        click: function($event) {
+          if (
+            !$event.type.indexOf("key") &&
+            _vm._k($event.keyCode, "left", 37, $event.key, [
+              "Left",
+              "ArrowLeft"
+            ])
+          ) {
+            return null
+          }
+          if ("button" in $event && $event.button !== 0) {
+            return null
+          }
+          return _vm.onClickLeft($event)
+        }
+      }
+    },
+    [_c("p", [_vm._v("context menu")])]
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
 /***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColorRectMountComponent.vue?vue&type=template&id=79d82e90&scoped=true&":
 /*!**************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/ColorRectMountComponent.vue?vue&type=template&id=79d82e90&scoped=true& ***!
@@ -45006,38 +45186,51 @@ var render = function() {
         }
       }
     },
-    _vm._l(_vm.colorRects, function(colorRect, index) {
-      return _c("div", {
-        directives: [
-          {
-            name: "colorRectCustomDirective",
-            rawName: "v-colorRectCustomDirective",
-            value: colorRect,
-            expression: "colorRect"
-          }
-        ],
-        key: index,
-        staticClass: "color-rect-class",
-        on: {
-          mousedown: function($event) {
-            if (
-              !$event.type.indexOf("key") &&
-              _vm._k($event.keyCode, "left", 37, $event.key, [
-                "Left",
-                "ArrowLeft"
-              ])
-            ) {
-              return null
+    [
+      _vm._l(_vm.colorRects, function(colorRect, index) {
+        return _c("div", {
+          directives: [
+            {
+              name: "color-rect-custom-directive",
+              rawName: "v-color-rect-custom-directive",
+              value: colorRect,
+              expression: "colorRect"
             }
-            if ("button" in $event && $event.button !== 0) {
-              return null
+          ],
+          key: index,
+          staticClass: "color-rect-class",
+          on: {
+            mousedown: function($event) {
+              if (
+                !$event.type.indexOf("key") &&
+                _vm._k($event.keyCode, "left", 37, $event.key, [
+                  "Left",
+                  "ArrowLeft"
+                ])
+              ) {
+                return null
+              }
+              if ("button" in $event && $event.button !== 0) {
+                return null
+              }
+              return _vm.onChildMouseDownLeft($event)
+            },
+            contextmenu: function($event) {
+              $event.preventDefault()
+              return _vm.onChildClickRight($event)
             }
-            return _vm.onChildMouseDownLeft($event)
           }
-        }
+        })
+      }),
+      _vm._v(" "),
+      _c("p", [_vm._v("showContextMenu = " + _vm._s(_vm.showContextMenu))]),
+      _vm._v(" "),
+      _c("color-rect-context-menu", {
+        attrs: { "show-props": _vm.showContextMenu },
+        on: { "hide-context-menu-custom-event": _vm.onHideContextMenu }
       })
-    }),
-    0
+    ],
+    2
   )
 }
 var staticRenderFns = []
@@ -57468,6 +57661,7 @@ Vue.component('todos-list', __webpack_require__(/*! ./components/TodoListCompone
 Vue.component('rect-test', __webpack_require__(/*! ./components/RectTestComponent.vue */ "./resources/js/components/RectTestComponent.vue")["default"]);
 Vue.component('rect-test-2', __webpack_require__(/*! ./components/RectTest2Component.vue */ "./resources/js/components/RectTest2Component.vue")["default"]);
 Vue.component('color-rect-mount', __webpack_require__(/*! ./components/ColorRectMountComponent.vue */ "./resources/js/components/ColorRectMountComponent.vue")["default"]);
+Vue.component('color-rect-context-menu', __webpack_require__(/*! ./components/ColorRectContextMenuComponent.vue */ "./resources/js/components/ColorRectContextMenuComponent.vue")["default"]);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -57527,6 +57721,93 @@ window.Echo = new laravel_echo__WEBPACK_IMPORTED_MODULE_0__["default"]({
   cluster: "ap3",
   encrypted: true
 });
+
+/***/ }),
+
+/***/ "./resources/js/components/ColorRectContextMenuComponent.vue":
+/*!*******************************************************************!*\
+  !*** ./resources/js/components/ColorRectContextMenuComponent.vue ***!
+  \*******************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ColorRectContextMenuComponent_vue_vue_type_template_id_b95393ca_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./ColorRectContextMenuComponent.vue?vue&type=template&id=b95393ca&scoped=true& */ "./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=template&id=b95393ca&scoped=true&");
+/* harmony import */ var _ColorRectContextMenuComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./ColorRectContextMenuComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _ColorRectContextMenuComponent_vue_vue_type_style_index_0_id_b95393ca_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./ColorRectContextMenuComponent.vue?vue&type=style&index=0&id=b95393ca&scoped=true&lang=css& */ "./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=style&index=0&id=b95393ca&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _ColorRectContextMenuComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _ColorRectContextMenuComponent_vue_vue_type_template_id_b95393ca_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _ColorRectContextMenuComponent_vue_vue_type_template_id_b95393ca_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  "b95393ca",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/ColorRectContextMenuComponent.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=script&lang=js&":
+/*!********************************************************************************************!*\
+  !*** ./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=script&lang=js& ***!
+  \********************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ColorRectContextMenuComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./ColorRectContextMenuComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_ColorRectContextMenuComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=style&index=0&id=b95393ca&scoped=true&lang=css&":
+/*!****************************************************************************************************************************!*\
+  !*** ./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=style&index=0&id=b95393ca&scoped=true&lang=css& ***!
+  \****************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_ColorRectContextMenuComponent_vue_vue_type_style_index_0_id_b95393ca_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./ColorRectContextMenuComponent.vue?vue&type=style&index=0&id=b95393ca&scoped=true&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=style&index=0&id=b95393ca&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_ColorRectContextMenuComponent_vue_vue_type_style_index_0_id_b95393ca_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_ColorRectContextMenuComponent_vue_vue_type_style_index_0_id_b95393ca_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_ColorRectContextMenuComponent_vue_vue_type_style_index_0_id_b95393ca_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_ColorRectContextMenuComponent_vue_vue_type_style_index_0_id_b95393ca_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+
+
+/***/ }),
+
+/***/ "./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=template&id=b95393ca&scoped=true&":
+/*!**************************************************************************************************************!*\
+  !*** ./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=template&id=b95393ca&scoped=true& ***!
+  \**************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColorRectContextMenuComponent_vue_vue_type_template_id_b95393ca_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./ColorRectContextMenuComponent.vue?vue&type=template&id=b95393ca&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/ColorRectContextMenuComponent.vue?vue&type=template&id=b95393ca&scoped=true&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColorRectContextMenuComponent_vue_vue_type_template_id_b95393ca_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_ColorRectContextMenuComponent_vue_vue_type_template_id_b95393ca_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
 
 /***/ }),
 

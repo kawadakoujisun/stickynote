@@ -8,11 +8,14 @@
         <div
             v-for="(colorRect, index) in colorRects"
             v-bind:key="index"
-            v-colorRectCustomDirective=colorRect
+            v-color-rect-custom-directive=colorRect
             class="color-rect-class"
             @mousedown.left="onChildMouseDownLeft"
+            @click.right.prevent="onChildClickRight"
         >
         </div>
+        <p>showContextMenu = {{ showContextMenu }}</p>
+        <color-rect-context-menu v-bind:show-props="showContextMenu" @hide-context-menu-custom-event="onHideContextMenu"></color-rect-context-menu>
     </div>
 </template>
 
@@ -54,6 +57,14 @@
                         y: null,
                     },
                 },
+                
+                showContextMenu: {
+                    isShow: false,
+                    mountPos: {
+                        x: 0,
+                        y: 0,
+                    },
+                },
             };
         },
         
@@ -86,7 +97,7 @@
         },
         
         directives: {
-            colorRectCustomDirective: {
+            'color-rect-custom-directive': {
                 bind: function (el, binding) {
                     let colorHex = '000000' + binding.value.color.toString(16);
                     colorHex = colorHex.substr(colorHex.length - 6);
@@ -184,8 +195,8 @@
                     
                     if (this.targetElem) {
                         // ターゲットの台紙内における座標
-                        this.targetElemMountPos.x = parseInt(this.targetElem.style.left);  // 単位を取り除く
-                        this.targetElemMountPos.y = parseInt(this.targetElem.style.top);
+                        this.targetElemMountPos.x = parseInt(this.targetElem.style.left, 10);  // 単位を取り除く
+                        this.targetElemMountPos.y = parseInt(this.targetElem.style.top, 10);
                         
                         // ターゲットの現在の画面内における座標
                         const targetElemRect = this.targetElem.getBoundingClientRect();
@@ -215,6 +226,19 @@
                         console.log(target.id, targetElemRect, convertedTargetElemMountPos, this.targetElemMountPos);
                     }
                 }
+            },
+            
+            onChildClickRight: function (e) {
+                console.log('onChildClickRight');
+                
+                const pagePos = {};
+                pagePos.x = e.pageX;
+                pagePos.y = e.pageY;
+                const mountPos = this.convertPosFromPageToMount(pagePos);
+                
+                this.showContextMenu.isShow = true;
+                this.showContextMenu.mountPos.x = mountPos.x;
+                this.showContextMenu.mountPos.y = mountPos.y;
             },
             
             onMouseMove: function (e) {
@@ -248,6 +272,15 @@
                     this.releaseTargetElem();
                 }
             },            
+            
+            onHideContextMenu: function (param) {
+                console.log('onHideContextMenu');
+                console.log(param);
+                
+                this.showContextMenu.isShow = false;
+                this.showContextMenu.mountPos.x = 0;
+                this.showContextMenu.mountPos.y = 0;
+            },
             
             releaseTargetElem() {
                 this.updateColorRect();
@@ -392,7 +425,7 @@
                 return 1;  
             },
         },
-    }
+    };
 </script>
 
 <style scoped>
