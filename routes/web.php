@@ -22,7 +22,8 @@ Route::group(['middleware' => ['auth']], function () {
 
     Route::get('/', function () {
         // return view('welcome');
-        return view('TaskReciever');
+        // return view('TaskReciever');
+        return view('index');
     });
     
     Route::get('/tasks', function () {
@@ -43,4 +44,8 @@ Route::group(['middleware' => ['auth']], function () {
     	return view('color-rects.index');
     });
 
+    Route::get('/work', function(){
+    	return view('work.index');
+    });
+        
 });
