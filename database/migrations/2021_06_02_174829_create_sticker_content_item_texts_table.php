@@ -15,12 +15,12 @@ class CreateStickerContentItemTextsTable extends Migration
     {
         Schema::create('sticker_content_item_texts', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->unsignedBigInteger('content_id');
+            $table->unsignedBigInteger('sticker_id');
             $table->string('text');
             $table->timestamps();
             
             // 外部キー制約
-            $table->foreign('content_id')->references('id')->on('sticker_contents')->onDelete('cascade');
+            $table->foreign('sticker_id')->references('id')->on('stickers')->onDelete('cascade');
         });
     }
 

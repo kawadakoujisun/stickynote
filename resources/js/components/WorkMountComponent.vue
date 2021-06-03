@@ -154,7 +154,7 @@
                     
                     if (updateElem) {
                         const divTextElem = document.createElement('div');
-                        divTextElem.innerHTML = response.eventParam.text;  // TODO: html構文をそのまま出力して！
+                        divTextElem.innerHTML = response.eventParam.text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
                         updateElem.appendChild(divTextElem);
                     }
                 });
@@ -180,7 +180,7 @@
                     if (texts) {
                         for (let i = 0; i < texts.length; ++i) {
                             const divTextElem = document.createElement('div');
-                            divTextElem.innerHTML = texts[i];  // TODO: html構文をそのまま出力して！
+                            divTextElem.innerHTML = texts[i];  // TODO(kawadakoujisun): html構文をそのまま出力して！
                             el.appendChild(divTextElem);
                         }
                     }

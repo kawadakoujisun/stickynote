@@ -147,9 +147,10 @@ Route::get('/work-mount', function() {
 
     $stickers = \App\Sticker::all();
     foreach ($stickers as $sticker) {
-		$stickerInfoItemPos   = $sticker->infoItemPos;
-		$stickerInfoItemColor = $sticker->infoItemColor;
-		$stickerContent = $sticker->content;
+		$stickerInfoItemPos      = $sticker->infoItemPos;
+		$stickerInfoItemColor    = $sticker->infoItemColor;
+		$stickerContentLinks     = $sticker->contentLinks;
+		$stickerContentItemTexts = $sticker->contentItemTexts;
 		
 		if ($stickerInfoItemPos && $stickerInfoItemColor) {
 			$stickerParam = [
@@ -159,14 +160,27 @@ Route::get('/work-mount', function() {
 				'color'    => $stickerInfoItemColor->color,
 			];
 			
-			if ($stickerContent) {
-				$contentItemTexts = $stickerContent->contentItemTexts;
+			if ($stickerContentLinks) {
 				$texts = array();
-				foreach ($contentItemTexts as $contentItemText) {
-					array_push($texts, $contentItemText->text);
+				
+				foreach ($stickerContentLinks as $contentLink) {
+					$item_id = $contentLink->item_id;
+					if ($contentLink->item_type == \App\Sticker::$contentItemType['text']) {
+						if ($stickerContentItemTexts) {
+							$contentItemText = $stickerContentItemTexts->where('id', $item_id)->first();
+							if ($contentItemText) {
+								$text = $contentItemText->text;
+								if ($text) {
+							        array_push($texts, $text);
+								}
+							}
+						}
+					}
 				}
 				
-				$stickerParam['texts'] = $texts;
+				if(count($texts) > 0) {
+					$stickerParam['texts'] = $texts;
+				}
 			}
 			
 			array_push($stickerParams, $stickerParam);
@@ -228,23 +242,20 @@ Route::post('/work-sticker-content-item-text-create', function(Request $request)
 	$sticker = \App\Sticker::findOrFail($request->reqParam['id']);
 
 	if ($sticker) {
-		$stickerContent = $sticker->content;
-		if ($stickerContent) {
-			$text = $request->reqParam['text'];
-			
-			// テキストを作成し、データベースに保存する
-			$stickerContent->createContentItemText([
-			    'text' => $text,
-			]);
-	    	
-	    	// イベント
-	    	$eventParam = [
-	    		'id'      => $sticker->id,
-	    		'text'    => $text,
-	    		'user_id' => $request->user_id,
-	    	];
-	    	
-	    	event((new \App\Events\StickerContentItemTextCreate($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
-		}
+		$text = $request->reqParam['text'];
+		
+		// テキストを作成し、データベースに保存する
+		$sticker->createContentItemText([
+		    'text' => $text,
+		]);
+	    
+	    // イベント
+	    $eventParam = [
+	    	'id'      => $sticker->id,
+	    	'text'    => $text,
+	    	'user_id' => $request->user_id,
+	    ];
+	    
+	    event((new \App\Events\StickerContentItemTextCreate($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
 	}
 });

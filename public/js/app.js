@@ -2753,7 +2753,7 @@ __webpack_require__.r(__webpack_exports__);
 
       if (updateElem) {
         var divTextElem = document.createElement('div');
-        divTextElem.innerHTML = response.eventParam.text; // TODO: html構文をそのまま出力して！
+        divTextElem.innerHTML = response.eventParam.text; // TODO(kawadakoujisun): html構文をそのまま出力して！
 
         updateElem.appendChild(divTextElem);
       }
@@ -2778,7 +2778,7 @@ __webpack_require__.r(__webpack_exports__);
         if (texts) {
           for (var i = 0; i < texts.length; ++i) {
             var divTextElem = document.createElement('div');
-            divTextElem.innerHTML = texts[i]; // TODO: html構文をそのまま出力して！
+            divTextElem.innerHTML = texts[i]; // TODO(kawadakoujisun): html構文をそのまま出力して！
 
             el.appendChild(divTextElem);
           }

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateStickerContentsTable extends Migration
+class CreateStickerContentLinksTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,11 @@ class CreateStickerContentsTable extends Migration
      */
     public function up()
     {
-        Schema::create('sticker_contents', function (Blueprint $table) {
+        Schema::create('sticker_content_links', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('sticker_id');
-            $table->unsignedInteger('item_type')->nullable();
-            $table->unsignedBigInteger('item_id')->nullable();
+            $table->unsignedInteger('item_type');
+            $table->unsignedBigInteger('item_id');
             $table->timestamps();
             
             // 外部キー制約
@@ -32,6 +32,6 @@ class CreateStickerContentsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sticker_contents');
+        Schema::dropIfExists('sticker_content_links');
     }
 }
