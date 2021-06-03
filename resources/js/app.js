@@ -27,6 +27,7 @@ Vue.component('color-rect-mount', require('./components/ColorRectMountComponent.
 Vue.component('color-rect-context-menu', require('./components/ColorRectContextMenuComponent.vue').default);
 Vue.component('work-mount', require('./components/WorkMountComponent.vue').default);
 Vue.component('work-sticker-context-menu', require('./components/WorkStickerContextMenuComponent.vue').default);
+Vue.component('work-sticker-color-change-window', require('./components/WorkStickerColorChangeWindowComponent.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

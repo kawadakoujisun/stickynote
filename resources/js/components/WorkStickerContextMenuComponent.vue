@@ -2,13 +2,15 @@
     <div
         v-show="isShow"
         class="sticker-context-menu-overlay-class"
-        @click.left="onClickLeft"
+        @click.self.prepend="onClickStickerContextMenuOverlay"
     >
         <div
             class="sticker-context-menu-class"
             id="sticker-content-menu-id"
+            @click.self.prepend="onClickStickerContextMenu"
         >
-            <p>context menu</p>
+            <div><button @click.prepend="onClickChangeColor">色を変更</button></div>
+            <div><button @click.prepend="onClickAddText">テキストを追加</button></div>
         </div>
     </div>
 </template>
@@ -38,13 +40,42 @@
         },
         
         methods: {
-            onClickLeft: function (e) {
-                const param = {
+            onClickStickerContextMenuOverlay: function (e) {
+                console.log('onClickStickerContextMenuOverlay');
+                const emitParam = {
                     event: e,
-                    dummy: '',
+                    result: 'none',
                 };
-                this.$emit('hide-sticker-context-menu-custom-event', param);
-            }
+                this.$emit('hide-sticker-context-menu-custom-event', emitParam); 
+            },
+            
+            onClickStickerContextMenu: function (e) {
+                console.log('onClickStickerContextMenu');
+                // 何もしないでもいいのだが、コンテキストメニューを閉じることにする。
+                const emitParam = {
+                    event: e,
+                    result: 'none',
+                };
+                this.$emit('hide-sticker-context-menu-custom-event', emitParam); 
+            },
+            
+            onClickChangeColor: function (e) {
+                console.log('onClickChangeColor');
+                const emitParam = {
+                    event: e,
+                    result: 'openStickerColorChangeWindow',
+                };
+                this.$emit('hide-sticker-context-menu-custom-event', emitParam);
+            },
+            
+            onClickAddText: function (e) {
+                console.log('onClickAddText');
+                const emitParam = {
+                    event: e,
+                    result: 'none',
+                };
+                this.$emit('hide-sticker-context-menu-custom-event', emitParam);
+            },
         },
     };
 </script>
@@ -58,6 +89,7 @@
         height: 100%;
         z-index: 1000;
         background: rgba(0, 0, 0, 0.0);
+        margin: 0;
     }
     
     .sticker-context-menu-class {

@@ -19,6 +19,11 @@
             @hide-sticker-context-menu-custom-event="onHideStickerContextMenu"
         >
         </work-sticker-context-menu>
+        <work-sticker-color-change-window
+            v-bind:show-sticker-color-change-window-props="showStickerColorChangeWindowParam"
+            @hide-sticker-color-change-window-custom-event="onHideStickerColorChangeWindow"
+        >
+        </work-sticker-color-change-window>
     </div>
 </template>
 
@@ -67,10 +72,19 @@
                 //                
                 showStickerContextMenuParam: {
                     isShow: false,
+                    idNo: null,  // 要素のidの文字列から抽出した数値
                     mountPos: {
                         x: 0,
                         y: 0,
                     },
+                },
+                
+                //
+                // ふせんの色変更するウィンドウに渡すパラメータ
+                //
+                showStickerColorChangeWindowParam: {
+                    isShow: false,
+                    idNo: null,  // 要素のidの文字列から抽出した数値
                 },
             };
         },
@@ -85,7 +99,7 @@
                 
             window.Echo.private('sticker-info-item-pos-update-channel.' + window.laravel.user['id'])
                 .listen('StickerInfoItemPosUpdate', response => {
-                    console.log('window.Echo.private listen');
+                    console.log('window.Echo.private sticker-info-item-pos-update-channel listen');
                     
                     const idBaseName = this.getStickerIdBaseName();
                     const updateId = `${idBaseName}${response.eventParam.id}`; 
@@ -97,6 +111,22 @@
                             updateElem.style.top  = `${response.eventParam.pos_top}px`;
                             updateElem.style.left = `${response.eventParam.pos_left}px`;
                         }
+                    }
+                });
+                
+            window.Echo.private('sticker-info-item-color-update-channel.' + window.laravel.user['id'])
+                .listen('StickerInfoItemColorUpdate', response => {
+                    console.log('window.Echo.private sticker-info-item-color-update-channel listen');
+                    
+                    const idBaseName = this.getStickerIdBaseName();
+                    const updateId = `${idBaseName}${response.eventParam.id}`; 
+                    
+                    const updateElem = document.getElementById(updateId);
+                    
+                    if (updateElem) {
+                        let colorHex = '000000' + response.eventParam.color.toString(16);
+                        colorHex = colorHex.substr(colorHex.length - 6);
+                        updateElem.style.backgroundColor = '#'+colorHex;  // background-color
                     }
                 });
         },
@@ -182,12 +212,28 @@
             },
             
             onChildClickRight: function (e) {
+                const idBaseName = this.getStickerIdBaseName();
+                    
+                let idNo = null;
+                let target = e.target;
+                while (target) {
+                    if (target.id) {
+                        if (target.id.substr(0, idBaseName.length) == idBaseName) {
+                            idNo = target.id.substr(idBaseName.length);
+                            break;
+                        }
+                    }
+                    // 子要素も@mousedown.leftに反応するので、親要素を見に行かなければならない。
+                    target = target.parentElement;
+                }
+                
                 const pagePos = {};
                 pagePos.x = e.pageX;
                 pagePos.y = e.pageY;
                 const mountPos = this.convertPosFromPageToMount(pagePos);
                 
                 this.showStickerContextMenuParam.isShow = true;
+                this.showStickerContextMenuParam.idNo = idNo;
                 this.showStickerContextMenuParam.mountPos.x = mountPos.x;
                 this.showStickerContextMenuParam.mountPos.y = mountPos.y;
             },
@@ -218,12 +264,35 @@
                 }
             },            
             
-            onHideStickerContextMenu: function (param) {
-                console.log('onHideStickerContextMenu', param.event);
+            onHideStickerContextMenu: function (emitParam) {
+                console.log('onHideStickerContextMenu', emitParam.event);
+                
+                const idNo = this.showStickerContextMenuParam.idNo;
                 
                 this.showStickerContextMenuParam.isShow = false;
+                this.showStickerContextMenuParam.idNo = null;
                 this.showStickerContextMenuParam.mountPos.x = 0;
                 this.showStickerContextMenuParam.mountPos.y = 0;
+                
+                if (emitParam.result != 'none') {
+                    if (emitParam.result == 'openStickerColorChangeWindow') {
+                        this.showStickerColorChangeWindowParam.isShow = true;
+                        this.showStickerColorChangeWindowParam.idNo = idNo;
+                    }
+                }
+            },
+            
+            onHideStickerColorChangeWindow: function (emitParam) {
+                console.log('onHideStickerColorChangeWindow', emitParam.event);
+                
+                this.showStickerColorChangeWindowParam.isShow = false;
+                this.showStickerColorChangeWindowParam.idNo = null;
+
+                if (emitParam.result != 'none') {
+                    if (emitParam.result == 'changeColor') {
+                        // ここに来る前に色を変更しているので、ここでは何もしない
+                    }
+                }
             },
             
             releaseTargetElem: function () {
@@ -248,17 +317,17 @@
                 if (isEqual) return;  // 同じなら更新しない
                 this.setLastUpdateTargetElemParam(updateTargetElemParam);
                 
-                const param = {
+                const reqParam = {
                     id: updateTargetElemParam.idNo,
                     mountPos: {
                         x: updateTargetElemParam.mountPos.x,
                         y: updateTargetElemParam.mountPos.y,
                     },
                 };
-                this.updateStickerInfoItemPos(param);
+                this.updateStickerInfoItemPos(reqParam);
             },
             
-            // param = {
+            // reqParam = {
             //     id: null,
             //     mountPos: {
             //         x: null,  // px（数値だけで単位の文字列は付けていない）
@@ -266,11 +335,11 @@
             //     },
             // };
             // mountPosは台紙内における座標。            
-            updateStickerInfoItemPos: function (param) {
+            updateStickerInfoItemPos: function (reqParam) {
                 console.log('axios.put');
                 
                 axios.put(window.laravel.asset + '/api/work-sticker-info-item-pos-update', {
-                    param: param,
+                    reqParam: reqParam,
                     user_id: window.laravel.user['id'],
                 })
                     .then(response => {

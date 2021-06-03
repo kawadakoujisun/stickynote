@@ -177,13 +177,13 @@ Route::get('/work-mount', function() {
 });
 
 Route::put('/work-sticker-info-item-pos-update', function(Request $request) {
-	$sticker = \App\Sticker::findOrFail($request->param['id']);
+	$sticker = \App\Sticker::findOrFail($request->reqParam['id']);
 
 	if ($sticker) {
 		$stickerInfoItemPos = $sticker->infoItemPos;
 		if ($stickerInfoItemPos) {
-			$stickerInfoItemPos->pos_top  = $request->param['mountPos']['y'];
-			$stickerInfoItemPos->pos_left = $request->param['mountPos']['x'];
+			$stickerInfoItemPos->pos_top  = $request->reqParam['mountPos']['y'];
+			$stickerInfoItemPos->pos_left = $request->reqParam['mountPos']['x'];
 	
 			// データベースに保存する
 	    	$stickerInfoItemPos->save();
@@ -197,6 +197,29 @@ Route::put('/work-sticker-info-item-pos-update', function(Request $request) {
 	    	];
 	    	
 	    	event((new \App\Events\StickerInfoItemPosUpdate($eventParam))->dontBroadcastToCurrentUser());
+		}
+	}
+});
+
+Route::put('/work-sticker-info-item-color-update', function(Request $request) {
+	$sticker = \App\Sticker::findOrFail($request->reqParam['id']);
+
+	if ($sticker) {
+		$stickerInfoItemColor = $sticker->infoItemColor;
+		if ($stickerInfoItemColor) {
+			$stickerInfoItemColor->color = $request->reqParam['color'];
+	
+			// データベースに保存する
+	    	$stickerInfoItemColor->save();
+	    	
+	    	// イベント
+	    	$eventParam = [
+	    		'id'      => $sticker->id,
+	    		'color'   => $stickerInfoItemColor->color,
+	    		'user_id' => $request->user_id,
+	    	];
+	    	
+	    	event((new \App\Events\StickerInfoItemColorUpdate($eventParam)));// 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
 		}
 	}
 });

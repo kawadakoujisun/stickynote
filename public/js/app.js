@@ -2616,6 +2616,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -2671,10 +2676,20 @@ __webpack_require__.r(__webpack_exports__);
       //                
       showStickerContextMenuParam: {
         isShow: false,
+        idNo: null,
+        // 要素のidの文字列から抽出した数値
         mountPos: {
           x: 0,
           y: 0
         }
+      },
+      //
+      // ふせんの色変更するウィンドウに渡すパラメータ
+      //
+      showStickerColorChangeWindowParam: {
+        isShow: false,
+        idNo: null // 要素のidの文字列から抽出した数値
+
       }
     };
   },
@@ -2686,7 +2701,7 @@ __webpack_require__.r(__webpack_exports__);
       _this.stickerParams = response.data;
     });
     window.Echo["private"]('sticker-info-item-pos-update-channel.' + window.laravel.user['id']).listen('StickerInfoItemPosUpdate', function (response) {
-      console.log('window.Echo.private listen');
+      console.log('window.Echo.private sticker-info-item-pos-update-channel listen');
 
       var idBaseName = _this.getStickerIdBaseName();
 
@@ -2699,6 +2714,20 @@ __webpack_require__.r(__webpack_exports__);
           updateElem.style.top = "".concat(response.eventParam.pos_top, "px");
           updateElem.style.left = "".concat(response.eventParam.pos_left, "px");
         }
+      }
+    });
+    window.Echo["private"]('sticker-info-item-color-update-channel.' + window.laravel.user['id']).listen('StickerInfoItemColorUpdate', function (response) {
+      console.log('window.Echo.private sticker-info-item-color-update-channel listen');
+
+      var idBaseName = _this.getStickerIdBaseName();
+
+      var updateId = "".concat(idBaseName).concat(response.eventParam.id);
+      var updateElem = document.getElementById(updateId);
+
+      if (updateElem) {
+        var colorHex = '000000' + response.eventParam.color.toString(16);
+        colorHex = colorHex.substr(colorHex.length - 6);
+        updateElem.style.backgroundColor = '#' + colorHex; // background-color
       }
     });
   },
@@ -2782,11 +2811,28 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     onChildClickRight: function onChildClickRight(e) {
+      var idBaseName = this.getStickerIdBaseName();
+      var idNo = null;
+      var target = e.target;
+
+      while (target) {
+        if (target.id) {
+          if (target.id.substr(0, idBaseName.length) == idBaseName) {
+            idNo = target.id.substr(idBaseName.length);
+            break;
+          }
+        } // 子要素も@mousedown.leftに反応するので、親要素を見に行かなければならない。
+
+
+        target = target.parentElement;
+      }
+
       var pagePos = {};
       pagePos.x = e.pageX;
       pagePos.y = e.pageY;
       var mountPos = this.convertPosFromPageToMount(pagePos);
       this.showStickerContextMenuParam.isShow = true;
+      this.showStickerContextMenuParam.idNo = idNo;
       this.showStickerContextMenuParam.mountPos.x = mountPos.x;
       this.showStickerContextMenuParam.mountPos.y = mountPos.y;
     },
@@ -2811,11 +2857,30 @@ __webpack_require__.r(__webpack_exports__);
         this.releaseTargetElem();
       }
     },
-    onHideStickerContextMenu: function onHideStickerContextMenu(param) {
-      console.log('onHideStickerContextMenu', param.event);
+    onHideStickerContextMenu: function onHideStickerContextMenu(emitParam) {
+      console.log('onHideStickerContextMenu', emitParam.event);
+      var idNo = this.showStickerContextMenuParam.idNo;
       this.showStickerContextMenuParam.isShow = false;
+      this.showStickerContextMenuParam.idNo = null;
       this.showStickerContextMenuParam.mountPos.x = 0;
       this.showStickerContextMenuParam.mountPos.y = 0;
+
+      if (emitParam.result != 'none') {
+        if (emitParam.result == 'openStickerColorChangeWindow') {
+          this.showStickerColorChangeWindowParam.isShow = true;
+          this.showStickerColorChangeWindowParam.idNo = idNo;
+        }
+      }
+    },
+    onHideStickerColorChangeWindow: function onHideStickerColorChangeWindow(emitParam) {
+      console.log('onHideStickerColorChangeWindow', emitParam.event);
+      this.showStickerColorChangeWindowParam.isShow = false;
+      this.showStickerColorChangeWindowParam.idNo = null;
+
+      if (emitParam.result != 'none') {
+        if (emitParam.result == 'changeColor') {// ここに来る前に色を変更しているので、ここでは何もしない
+        }
+      }
     },
     releaseTargetElem: function releaseTargetElem() {
       this.updateTargetElem();
@@ -2837,16 +2902,16 @@ __webpack_require__.r(__webpack_exports__);
       if (isEqual) return; // 同じなら更新しない
 
       this.setLastUpdateTargetElemParam(updateTargetElemParam);
-      var param = {
+      var reqParam = {
         id: updateTargetElemParam.idNo,
         mountPos: {
           x: updateTargetElemParam.mountPos.x,
           y: updateTargetElemParam.mountPos.y
         }
       };
-      this.updateStickerInfoItemPos(param);
+      this.updateStickerInfoItemPos(reqParam);
     },
-    // param = {
+    // reqParam = {
     //     id: null,
     //     mountPos: {
     //         x: null,  // px（数値だけで単位の文字列は付けていない）
@@ -2854,10 +2919,10 @@ __webpack_require__.r(__webpack_exports__);
     //     },
     // };
     // mountPosは台紙内における座標。            
-    updateStickerInfoItemPos: function updateStickerInfoItemPos(param) {
+    updateStickerInfoItemPos: function updateStickerInfoItemPos(reqParam) {
       console.log('axios.put');
       axios.put(window.laravel.asset + '/api/work-sticker-info-item-pos-update', {
-        param: param,
+        reqParam: reqParam,
         user_id: window.laravel.user['id']
       }).then(function (response) {// 特にすることなし
       });
@@ -2954,6 +3019,103 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=script&lang=js&":
+/*!************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=script&lang=js& ***!
+  \************************************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: {
+    showStickerColorChangeWindowProps: Object
+  },
+  data: function data() {
+    return {
+      isShow: this.showStickerColorChangeWindowProps.isShow
+    };
+  },
+  watch: {
+    'showStickerColorChangeWindowProps.isShow': function showStickerColorChangeWindowPropsIsShow(newValue, oldValue) {
+      this.isShow = this.showStickerColorChangeWindowProps.isShow;
+    }
+  },
+  methods: {
+    onClickStickerColorChangeWindowOverlay: function onClickStickerColorChangeWindowOverlay(e) {
+      console.log('onClickStickerColorChangeWindowOverlay'); // 何もしない
+    },
+    onClickStickerColorChangeWindow: function onClickStickerColorChangeWindow(e) {
+      console.log('onClickStickerColorChangeWindow'); // 何もしない
+    },
+    onClickClose: function onClickClose(e) {
+      var emitParam = {
+        event: e,
+        result: 'none'
+      };
+      this.$emit('hide-sticker-color-change-window-custom-event', emitParam);
+    },
+    onClickColorRed: function onClickColorRed(e) {
+      this.changeColor(e, 0xffaaaa);
+    },
+    onClickColorBlue: function onClickColorBlue(e) {
+      this.changeColor(e, 0xaaaaff);
+    },
+    onClickColorYellow: function onClickColorYellow(e) {
+      this.changeColor(e, 0xffffaa);
+    },
+    onClickColorGreen: function onClickColorGreen(e) {
+      this.changeColor(e, 0xaaffaa);
+    },
+    onClickColorPink: function onClickColorPink(e) {
+      this.changeColor(e, 0xffaaff);
+    },
+    changeColor: function changeColor(e, color) {
+      // 色を変更する
+      console.log('axios.put');
+      var reqParam = {
+        id: this.showStickerColorChangeWindowProps.idNo,
+        color: color
+      };
+      axios.put(window.laravel.asset + '/api/work-sticker-info-item-color-update', {
+        reqParam: reqParam,
+        user_id: window.laravel.user['id']
+      }).then(function (response) {// 特にすることなし
+      }); // 親に戻る
+
+      var emitParam = {
+        event: e,
+        result: 'changeColor'
+      };
+      this.$emit('hide-sticker-color-change-window-custom-event', emitParam);
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=script&lang=js&":
 /*!******************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=script&lang=js& ***!
@@ -2963,6 +3125,8 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+//
+//
 //
 //
 //
@@ -3000,12 +3164,38 @@ __webpack_require__.r(__webpack_exports__);
     }
   },
   methods: {
-    onClickLeft: function onClickLeft(e) {
-      var param = {
+    onClickStickerContextMenuOverlay: function onClickStickerContextMenuOverlay(e) {
+      console.log('onClickStickerContextMenuOverlay');
+      var emitParam = {
         event: e,
-        dummy: ''
+        result: 'none'
       };
-      this.$emit('hide-sticker-context-menu-custom-event', param);
+      this.$emit('hide-sticker-context-menu-custom-event', emitParam);
+    },
+    onClickStickerContextMenu: function onClickStickerContextMenu(e) {
+      console.log('onClickStickerContextMenu'); // 何もしないでもいいのだが、コンテキストメニューを閉じることにする。
+
+      var emitParam = {
+        event: e,
+        result: 'none'
+      };
+      this.$emit('hide-sticker-context-menu-custom-event', emitParam);
+    },
+    onClickChangeColor: function onClickChangeColor(e) {
+      console.log('onClickChangeColor');
+      var emitParam = {
+        event: e,
+        result: 'openStickerColorChangeWindow'
+      };
+      this.$emit('hide-sticker-context-menu-custom-event', emitParam);
+    },
+    onClickAddText: function onClickAddText(e) {
+      console.log('onClickAddText');
+      var emitParam = {
+        event: e,
+        result: 'none'
+      };
+      this.$emit('hide-sticker-context-menu-custom-event', emitParam);
     }
   }
 });
@@ -7530,6 +7720,25 @@ exports.push([module.i, "\n.mount-class[data-v-652fa580] {\n    position: relati
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=style&index=0&id=14581d2b&scoped=true&lang=css&":
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=style&index=0&id=14581d2b&scoped=true&lang=css& ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n.sticker-color-change-window-overlay-class[data-v-14581d2b] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 1000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.sticker-color-change-window-class[data-v-14581d2b] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  150px;\n    height: 300px;\n    z-index: 1001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=style&index=0&id=5800ee40&scoped=true&lang=css&":
 /*!*************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=style&index=0&id=5800ee40&scoped=true&lang=css& ***!
@@ -7542,7 +7751,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.sticker-context-menu-overlay-class[data-v-5800ee40] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 1000;\n    background: rgba(0, 0, 0, 0.0);\n}\n.sticker-context-menu-class[data-v-5800ee40] {\n    position: absolute;\n    width:  150px;\n    height: 300px;\n    z-index: 1001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  300;\n    left: 300;\n}\n", ""]);
+exports.push([module.i, "\n.sticker-context-menu-overlay-class[data-v-5800ee40] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 1000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.sticker-context-menu-class[data-v-5800ee40] {\n    position: absolute;\n    width:  150px;\n    height: 300px;\n    z-index: 1001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  300;\n    left: 300;\n}\n", ""]);
 
 // exports
 
@@ -45002,6 +45211,36 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=style&index=0&id=14581d2b&scoped=true&lang=css&":
+/*!***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=style&index=0&id=14581d2b&scoped=true&lang=css& ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerColorChangeWindowComponent.vue?vue&type=style&index=0&id=14581d2b&scoped=true&lang=css& */ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=style&index=0&id=14581d2b&scoped=true&lang=css&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=style&index=0&id=5800ee40&scoped=true&lang=css&":
 /*!*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=style&index=0&id=5800ee40&scoped=true&lang=css& ***!
@@ -46082,9 +46321,257 @@ var render = function() {
         on: {
           "hide-sticker-context-menu-custom-event": _vm.onHideStickerContextMenu
         }
+      }),
+      _vm._v(" "),
+      _c("work-sticker-color-change-window", {
+        attrs: {
+          "show-sticker-color-change-window-props":
+            _vm.showStickerColorChangeWindowParam
+        },
+        on: {
+          "hide-sticker-color-change-window-custom-event":
+            _vm.onHideStickerColorChangeWindow
+        }
       })
     ],
     2
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=template&id=14581d2b&scoped=true&":
+/*!****************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=template&id=14581d2b&scoped=true& ***!
+  \****************************************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    {
+      directives: [
+        {
+          name: "show",
+          rawName: "v-show",
+          value: _vm.isShow,
+          expression: "isShow"
+        }
+      ],
+      staticClass: "sticker-color-change-window-overlay-class",
+      on: {
+        click: function($event) {
+          if (
+            !$event.type.indexOf("key") &&
+            _vm._k($event.keyCode, "prepend", undefined, $event.key, undefined)
+          ) {
+            return null
+          }
+          if ($event.target !== $event.currentTarget) {
+            return null
+          }
+          return _vm.onClickStickerColorChangeWindowOverlay($event)
+        }
+      }
+    },
+    [
+      _c(
+        "div",
+        {
+          staticClass: "sticker-color-change-window-class",
+          attrs: { id: "sticker-color-change-window-id" },
+          on: {
+            click: function($event) {
+              if (
+                !$event.type.indexOf("key") &&
+                _vm._k(
+                  $event.keyCode,
+                  "prepend",
+                  undefined,
+                  $event.key,
+                  undefined
+                )
+              ) {
+                return null
+              }
+              if ($event.target !== $event.currentTarget) {
+                return null
+              }
+              return _vm.onClickStickerColorChangeWindow($event)
+            }
+          }
+        },
+        [
+          _c("div", [
+            _c(
+              "button",
+              {
+                on: {
+                  click: function($event) {
+                    if (
+                      !$event.type.indexOf("key") &&
+                      _vm._k(
+                        $event.keyCode,
+                        "prepend",
+                        undefined,
+                        $event.key,
+                        undefined
+                      )
+                    ) {
+                      return null
+                    }
+                    return _vm.onClickColorRed($event)
+                  }
+                }
+              },
+              [_vm._v("赤")]
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", [
+            _c(
+              "button",
+              {
+                on: {
+                  click: function($event) {
+                    if (
+                      !$event.type.indexOf("key") &&
+                      _vm._k(
+                        $event.keyCode,
+                        "prepend",
+                        undefined,
+                        $event.key,
+                        undefined
+                      )
+                    ) {
+                      return null
+                    }
+                    return _vm.onClickColorBlue($event)
+                  }
+                }
+              },
+              [_vm._v("青")]
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", [
+            _c(
+              "button",
+              {
+                on: {
+                  click: function($event) {
+                    if (
+                      !$event.type.indexOf("key") &&
+                      _vm._k(
+                        $event.keyCode,
+                        "prepend",
+                        undefined,
+                        $event.key,
+                        undefined
+                      )
+                    ) {
+                      return null
+                    }
+                    return _vm.onClickColorYellow($event)
+                  }
+                }
+              },
+              [_vm._v("黄色")]
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", [
+            _c(
+              "button",
+              {
+                on: {
+                  click: function($event) {
+                    if (
+                      !$event.type.indexOf("key") &&
+                      _vm._k(
+                        $event.keyCode,
+                        "prepend",
+                        undefined,
+                        $event.key,
+                        undefined
+                      )
+                    ) {
+                      return null
+                    }
+                    return _vm.onClickColorGreen($event)
+                  }
+                }
+              },
+              [_vm._v("緑")]
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", [
+            _c(
+              "button",
+              {
+                on: {
+                  click: function($event) {
+                    if (
+                      !$event.type.indexOf("key") &&
+                      _vm._k(
+                        $event.keyCode,
+                        "prepend",
+                        undefined,
+                        $event.key,
+                        undefined
+                      )
+                    ) {
+                      return null
+                    }
+                    return _vm.onClickColorPink($event)
+                  }
+                }
+              },
+              [_vm._v("ピンク")]
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", [
+            _c(
+              "button",
+              {
+                on: {
+                  click: function($event) {
+                    if (
+                      !$event.type.indexOf("key") &&
+                      _vm._k(
+                        $event.keyCode,
+                        "prepend",
+                        undefined,
+                        $event.key,
+                        undefined
+                      )
+                    ) {
+                      return null
+                    }
+                    return _vm.onClickClose($event)
+                  }
+                }
+              },
+              [_vm._v("閉じる")]
+            )
+          ])
+        ]
+      )
+    ]
   )
 }
 var staticRenderFns = []
@@ -46125,38 +46612,102 @@ var render = function() {
         click: function($event) {
           if (
             !$event.type.indexOf("key") &&
-            _vm._k($event.keyCode, "left", 37, $event.key, [
-              "Left",
-              "ArrowLeft"
-            ])
+            _vm._k($event.keyCode, "prepend", undefined, $event.key, undefined)
           ) {
             return null
           }
-          if ("button" in $event && $event.button !== 0) {
+          if ($event.target !== $event.currentTarget) {
             return null
           }
-          return _vm.onClickLeft($event)
+          return _vm.onClickStickerContextMenuOverlay($event)
         }
       }
     },
-    [_vm._m(0)]
+    [
+      _c(
+        "div",
+        {
+          staticClass: "sticker-context-menu-class",
+          attrs: { id: "sticker-content-menu-id" },
+          on: {
+            click: function($event) {
+              if (
+                !$event.type.indexOf("key") &&
+                _vm._k(
+                  $event.keyCode,
+                  "prepend",
+                  undefined,
+                  $event.key,
+                  undefined
+                )
+              ) {
+                return null
+              }
+              if ($event.target !== $event.currentTarget) {
+                return null
+              }
+              return _vm.onClickStickerContextMenu($event)
+            }
+          }
+        },
+        [
+          _c("div", [
+            _c(
+              "button",
+              {
+                on: {
+                  click: function($event) {
+                    if (
+                      !$event.type.indexOf("key") &&
+                      _vm._k(
+                        $event.keyCode,
+                        "prepend",
+                        undefined,
+                        $event.key,
+                        undefined
+                      )
+                    ) {
+                      return null
+                    }
+                    return _vm.onClickChangeColor($event)
+                  }
+                }
+              },
+              [_vm._v("色を変更")]
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", [
+            _c(
+              "button",
+              {
+                on: {
+                  click: function($event) {
+                    if (
+                      !$event.type.indexOf("key") &&
+                      _vm._k(
+                        $event.keyCode,
+                        "prepend",
+                        undefined,
+                        $event.key,
+                        undefined
+                      )
+                    ) {
+                      return null
+                    }
+                    return _vm.onClickAddText($event)
+                  }
+                }
+              },
+              [_vm._v("テキストを追加")]
+            )
+          ])
+        ]
+      )
+    ]
   )
 }
-var staticRenderFns = [
-  function() {
-    var _vm = this
-    var _h = _vm.$createElement
-    var _c = _vm._self._c || _h
-    return _c(
-      "div",
-      {
-        staticClass: "sticker-context-menu-class",
-        attrs: { id: "sticker-content-menu-id" }
-      },
-      [_c("p", [_vm._v("context menu")])]
-    )
-  }
-]
+var staticRenderFns = []
 render._withStripped = true
 
 
@@ -58358,6 +58909,7 @@ Vue.component('color-rect-mount', __webpack_require__(/*! ./components/ColorRect
 Vue.component('color-rect-context-menu', __webpack_require__(/*! ./components/ColorRectContextMenuComponent.vue */ "./resources/js/components/ColorRectContextMenuComponent.vue")["default"]);
 Vue.component('work-mount', __webpack_require__(/*! ./components/WorkMountComponent.vue */ "./resources/js/components/WorkMountComponent.vue")["default"]);
 Vue.component('work-sticker-context-menu', __webpack_require__(/*! ./components/WorkStickerContextMenuComponent.vue */ "./resources/js/components/WorkStickerContextMenuComponent.vue")["default"]);
+Vue.component('work-sticker-color-change-window', __webpack_require__(/*! ./components/WorkStickerColorChangeWindowComponent.vue */ "./resources/js/components/WorkStickerColorChangeWindowComponent.vue")["default"]);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -58901,6 +59453,93 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_template_id_652fa580_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_template_id_652fa580_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerColorChangeWindowComponent.vue":
+/*!***************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerColorChangeWindowComponent.vue ***!
+  \***************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _WorkStickerColorChangeWindowComponent_vue_vue_type_template_id_14581d2b_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./WorkStickerColorChangeWindowComponent.vue?vue&type=template&id=14581d2b&scoped=true& */ "./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=template&id=14581d2b&scoped=true&");
+/* harmony import */ var _WorkStickerColorChangeWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./WorkStickerColorChangeWindowComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _WorkStickerColorChangeWindowComponent_vue_vue_type_style_index_0_id_14581d2b_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./WorkStickerColorChangeWindowComponent.vue?vue&type=style&index=0&id=14581d2b&scoped=true&lang=css& */ "./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=style&index=0&id=14581d2b&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _WorkStickerColorChangeWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _WorkStickerColorChangeWindowComponent_vue_vue_type_template_id_14581d2b_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _WorkStickerColorChangeWindowComponent_vue_vue_type_template_id_14581d2b_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  "14581d2b",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/WorkStickerColorChangeWindowComponent.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=script&lang=js&":
+/*!****************************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=script&lang=js& ***!
+  \****************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerColorChangeWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerColorChangeWindowComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerColorChangeWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=style&index=0&id=14581d2b&scoped=true&lang=css&":
+/*!************************************************************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=style&index=0&id=14581d2b&scoped=true&lang=css& ***!
+  \************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerColorChangeWindowComponent_vue_vue_type_style_index_0_id_14581d2b_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerColorChangeWindowComponent.vue?vue&type=style&index=0&id=14581d2b&scoped=true&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=style&index=0&id=14581d2b&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerColorChangeWindowComponent_vue_vue_type_style_index_0_id_14581d2b_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerColorChangeWindowComponent_vue_vue_type_style_index_0_id_14581d2b_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerColorChangeWindowComponent_vue_vue_type_style_index_0_id_14581d2b_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerColorChangeWindowComponent_vue_vue_type_style_index_0_id_14581d2b_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=template&id=14581d2b&scoped=true&":
+/*!**********************************************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=template&id=14581d2b&scoped=true& ***!
+  \**********************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerColorChangeWindowComponent_vue_vue_type_template_id_14581d2b_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerColorChangeWindowComponent.vue?vue&type=template&id=14581d2b&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=template&id=14581d2b&scoped=true&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerColorChangeWindowComponent_vue_vue_type_template_id_14581d2b_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerColorChangeWindowComponent_vue_vue_type_template_id_14581d2b_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 
