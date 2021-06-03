@@ -2,15 +2,15 @@
     <div
         v-show="isShow"
         class="sticker-context-menu-overlay-class"
-        @click.self.prepend="onClickStickerContextMenuOverlay"
+        @click.self.prevent="onClickStickerContextMenuOverlay"
     >
         <div
             class="sticker-context-menu-class"
             id="sticker-content-menu-id"
-            @click.self.prepend="onClickStickerContextMenu"
+            @click.self.prevent="onClickStickerContextMenu"
         >
-            <div><button @click.prepend="onClickChangeColor">色を変更</button></div>
-            <div><button @click.prepend="onClickAddText">テキストを追加</button></div>
+            <div><button @click.prevent="onClickChangeColor">色を変更</button></div>
+            <div><button @click.prevent="onClickAddText">テキストを追加</button></div>
         </div>
     </div>
 </template>
@@ -72,7 +72,7 @@
                 console.log('onClickAddText');
                 const emitParam = {
                     event: e,
-                    result: 'none',
+                    result: 'openStickerTextAddWindow',
                 };
                 this.$emit('hide-sticker-context-menu-custom-event', emitParam);
             },

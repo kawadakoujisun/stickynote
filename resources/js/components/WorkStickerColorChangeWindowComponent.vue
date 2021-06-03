@@ -2,19 +2,19 @@
     <div
         v-show="isShow"
         class="sticker-color-change-window-overlay-class"
-        @click.self.prepend="onClickStickerColorChangeWindowOverlay"
+        @click.self.prevent="onClickStickerColorChangeWindowOverlay"
     >
         <div
             class="sticker-color-change-window-class"
             id="sticker-color-change-window-id"
-            @click.self.prepend="onClickStickerColorChangeWindow"
+            @click.self.prevent="onClickStickerColorChangeWindow"
         >
-            <div><button @click.prepend="onClickColorRed">赤</button></div>
-            <div><button @click.prepend="onClickColorBlue">青</button></div>
-            <div><button @click.prepend="onClickColorYellow">黄色</button></div>
-            <div><button @click.prepend="onClickColorGreen">緑</button></div>
-            <div><button @click.prepend="onClickColorPink">ピンク</button></div>
-            <div><button @click.prepend="onClickClose">閉じる</button></div>
+            <div><button @click.prevent="onClickColorRed">赤</button></div>
+            <div><button @click.prevent="onClickColorBlue">青</button></div>
+            <div><button @click.prevent="onClickColorYellow">黄色</button></div>
+            <div><button @click.prevent="onClickColorGreen">緑</button></div>
+            <div><button @click.prevent="onClickColorPink">ピンク</button></div>
+            <div><button @click.prevent="onClickClose">閉じる</button></div>
         </div>
     </div>
 </template>

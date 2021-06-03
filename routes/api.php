@@ -219,7 +219,32 @@ Route::put('/work-sticker-info-item-color-update', function(Request $request) {
 	    		'user_id' => $request->user_id,
 	    	];
 	    	
-	    	event((new \App\Events\StickerInfoItemColorUpdate($eventParam)));// 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+	    	event((new \App\Events\StickerInfoItemColorUpdate($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+		}
+	}
+});
+
+Route::post('/work-sticker-content-item-text-create', function(Request $request) {
+	$sticker = \App\Sticker::findOrFail($request->reqParam['id']);
+
+	if ($sticker) {
+		$stickerContent = $sticker->content;
+		if ($stickerContent) {
+			$text = $request->reqParam['text'];
+			
+			// テキストを作成し、データベースに保存する
+			$stickerContent->createContentItemText([
+			    'text' => $text,
+			]);
+	    	
+	    	// イベント
+	    	$eventParam = [
+	    		'id'      => $sticker->id,
+	    		'text'    => $text,
+	    		'user_id' => $request->user_id,
+	    	];
+	    	
+	    	event((new \App\Events\StickerContentItemTextCreate($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
 		}
 	}
 });

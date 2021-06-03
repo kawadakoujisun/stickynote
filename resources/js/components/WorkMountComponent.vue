@@ -24,6 +24,11 @@
             @hide-sticker-color-change-window-custom-event="onHideStickerColorChangeWindow"
         >
         </work-sticker-color-change-window>
+        <work-sticker-text-add-window
+            v-bind:show-sticker-text-add-window-props="showStickerTextAddWindowParam"
+            @hide-sticker-text-add-window-custom-event="onHideStickerTextAddWindow"
+        >
+        </work-sticker-text-add-window>
     </div>
 </template>
 
@@ -86,6 +91,14 @@
                     isShow: false,
                     idNo: null,  // 要素のidの文字列から抽出した数値
                 },
+                
+                //
+                // ふせんにテキストを追加するウィンドウに渡すパラメータ
+                //
+                showStickerTextAddWindowParam: {
+                    isShow: false,
+                    idNo: null,  // 要素のidの文字列から抽出した数値
+                },
             };
         },
         
@@ -127,6 +140,22 @@
                         let colorHex = '000000' + response.eventParam.color.toString(16);
                         colorHex = colorHex.substr(colorHex.length - 6);
                         updateElem.style.backgroundColor = '#'+colorHex;  // background-color
+                    }
+                });
+                
+            window.Echo.private('sticker-content-item-text-create-channel.' + window.laravel.user['id'])
+                .listen('StickerContentItemTextCreate', response => {
+                    console.log('window.Echo.private sticker-content-item-text-create-channel listen');
+                    
+                    const idBaseName = this.getStickerIdBaseName();
+                    const updateId = `${idBaseName}${response.eventParam.id}`; 
+                    
+                    const updateElem = document.getElementById(updateId);
+                    
+                    if (updateElem) {
+                        const divTextElem = document.createElement('div');
+                        divTextElem.innerHTML = response.eventParam.text;  // TODO: html構文をそのまま出力して！
+                        updateElem.appendChild(divTextElem);
                     }
                 });
         },
@@ -278,6 +307,9 @@
                     if (emitParam.result == 'openStickerColorChangeWindow') {
                         this.showStickerColorChangeWindowParam.isShow = true;
                         this.showStickerColorChangeWindowParam.idNo = idNo;
+                    } else if (emitParam.result == 'openStickerTextAddWindow') {
+                        this.showStickerTextAddWindowParam.isShow = true;
+                        this.showStickerTextAddWindowParam.idNo = idNo;
                     }
                 }
             },
@@ -294,6 +326,19 @@
                     }
                 }
             },
+            
+            onHideStickerTextAddWindow: function (emitParam) {
+                console.log('onHideStickerTextAddWindow', emitParam.event);
+                
+                this.showStickerTextAddWindowParam.isShow = false;
+                this.showStickerTextAddWindowParam.idNo = null;
+
+                if (emitParam.result != 'none') {
+                    if (emitParam.result == 'addText') {
+                        // ここに来る前に色を変更しているので、ここでは何もしない
+                    }
+                }
+            },            
             
             releaseTargetElem: function () {
                 this.updateTargetElem();
