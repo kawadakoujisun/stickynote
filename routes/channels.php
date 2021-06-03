@@ -22,3 +22,7 @@ Broadcast::channel('todo-added-channel.{id}', function ($user, $id) {
 Broadcast::channel('color-rect-update-channel.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+
+Broadcast::channel('sticker-info-item-pos-update-channel.{id}', function ($user, $id) {
+    return (int) $user->id === (int) $id;
+});

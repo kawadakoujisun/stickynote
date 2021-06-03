@@ -5,12 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>ColorRects</title>
+        <title>StickyNote Mount</title>
     </head>
     <body>
         <div id="app">
 
-        <color-rect-mount></color-rect-mount>
+        <work-mount></work-mount>
 
         </div>
 

@@ -139,3 +139,64 @@ Route::put('/color-rects', function(Request $request) {
 	}
 });
 
+
+
+
+Route::get('/work-mount', function() {
+	$stickerParams = array();
+
+    $stickers = \App\Sticker::all();
+    foreach ($stickers as $sticker) {
+		$stickerInfoItemPos   = $sticker->infoItemPos;
+		$stickerInfoItemColor = $sticker->infoItemColor;
+		$stickerContent = $sticker->content;
+		
+		if ($stickerInfoItemPos && $stickerInfoItemColor) {
+			$stickerParam = [
+				'id'       => $sticker->id,
+				'pos_top'  => $stickerInfoItemPos->pos_top,
+				'pos_left' => $stickerInfoItemPos->pos_left,
+				'color'    => $stickerInfoItemColor->color,
+			];
+			
+			if ($stickerContent) {
+				$contentItemTexts = $stickerContent->contentItemTexts;
+				$texts = array();
+				foreach ($contentItemTexts as $contentItemText) {
+					array_push($texts, $contentItemText->text);
+				}
+				
+				$stickerParam['texts'] = $texts;
+			}
+			
+			array_push($stickerParams, $stickerParam);
+		}
+	}
+	
+	return $stickerParams;
+});
+
+Route::put('/work-sticker-info-item-pos-update', function(Request $request) {
+	$sticker = \App\Sticker::findOrFail($request->param['id']);
+
+	if ($sticker) {
+		$stickerInfoItemPos = $sticker->infoItemPos;
+		if ($stickerInfoItemPos) {
+			$stickerInfoItemPos->pos_top  = $request->param['mountPos']['y'];
+			$stickerInfoItemPos->pos_left = $request->param['mountPos']['x'];
+	
+			// データベースに保存する
+	    	$stickerInfoItemPos->save();
+	    	
+	    	// イベント
+	    	$eventParam = [
+	    		'id'       => $sticker->id,
+	    		'pos_top'  => $stickerInfoItemPos->pos_top,
+	    		'pos_left' => $stickerInfoItemPos->pos_left,
+	    		'user_id'  => $request->user_id,
+	    	];
+	    	
+	    	event((new \App\Events\StickerInfoItemPosUpdate($eventParam))->dontBroadcastToCurrentUser());
+		}
+	}
+});

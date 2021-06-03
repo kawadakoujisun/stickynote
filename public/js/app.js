@@ -2583,6 +2583,435 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=script&lang=js&":
+/*!*****************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkMountComponent.vue?vue&type=script&lang=js& ***!
+  \*****************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      //
+      // 台紙に貼ってあるふせん
+      //
+      stickerParams: [],
+      //
+      // 選んだふせん
+      //
+      targetElem: null,
+      targetElemMountPos: {
+        // targetElemがnullでないとき、有効な値が入っている。
+        x: 0,
+        // px（数値だけで単位の文字列は付けていない）
+        y: 0
+      },
+      targetElemSize: {
+        // targetElemがnullでないとき、有効な値が入っている。
+        width: 0,
+        // px（数値だけで単位の文字列は付けていない）
+        height: 0 // 枠の太さの分も込みの大きさ
+
+      },
+      moveStartTargetElemMountPos: {
+        // targetElemがnullでないとき、有効な値が入っている。
+        x: 0,
+        // px（数値だけで単位の文字列は付けていない）
+        y: 0
+      },
+      moveStartMousePagePos: {
+        // targetElemがnullでないとき、有効な値が入っている。
+        x: 0,
+        // px（数値だけで単位の文字列は付けていない）
+        y: 0
+      },
+      moveIntervalId: null,
+      // targetElemがnullでないとき、有効な値が入っている。
+      lastUpdateTargetElemParam: {
+        // targetElemがnullでないとき、有効な値が入っている。
+        // ただし、setIntervalに設定した関数が呼ばれる前は無効な値が入っているので、
+        // idNoがnullでないことを確認すること。
+        idNo: null,
+        // 要素のidの文字列から抽出した数値
+        mountPos: {
+          x: 0,
+          // px（数値だけで単位の文字列は付けていない）
+          y: 0
+        }
+      },
+      //
+      // ふせんのコンテキストメニューに渡すパラメータ
+      //                
+      showStickerContextMenuParam: {
+        isShow: false,
+        mountPos: {
+          x: 0,
+          y: 0
+        }
+      }
+    };
+  },
+  mounted: function mounted() {
+    var _this = this;
+
+    axios.get(window.laravel.asset + '/api/work-mount').then(function (response) {
+      console.log('axios.get');
+      _this.stickerParams = response.data;
+    });
+    window.Echo["private"]('sticker-info-item-pos-update-channel.' + window.laravel.user['id']).listen('StickerInfoItemPosUpdate', function (response) {
+      console.log('window.Echo.private listen');
+
+      var idBaseName = _this.getStickerIdBaseName();
+
+      var updateId = "".concat(idBaseName).concat(response.eventParam.id);
+      var updateElem = document.getElementById(updateId);
+
+      if (updateElem) {
+        if (_this.targetElem !== updateElem) {
+          // 操作中の要素でなかったら更新する
+          updateElem.style.top = "".concat(response.eventParam.pos_top, "px");
+          updateElem.style.left = "".concat(response.eventParam.pos_left, "px");
+        }
+      }
+    });
+  },
+  directives: {
+    'sticker-custom-directive': {
+      bind: function bind(el, binding) {
+        var stickerParam = binding.value;
+        var colorHex = '000000' + stickerParam['color'].toString(16);
+        colorHex = colorHex.substr(colorHex.length - 6);
+        el.style.top = "".concat(stickerParam['pos_top'], "px");
+        el.style.left = "".concat(stickerParam['pos_left'], "px");
+        el.style.backgroundColor = '#' + colorHex; // background-color
+        // const idBaseName = this.getStickerIdBaseName();  // directives内はthisが使えない？
+
+        var idBaseName = 'sticker-id-'; // 調べている時間がないので直書きしておく。
+
+        el.id = "".concat(idBaseName).concat(stickerParam['id']);
+        var texts = stickerParam['texts'];
+
+        if (texts) {
+          for (var i = 0; i < texts.length; ++i) {
+            var divTextElem = document.createElement('div');
+            divTextElem.innerHTML = texts[i]; // TODO: html構文をそのまま出力して！
+
+            el.appendChild(divTextElem);
+          }
+        }
+      }
+    }
+  },
+  methods: {
+    onChildMouseDownLeft: function onChildMouseDownLeft(e) {
+      var _this2 = this;
+
+      if (this.targetElem === null) {
+        var idBaseName = this.getStickerIdBaseName();
+        var target = e.target;
+
+        while (target) {
+          if (target.id) {
+            if (target.id.substr(0, idBaseName.length) == idBaseName) {
+              this.targetElem = target;
+              break;
+            }
+          } // 子要素も@mousedown.leftに反応するので、親要素を見に行かなければならない。
+
+
+          target = target.parentElement;
+        }
+
+        if (this.targetElem) {
+          // ターゲットの台紙内における座標
+          this.targetElemMountPos.x = parseInt(this.targetElem.style.left, 10); // 単位を取り除く
+
+          this.targetElemMountPos.y = parseInt(this.targetElem.style.top, 10); // ターゲットの現在の画面内における座標
+
+          var targetElemRect = this.targetElem.getBoundingClientRect(); // ターゲットのサイズ
+
+          this.targetElemSize.width = targetElemRect.width; // 画面内のどこにあっても大きさは変わらない
+
+          this.targetElemSize.height = targetElemRect.height; // 枠の太さの分も込みの大きさ
+
+          this.moveStartTargetElemMountPos.x = this.targetElemMountPos.x;
+          this.moveStartTargetElemMountPos.y = this.targetElemMountPos.y;
+          this.moveStartMousePagePos.x = e.pageX;
+          this.moveStartMousePagePos.y = e.pageY;
+          this.moveIntervalId = setInterval(function () {
+            _this2.updateTargetElem();
+          }, 500); // mili seconds
+          //100);  // 100ミリ秒だと「429 Too Many Requests」エラーになってしまう
+          // 確認
+          // ターゲットのページ内における座標
+
+          var targetElemPagePos = {};
+          targetElemPagePos.x = targetElemRect.left + window.pageXOffset;
+          targetElemPagePos.y = targetElemRect.top + window.pageYOffset; // ターゲットの台紙内における座標
+
+          var convertedTargetElemMountPos = this.convertPosFromPageToMount(targetElemPagePos);
+          console.log(target.id, targetElemRect, convertedTargetElemMountPos, this.targetElemMountPos);
+        }
+      }
+    },
+    onChildClickRight: function onChildClickRight(e) {
+      var pagePos = {};
+      pagePos.x = e.pageX;
+      pagePos.y = e.pageY;
+      var mountPos = this.convertPosFromPageToMount(pagePos);
+      this.showStickerContextMenuParam.isShow = true;
+      this.showStickerContextMenuParam.mountPos.x = mountPos.x;
+      this.showStickerContextMenuParam.mountPos.y = mountPos.y;
+    },
+    onMouseMove: function onMouseMove(e) {
+      if (this.targetElem) {
+        this.targetElemMountPos.x = this.moveStartTargetElemMountPos.x + e.pageX - this.moveStartMousePagePos.x;
+        this.targetElemMountPos.y = this.moveStartTargetElemMountPos.y + e.pageY - this.moveStartMousePagePos.y;
+        this.targetElemMountPos = this.modifyPosInMount(this.targetElemMountPos, this.targetElemSize);
+        this.targetElem.style.top = "".concat(this.targetElemMountPos.y, "px");
+        this.targetElem.style.left = "".concat(this.targetElemMountPos.x, "px");
+      }
+    },
+    onMouseLeave: function onMouseLeave(e) {
+      if (this.targetElem) {
+        console.log('onMouseLeave');
+        this.releaseTargetElem();
+      }
+    },
+    onMouseUpLeft: function onMouseUpLeft(e) {
+      if (this.targetElem) {
+        console.log('onMouseUpLeft');
+        this.releaseTargetElem();
+      }
+    },
+    onHideStickerContextMenu: function onHideStickerContextMenu(param) {
+      console.log('onHideStickerContextMenu', param.event);
+      this.showStickerContextMenuParam.isShow = false;
+      this.showStickerContextMenuParam.mountPos.x = 0;
+      this.showStickerContextMenuParam.mountPos.y = 0;
+    },
+    releaseTargetElem: function releaseTargetElem() {
+      this.updateTargetElem();
+      clearInterval(this.moveIntervalId);
+      this.resetLastUpdateTargetElemParam();
+      this.targetElem = null;
+    },
+    updateTargetElem: function updateTargetElem() {
+      var idBaseName = this.getStickerIdBaseName();
+      var idNo = this.targetElem.id.substr(idBaseName.length);
+      var updateTargetElemParam = {
+        idNo: idNo,
+        mountPos: {
+          x: this.targetElemMountPos.x,
+          y: this.targetElemMountPos.y
+        }
+      };
+      var isEqual = this.isEqualToUpdateTargetElemParam(this.lastUpdateTargetElemParam, updateTargetElemParam);
+      if (isEqual) return; // 同じなら更新しない
+
+      this.setLastUpdateTargetElemParam(updateTargetElemParam);
+      var param = {
+        id: updateTargetElemParam.idNo,
+        mountPos: {
+          x: updateTargetElemParam.mountPos.x,
+          y: updateTargetElemParam.mountPos.y
+        }
+      };
+      this.updateStickerInfoItemPos(param);
+    },
+    // param = {
+    //     id: null,
+    //     mountPos: {
+    //         x: null,  // px（数値だけで単位の文字列は付けていない）
+    //         y: null,
+    //     },
+    // };
+    // mountPosは台紙内における座標。            
+    updateStickerInfoItemPos: function updateStickerInfoItemPos(param) {
+      console.log('axios.put');
+      axios.put(window.laravel.asset + '/api/work-sticker-info-item-pos-update', {
+        param: param,
+        user_id: window.laravel.user['id']
+      }).then(function (response) {// 特にすることなし
+      });
+    },
+    isEqualToUpdateTargetElemParam: function isEqualToUpdateTargetElemParam(paramA, paramB) {
+      return paramA.idNo === paramB.idNo && paramA.mountPos.x === paramB.mountPos.x && paramA.mountPos.y === paramB.mountPos.y;
+    },
+    setLastUpdateTargetElemParam: function setLastUpdateTargetElemParam(param) {
+      // 代入に気を付ける
+      this.lastUpdateTargetElemParam.idNo = param.idNo;
+      this.lastUpdateTargetElemParam.mountPos.x = param.mountPos.x;
+      this.lastUpdateTargetElemParam.mountPos.y = param.mountPos.y;
+    },
+    resetLastUpdateTargetElemParam: function resetLastUpdateTargetElemParam() {
+      // 代入に気を付ける
+      var oldParam = {
+        idNo: this.lastUpdateTargetElemParam.idNo,
+        mountPos: {
+          x: this.lastUpdateTargetElemParam.mountPos.x,
+          y: this.lastUpdateTargetElemParam.mountPos.y
+        }
+      };
+      this.lastUpdateTargetElemParam.idNo = null;
+      this.lastUpdateTargetElemParam.mountPos.x = 0;
+      this.lastUpdateTargetElemParam.mountPos.y = 0;
+      return oldParam;
+    },
+    // pagePos = {
+    //     x: 0,  // px（数値だけで単位の文字列は付けていない）
+    //     y: 0,
+    // };
+    // pagePosはページ内における座標。
+    // mountPosは台紙内における座標。
+    convertPosFromPageToMount: function convertPosFromPageToMount(pagePos) {
+      var mountPos = {
+        x: 0,
+        // px（数値だけで単位の文字列は付けていない）
+        y: 0
+      }; // 台紙の枠の太さ
+
+      var mountBorderWidth = this.getMountBorderWidth();
+      var mountElem = this.$el; // 台紙の現在の画面内における座標
+
+      var mountElemRect = mountElem.getBoundingClientRect(); // 台紙のページ内における座標
+
+      var mountElemPagePos = {};
+      mountElemPagePos.x = mountElemRect.left + window.pageXOffset;
+      mountElemPagePos.y = mountElemRect.top + window.pageYOffset;
+      mountPos.x = pagePos.x - mountElemPagePos.x - mountBorderWidth;
+      mountPos.y = pagePos.y - mountElemPagePos.y - mountBorderWidth;
+      return mountPos;
+    },
+    // mountPos = {
+    //     x: 0,  // px（数値だけで単位の文字列は付けていない）
+    //     y: 0,
+    // };
+    // size = {
+    //     width:  0,  // px（数値だけで単位の文字列は付けていない）
+    //     height: 0,  // 枠の太さの分も込みの大きさにしておくのがいい
+    // };
+    // mountPosは台紙内における座標。
+    // sizeは大きさ。
+    // modifiedMountPosは台紙内における座標。
+    modifyPosInMount: function modifyPosInMount(mountPos, size) {
+      var modifiedMountPos = {
+        x: mountPos.x,
+        y: mountPos.y
+      }; // 台紙の枠の太さ
+
+      var mountBorderWidth = this.getMountBorderWidth();
+      var mountElem = this.$el; // 台紙の現在の画面内における座標
+
+      var mountElemRect = mountElem.getBoundingClientRect(); // 台紙のサイズ
+
+      var mountElemSize = {};
+      mountElemSize.width = mountElemRect.width - mountBorderWidth * 2; // 画面内のどこにあっても大きさは変わらない
+
+      mountElemSize.height = mountElemRect.height - mountBorderWidth * 2; // 枠の太さの分も込みの大きさなので、その分は引いておく
+
+      if (mountPos.x < 0) modifiedMountPos.x = 0;
+      if (mountPos.x + size.width > mountElemSize.width) modifiedMountPos.x = mountElemSize.width - size.width;
+      if (mountPos.y < 0) modifiedMountPos.y = 0;
+      if (mountPos.y + size.height > mountElemSize.height) modifiedMountPos.y = mountElemSize.height - size.height;
+      return modifiedMountPos;
+    },
+    getStickerIdBaseName: function getStickerIdBaseName() {
+      return 'sticker-id-';
+    },
+    getMountBorderWidth: function getMountBorderWidth() {
+      return 1;
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=script&lang=js&":
+/*!******************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=script&lang=js& ***!
+  \******************************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: {
+    showStickerContextMenuProps: Object
+  },
+  data: function data() {
+    return {
+      isShow: this.showStickerContextMenuProps.isShow
+    };
+  },
+  watch: {
+    'showStickerContextMenuProps.isShow': function showStickerContextMenuPropsIsShow(newValue, oldValue) {
+      // showStickerContextMenuProps: functionでは変更を検知できなかった。Objectの変更は検知できないのだろうか？
+      this.isShow = this.showStickerContextMenuProps.isShow;
+
+      if (this.isShow) {
+        var contextMenuElem = document.getElementById('sticker-content-menu-id');
+        contextMenuElem.style.top = "".concat(this.showStickerContextMenuProps.mountPos.y, "px");
+        contextMenuElem.style.left = "".concat(this.showStickerContextMenuProps.mountPos.x, "px");
+      }
+    }
+  },
+  methods: {
+    onClickLeft: function onClickLeft(e) {
+      var param = {
+        event: e,
+        dummy: ''
+      };
+      this.$emit('hide-sticker-context-menu-custom-event', param);
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/bootstrap/dist/js/bootstrap.js":
 /*!*****************************************************!*\
   !*** ./node_modules/bootstrap/dist/js/bootstrap.js ***!
@@ -7076,6 +7505,44 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 // module
 exports.push([module.i, "\n.drag-frame[data-v-4548932c] {\n    width:  800px;\n    height: 800px;\n    left:   300px;\n    top:    1000px;\n    position: absolute;\n    border: 1px solid #000;\n}\n.drag-and-drop[data-v-4548932c] {\n    width:  200px;\n    height: 200px;\n    cursor: move;\n    position: absolute;\n    z-index: 1000;\n}\n.drag[data-v-4548932c] {\n    z-index: 1001;\n}\n#red-box[data-v-4548932c] {\n    background-color: #ffaaaa;\n}\n#blue-box[data-v-4548932c] {\n    background-color: #aaaaff;\n}\n#yellow-box[data-v-4548932c] {\n    background-color: #ffffaa;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css&":
+/*!************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css& ***!
+  \************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 40px;\n    padding: 0;\n}\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:  200px;\n    height: 200px;\n    border: 1px solid #000;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=style&index=0&id=5800ee40&scoped=true&lang=css&":
+/*!*************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=style&index=0&id=5800ee40&scoped=true&lang=css& ***!
+  \*************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n.sticker-context-menu-overlay-class[data-v-5800ee40] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 1000;\n    background: rgba(0, 0, 0, 0.0);\n}\n.sticker-context-menu-class[data-v-5800ee40] {\n    position: absolute;\n    width:  150px;\n    height: 300px;\n    z-index: 1001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  300;\n    left: 300;\n}\n", ""]);
 
 // exports
 
@@ -44505,6 +44972,66 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css&":
+/*!****************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css& ***!
+  \****************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css& */ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=style&index=0&id=5800ee40&scoped=true&lang=css&":
+/*!*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=style&index=0&id=5800ee40&scoped=true&lang=css& ***!
+  \*****************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerContextMenuComponent.vue?vue&type=style&index=0&id=5800ee40&scoped=true&lang=css& */ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=style&index=0&id=5800ee40&scoped=true&lang=css&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/lib/addStyles.js":
 /*!****************************************************!*\
   !*** ./node_modules/style-loader/lib/addStyles.js ***!
@@ -45463,6 +45990,173 @@ var render = function() {
   ])
 }
 var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=template&id=652fa580&scoped=true&":
+/*!*********************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkMountComponent.vue?vue&type=template&id=652fa580&scoped=true& ***!
+  \*********************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    {
+      staticClass: "mount-class",
+      on: {
+        mousemove: function($event) {
+          $event.preventDefault()
+          return _vm.onMouseMove($event)
+        },
+        mouseleave: _vm.onMouseLeave,
+        mouseup: function($event) {
+          if (
+            !$event.type.indexOf("key") &&
+            _vm._k($event.keyCode, "left", 37, $event.key, [
+              "Left",
+              "ArrowLeft"
+            ])
+          ) {
+            return null
+          }
+          if ("button" in $event && $event.button !== 0) {
+            return null
+          }
+          return _vm.onMouseUpLeft($event)
+        }
+      }
+    },
+    [
+      _vm._l(_vm.stickerParams, function(stickerParam, index) {
+        return _c("div", {
+          directives: [
+            {
+              name: "sticker-custom-directive",
+              rawName: "v-sticker-custom-directive",
+              value: stickerParam,
+              expression: "stickerParam"
+            }
+          ],
+          key: index,
+          staticClass: "sticker-class",
+          on: {
+            mousedown: function($event) {
+              if (
+                !$event.type.indexOf("key") &&
+                _vm._k($event.keyCode, "left", 37, $event.key, [
+                  "Left",
+                  "ArrowLeft"
+                ])
+              ) {
+                return null
+              }
+              if ("button" in $event && $event.button !== 0) {
+                return null
+              }
+              return _vm.onChildMouseDownLeft($event)
+            },
+            contextmenu: function($event) {
+              $event.preventDefault()
+              return _vm.onChildClickRight($event)
+            }
+          }
+        })
+      }),
+      _vm._v(" "),
+      _c("work-sticker-context-menu", {
+        attrs: {
+          "show-sticker-context-menu-props": _vm.showStickerContextMenuParam
+        },
+        on: {
+          "hide-sticker-context-menu-custom-event": _vm.onHideStickerContextMenu
+        }
+      })
+    ],
+    2
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=template&id=5800ee40&scoped=true&":
+/*!**********************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=template&id=5800ee40&scoped=true& ***!
+  \**********************************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    {
+      directives: [
+        {
+          name: "show",
+          rawName: "v-show",
+          value: _vm.isShow,
+          expression: "isShow"
+        }
+      ],
+      staticClass: "sticker-context-menu-overlay-class",
+      on: {
+        click: function($event) {
+          if (
+            !$event.type.indexOf("key") &&
+            _vm._k($event.keyCode, "left", 37, $event.key, [
+              "Left",
+              "ArrowLeft"
+            ])
+          ) {
+            return null
+          }
+          if ("button" in $event && $event.button !== 0) {
+            return null
+          }
+          return _vm.onClickLeft($event)
+        }
+      }
+    },
+    [_vm._m(0)]
+  )
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c(
+      "div",
+      {
+        staticClass: "sticker-context-menu-class",
+        attrs: { id: "sticker-content-menu-id" }
+      },
+      [_c("p", [_vm._v("context menu")])]
+    )
+  }
+]
 render._withStripped = true
 
 
@@ -57662,6 +58356,8 @@ Vue.component('rect-test', __webpack_require__(/*! ./components/RectTestComponen
 Vue.component('rect-test-2', __webpack_require__(/*! ./components/RectTest2Component.vue */ "./resources/js/components/RectTest2Component.vue")["default"]);
 Vue.component('color-rect-mount', __webpack_require__(/*! ./components/ColorRectMountComponent.vue */ "./resources/js/components/ColorRectMountComponent.vue")["default"]);
 Vue.component('color-rect-context-menu', __webpack_require__(/*! ./components/ColorRectContextMenuComponent.vue */ "./resources/js/components/ColorRectContextMenuComponent.vue")["default"]);
+Vue.component('work-mount', __webpack_require__(/*! ./components/WorkMountComponent.vue */ "./resources/js/components/WorkMountComponent.vue")["default"]);
+Vue.component('work-sticker-context-menu', __webpack_require__(/*! ./components/WorkStickerContextMenuComponent.vue */ "./resources/js/components/WorkStickerContextMenuComponent.vue")["default"]);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -58118,6 +58814,180 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_TodoListComponent_vue_vue_type_template_id_5c76bffe___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_TodoListComponent_vue_vue_type_template_id_5c76bffe___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkMountComponent.vue":
+/*!********************************************************!*\
+  !*** ./resources/js/components/WorkMountComponent.vue ***!
+  \********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _WorkMountComponent_vue_vue_type_template_id_652fa580_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./WorkMountComponent.vue?vue&type=template&id=652fa580&scoped=true& */ "./resources/js/components/WorkMountComponent.vue?vue&type=template&id=652fa580&scoped=true&");
+/* harmony import */ var _WorkMountComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./WorkMountComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/WorkMountComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _WorkMountComponent_vue_vue_type_style_index_0_id_652fa580_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css& */ "./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _WorkMountComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _WorkMountComponent_vue_vue_type_template_id_652fa580_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _WorkMountComponent_vue_vue_type_template_id_652fa580_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  "652fa580",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/WorkMountComponent.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkMountComponent.vue?vue&type=script&lang=js&":
+/*!*********************************************************************************!*\
+  !*** ./resources/js/components/WorkMountComponent.vue?vue&type=script&lang=js& ***!
+  \*********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkMountComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css&":
+/*!*****************************************************************************************************************!*\
+  !*** ./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css& ***!
+  \*****************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_style_index_0_id_652fa580_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_style_index_0_id_652fa580_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_style_index_0_id_652fa580_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_style_index_0_id_652fa580_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_style_index_0_id_652fa580_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkMountComponent.vue?vue&type=template&id=652fa580&scoped=true&":
+/*!***************************************************************************************************!*\
+  !*** ./resources/js/components/WorkMountComponent.vue?vue&type=template&id=652fa580&scoped=true& ***!
+  \***************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_template_id_652fa580_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkMountComponent.vue?vue&type=template&id=652fa580&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=template&id=652fa580&scoped=true&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_template_id_652fa580_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_template_id_652fa580_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerContextMenuComponent.vue":
+/*!*********************************************************************!*\
+  !*** ./resources/js/components/WorkStickerContextMenuComponent.vue ***!
+  \*********************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _WorkStickerContextMenuComponent_vue_vue_type_template_id_5800ee40_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./WorkStickerContextMenuComponent.vue?vue&type=template&id=5800ee40&scoped=true& */ "./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=template&id=5800ee40&scoped=true&");
+/* harmony import */ var _WorkStickerContextMenuComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./WorkStickerContextMenuComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _WorkStickerContextMenuComponent_vue_vue_type_style_index_0_id_5800ee40_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./WorkStickerContextMenuComponent.vue?vue&type=style&index=0&id=5800ee40&scoped=true&lang=css& */ "./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=style&index=0&id=5800ee40&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _WorkStickerContextMenuComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _WorkStickerContextMenuComponent_vue_vue_type_template_id_5800ee40_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _WorkStickerContextMenuComponent_vue_vue_type_template_id_5800ee40_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  "5800ee40",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/WorkStickerContextMenuComponent.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=script&lang=js&":
+/*!**********************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=script&lang=js& ***!
+  \**********************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerContextMenuComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerContextMenuComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerContextMenuComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=style&index=0&id=5800ee40&scoped=true&lang=css&":
+/*!******************************************************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=style&index=0&id=5800ee40&scoped=true&lang=css& ***!
+  \******************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerContextMenuComponent_vue_vue_type_style_index_0_id_5800ee40_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerContextMenuComponent.vue?vue&type=style&index=0&id=5800ee40&scoped=true&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=style&index=0&id=5800ee40&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerContextMenuComponent_vue_vue_type_style_index_0_id_5800ee40_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerContextMenuComponent_vue_vue_type_style_index_0_id_5800ee40_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerContextMenuComponent_vue_vue_type_style_index_0_id_5800ee40_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerContextMenuComponent_vue_vue_type_style_index_0_id_5800ee40_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=template&id=5800ee40&scoped=true&":
+/*!****************************************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=template&id=5800ee40&scoped=true& ***!
+  \****************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerContextMenuComponent_vue_vue_type_template_id_5800ee40_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerContextMenuComponent.vue?vue&type=template&id=5800ee40&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerContextMenuComponent.vue?vue&type=template&id=5800ee40&scoped=true&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerContextMenuComponent_vue_vue_type_template_id_5800ee40_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerContextMenuComponent_vue_vue_type_template_id_5800ee40_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 
