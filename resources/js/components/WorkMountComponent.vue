@@ -203,8 +203,62 @@
                         
                         // 見た目更新
                         const divTextElem = document.createElement('div');
+                        
+                        const contentLinkIdBaseName = this.getContentLinkIdBaseName();
+                        divTextElem.id = `${contentLinkIdBaseName}${content['link'].id}`;
+                        
                         divTextElem.innerHTML = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
                         updateElem.appendChild(divTextElem);
+                    }
+                });
+                
+            window.Echo.private('sticker-content-item-text-destroy-channel.' + window.laravel.user['id'])
+                .listen('StickerContentItemTextDestroy', response => {
+                    console.log('window.Echo.private sticker-content-item-text-destroy-channel listen');
+                    
+                    const idBaseName = this.getStickerIdBaseName();
+                    const updateId = `${idBaseName}${response.eventParam.id}`; 
+                    
+                    const updateElem = document.getElementById(updateId);
+                    
+                    if (updateElem) {
+                        const contentLinkId = response.eventParam.content_link_id;
+                        
+                        // データ更新
+                        const index = updateElem.dataset.arrayIndex;
+                        const contents = this.stickerParams[index]['contents'];  // JavaScriptの配列は参照渡し
+                        
+                        let contentIndex = null;
+                        for (let i = 0; i < contents.length; ++i) {
+                            if (contents[i].link.id == contentLinkId) {
+                                contentIndex = i;
+                                break;
+                            }
+                        }
+                        
+                        if (contentIndex !== null) {
+                            contents.splice(contentIndex, 1);
+                            
+                            // 見た目更新
+                            const contentLinkIdBaseName = this.getContentLinkIdBaseName();
+                            const divItemElemId = `${contentLinkIdBaseName}${contentLinkId}`;
+                                // TODO(kawadakoujisun): refを使えばループを回さなくて済むか？
+                            
+                            const childElems = updateElem.childNodes;
+
+                            let divItemElem = null;
+                            for (let i = 0; i < childElems.length; ++i) {
+                                const childElem = childElems.item(i);
+                                if (childElem.id == divItemElemId) {
+                                    divItemElem = childElem;
+                                    break;
+                                }
+                            }
+                            
+                            if (divItemElem !== null) {
+                                updateElem.removeChild(divItemElem);
+                            }
+                        }
                     }
                 });
         },
@@ -236,6 +290,11 @@
                         if (content['link'].item_type == 1) {  // app/Sticker.phpで値を定義している
                             const text = content['item']['text'];
                             const divTextElem = document.createElement('div');
+                            
+                            // const contentLinkIdBaseName = this.getContentLinkIdBaseName();
+                            const contentLinkIdBaseName = 'content-link-id-';  // 直書き
+                            divTextElem.id = `${contentLinkIdBaseName}${content['link'].id}`;
+                            
                             divTextElem.innerHTML = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
                             el.appendChild(divTextElem);
                         }
@@ -365,7 +424,6 @@
                         const stickerId = `${idBaseName}${idNo}`; 
                     
                         const stickerElem = document.getElementById(stickerId);
-            
                         const arrayIndex = stickerElem.dataset.arrayIndex;
                         
                         this.showStickerEditWindowParam.isShow = true;
@@ -388,7 +446,9 @@
                 this.showStickerEditWindowParam.idNo = null;
 
                 if (emitParam.result != 'none') {
-                    // TODO(kawadakoujisun):
+                    if (emitParam.result == 'removeText') {
+                        // ここに来る前にテキストを削除しているので、ここでは何もしない
+                    }
                 }
             },
             
@@ -413,7 +473,7 @@
 
                 if (emitParam.result != 'none') {
                     if (emitParam.result == 'addText') {
-                        // ここに来る前に色を変更しているので、ここでは何もしない
+                        // ここに来る前にテキストを追加しているので、ここでは何もしない
                     }
                 }
             },            
@@ -566,6 +626,10 @@
             
             getStickerIdBaseName: function () {
                 return 'sticker-id-';
+            },
+            
+            getContentLinkIdBaseName: function () {
+                return 'content-link-id-';
             },
             
             getMountBorderWidth: function () {

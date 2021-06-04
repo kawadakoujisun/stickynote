@@ -2797,9 +2797,61 @@ __webpack_require__.r(__webpack_exports__);
         // 見た目更新
 
         var divTextElem = document.createElement('div');
+
+        var contentLinkIdBaseName = _this.getContentLinkIdBaseName();
+
+        divTextElem.id = "".concat(contentLinkIdBaseName).concat(content['link'].id);
         divTextElem.innerHTML = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
 
         updateElem.appendChild(divTextElem);
+      }
+    });
+    window.Echo["private"]('sticker-content-item-text-destroy-channel.' + window.laravel.user['id']).listen('StickerContentItemTextDestroy', function (response) {
+      console.log('window.Echo.private sticker-content-item-text-destroy-channel listen');
+
+      var idBaseName = _this.getStickerIdBaseName();
+
+      var updateId = "".concat(idBaseName).concat(response.eventParam.id);
+      var updateElem = document.getElementById(updateId);
+
+      if (updateElem) {
+        var contentLinkId = response.eventParam.content_link_id; // データ更新
+
+        var index = updateElem.dataset.arrayIndex;
+        var contents = _this.stickerParams[index]['contents']; // JavaScriptの配列は参照渡し
+
+        var contentIndex = null;
+
+        for (var i = 0; i < contents.length; ++i) {
+          if (contents[i].link.id == contentLinkId) {
+            contentIndex = i;
+            break;
+          }
+        }
+
+        if (contentIndex !== null) {
+          contents.splice(contentIndex, 1); // 見た目更新
+
+          var contentLinkIdBaseName = _this.getContentLinkIdBaseName();
+
+          var divItemElemId = "".concat(contentLinkIdBaseName).concat(contentLinkId); // TODO(kawadakoujisun): refを使えばループを回さなくて済むか？
+
+          var childElems = updateElem.childNodes;
+          var divItemElem = null;
+
+          for (var _i = 0; _i < childElems.length; ++_i) {
+            var childElem = childElems.item(_i);
+
+            if (childElem.id == divItemElemId) {
+              divItemElem = childElem;
+              break;
+            }
+          }
+
+          if (divItemElem !== null) {
+            updateElem.removeChild(divItemElem);
+          }
+        }
       }
     });
   },
@@ -2829,7 +2881,11 @@ __webpack_require__.r(__webpack_exports__);
           if (content['link'].item_type == 1) {
             // app/Sticker.phpで値を定義している
             var text = content['item']['text'];
-            var divTextElem = document.createElement('div');
+            var divTextElem = document.createElement('div'); // const contentLinkIdBaseName = this.getContentLinkIdBaseName();
+
+            var contentLinkIdBaseName = 'content-link-id-'; // 直書き
+
+            divTextElem.id = "".concat(contentLinkIdBaseName).concat(content['link'].id);
             divTextElem.innerHTML = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
 
             el.appendChild(divTextElem);
@@ -2968,7 +3024,9 @@ __webpack_require__.r(__webpack_exports__);
       this.showStickerEditWindowParam.isShow = false;
       this.showStickerEditWindowParam.idNo = null;
 
-      if (emitParam.result != 'none') {// TODO(kawadakoujisun):
+      if (emitParam.result != 'none') {
+        if (emitParam.result == 'removeText') {// ここに来る前にテキストを削除しているので、ここでは何もしない
+        }
       }
     },
     onHideStickerColorChangeWindow: function onHideStickerColorChangeWindow(emitParam) {
@@ -2987,7 +3045,7 @@ __webpack_require__.r(__webpack_exports__);
       this.showStickerTextAddWindowParam.idNo = null;
 
       if (emitParam.result != 'none') {
-        if (emitParam.result == 'addText') {// ここに来る前に色を変更しているので、ここでは何もしない
+        if (emitParam.result == 'addText') {// ここに来る前にテキストを追加しているので、ここでは何もしない
         }
       }
     },
@@ -3119,6 +3177,9 @@ __webpack_require__.r(__webpack_exports__);
     },
     getStickerIdBaseName: function getStickerIdBaseName() {
       return 'sticker-id-';
+    },
+    getContentLinkIdBaseName: function getContentLinkIdBaseName() {
+      return 'content-link-id-';
     },
     getMountBorderWidth: function getMountBorderWidth() {
       return 1;
@@ -3437,6 +3498,7 @@ __webpack_require__.r(__webpack_exports__);
       console.log('onClickStickerEditWindow'); // 何もしない
     },
     onClickStickerContentRemove: function onClickStickerContentRemove(e) {
+      // テキストを削除する
       console.log('onClickStickerContentRemove');
       var idBaseName = 'content-link-id-';
       var contentElem = null;
@@ -3456,6 +3518,24 @@ __webpack_require__.r(__webpack_exports__);
       if (contentElem) {
         var contentLinkId = contentElem.id.substr(idBaseName.length);
         console.log(contentLinkId);
+        console.log('axios.delete');
+        var reqParam = {
+          id: this.showStickerEditWindowProps.idNo,
+          content_link_id: contentLinkId
+        };
+        axios["delete"](window.laravel.asset + '/api/work-sticker-content-item-text-destroy', {
+          data: {
+            reqParam: reqParam,
+            user_id: window.laravel.user['id']
+          }
+        }).then(function (response) {// 特にすることなし
+        }); // 親に戻る
+
+        var emitParam = {
+          event: e,
+          result: 'removeText'
+        };
+        this.$emit('hide-sticker-edit-window-custom-event', emitParam);
       }
     },
     onClickClose: function onClickClose(e) {

@@ -122,6 +122,7 @@
             },
             
             onClickStickerContentRemove: function (e) {
+                // テキストを削除する
                 console.log('onClickStickerContentRemove');
                 
                 const idBaseName = 'content-link-id-';
@@ -141,6 +142,30 @@
                 if (contentElem) {
                     const contentLinkId = contentElem.id.substr(idBaseName.length);
                     console.log(contentLinkId);
+                    
+                    console.log('axios.delete');
+                                    
+                    const reqParam = {
+                        id: this.showStickerEditWindowProps.idNo,
+                        content_link_id: contentLinkId,
+                    };
+                    
+                    axios.delete(window.laravel.asset + '/api/work-sticker-content-item-text-destroy', {
+                        data: {
+                            reqParam: reqParam,
+                            user_id: window.laravel.user['id'],
+                        },
+                    })
+                        .then(response => {
+                            // 特にすることなし
+                        });
+                        
+                    // 親に戻る
+                    const emitParam = {
+                        event: e,
+                        result: 'removeText',
+                    };
+                    this.$emit('hide-sticker-edit-window-custom-event', emitParam);
                 }
             },
             
