@@ -11,6 +11,10 @@ class Sticker extends Model
         'image' => 2,
         'video' => 3,
     ];
+    // ↑ $contentItemTypeで定義しているのと同じ値を使っている箇所
+    // resources/js/components/WorkMountComponent.vue
+    // resources/js/components/WorkStickerEditWindowComponent.vue
+    // ↑ これらの箇所には「app/Sticker.phpで値を定義している」というコメントをいれてある。
     
     /**
      * このStickerが所有するStickerInfoItemPos。（StickerInfoItemPosモデルとの関係を定義）
@@ -57,6 +61,27 @@ class Sticker extends Model
             'item_type' => self::$contentItemType['text'],
             'item_id'   => $contentItem->id,
         ]);
-        return $contentItem;
+        return [ $contentLink, $contentItem ];
+    }
+    
+    /**
+     * このStickerが所有するStickerContentItem〇〇とそれと関連があるStickerContentLinkを削除する。
+     */
+    public function destroyContentItem($arg)
+    {
+        $contentLink = $this->contentLinks()->where('id', $arg['content_link_id'])->first();
+        if ($contentLink) {
+            $item_type = $contentLink->item_type;
+            $item_id   = $contentLink->item_id;
+            
+            $contentLink->delete();
+            
+            if ($item_type == self::$contentItemType['text']) {
+                $contentItem = $this->contentItemTexts()->where('id', $item_id)->first();
+                if ($contentItem) {
+                    $contentItem->delete();
+                }
+            }
+        }
     }
 }

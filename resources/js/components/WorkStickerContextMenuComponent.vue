@@ -9,6 +9,7 @@
             id="sticker-content-menu-id"
             @click.self.prevent="onClickStickerContextMenu"
         >
+            <div><button @click.prevent="onClickEdit">編集</button></div>
             <div><button @click.prevent="onClickChangeColor">色を変更</button></div>
             <div><button @click.prevent="onClickAddText">テキストを追加</button></div>
         </div>
@@ -59,6 +60,15 @@
                 this.$emit('hide-sticker-context-menu-custom-event', emitParam); 
             },
             
+            onClickEdit: function (e) {
+                console.log('onClickEdit');
+                const emitParam = {
+                    event: e,
+                    result: 'openStickerEditWindow',
+                };
+                this.$emit('hide-sticker-context-menu-custom-event', emitParam);
+            },
+
             onClickChangeColor: function (e) {
                 console.log('onClickChangeColor');
                 const emitParam = {

@@ -8,7 +8,7 @@
         <div
             v-for="(stickerParam, index) in stickerParams"
             v-bind:key="index"
-            v-sticker-custom-directive=stickerParam
+            v-sticker-custom-directive="{ stickerParam: stickerParam, index: index }"
             class="sticker-class"
             @mousedown.left="onChildMouseDownLeft"
             @click.right.prevent="onChildClickRight"
@@ -19,6 +19,11 @@
             @hide-sticker-context-menu-custom-event="onHideStickerContextMenu"
         >
         </work-sticker-context-menu>
+        <work-sticker-edit-window
+            v-bind:show-sticker-edit-window-props="showStickerEditWindowParam"
+            @hide-sticker-edit-window-custom-event="onHideStickerEditWindow"
+        >
+        </work-sticker-edit-window>
         <work-sticker-color-change-window
             v-bind:show-sticker-color-change-window-props="showStickerColorChangeWindowParam"
             @hide-sticker-color-change-window-custom-event="onHideStickerColorChangeWindow"
@@ -83,6 +88,15 @@
                         y: 0,
                     },
                 },
+
+                //
+                // ふせんの編集ウィンドウに渡すパラメータ
+                //
+                showStickerEditWindowParam: {
+                    isShow: false,
+                    idNo: null,  // 要素のidの文字列から抽出した数値
+                    stickerParam: null,
+                },
                 
                 //
                 // ふせんの色変更するウィンドウに渡すパラメータ
@@ -121,8 +135,17 @@
                     
                     if (updateElem) {
                         if (this.targetElem !== updateElem) {  // 操作中の要素でなかったら更新する
-                            updateElem.style.top  = `${response.eventParam.pos_top}px`;
-                            updateElem.style.left = `${response.eventParam.pos_left}px`;
+                            const posTop  = response.eventParam.pos_top;
+                            const posLeft = response.eventParam.pos_left;
+                        
+                            // データ更新
+                            const index = updateElem.dataset.arrayIndex;
+                            this.stickerParams[index]['pos_top']  = posTop;
+                            this.stickerParams[index]['pos_left'] = posLeft;
+                        
+                            // 見た目更新
+                            updateElem.style.top  = `${posTop}px`;
+                            updateElem.style.left = `${posLeft}px`;
                         }
                     }
                 });
@@ -137,7 +160,13 @@
                     const updateElem = document.getElementById(updateId);
                     
                     if (updateElem) {
-                        let colorHex = '000000' + response.eventParam.color.toString(16);
+                        const color = response.eventParam.color; 
+                        // データ更新
+                        const index = updateElem.dataset.arrayIndex;
+                        this.stickerParams[index]['color'] = color;
+                        
+                        // 見た目更新
+                        let colorHex = '000000' + color.toString(16);
                         colorHex = colorHex.substr(colorHex.length - 6);
                         updateElem.style.backgroundColor = '#'+colorHex;  // background-color
                     }
@@ -153,8 +182,28 @@
                     const updateElem = document.getElementById(updateId);
                     
                     if (updateElem) {
+                        const text = response.eventParam.text;
+                        
+                        // データ更新
+                        const index = updateElem.dataset.arrayIndex;
+                        const contents = this.stickerParams[index]['contents'];  // JavaScriptの配列は参照渡し
+                        
+                        const content = {
+                            link: {
+                                id:        response.eventParam.content_link_id,
+                                item_type: response.eventParam.content_item_type,
+                                item_id:   response.eventParam.content_item_id,
+                            },
+                            item: {
+                                text: text,
+                            },
+                        };
+                        
+                        contents.push(content);  // TODO(kawadakoujisun): id順に並び替える必要あるかも。見た目のdivの並びも。
+                        
+                        // 見た目更新
                         const divTextElem = document.createElement('div');
-                        divTextElem.innerHTML = response.eventParam.text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
+                        divTextElem.innerHTML = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
                         updateElem.appendChild(divTextElem);
                     }
                 });
@@ -163,7 +212,10 @@
         directives: {
             'sticker-custom-directive': {
                 bind: function (el, binding) {
-                    const stickerParam = binding.value;
+                    const stickerParam = binding.value.stickerParam;
+                    const index        = binding.value.index;
+
+                    console.log('binding.value.index', index);
                     
                     let colorHex = '000000' + stickerParam['color'].toString(16);
                     colorHex = colorHex.substr(colorHex.length - 6);
@@ -176,11 +228,15 @@
                     const idBaseName = 'sticker-id-';                   // 調べている時間がないので直書きしておく。
                     el.id = `${idBaseName}${stickerParam['id']}`;
                     
-                    const texts = stickerParam['texts'];
-                    if (texts) {
-                        for (let i = 0; i < texts.length; ++i) {
+                    el.dataset.arrayIndex = index;  // data-array-index
+                    
+                    const contents = stickerParam['contents'];
+                    for (let i = 0; i < contents.length; ++i) {
+                        const content = contents[i];
+                        if (content['link'].item_type == 1) {  // app/Sticker.phpで値を定義している
+                            const text = content['item']['text'];
                             const divTextElem = document.createElement('div');
-                            divTextElem.innerHTML = texts[i];  // TODO(kawadakoujisun): html構文をそのまま出力して！
+                            divTextElem.innerHTML = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
                             el.appendChild(divTextElem);
                         }
                     }
@@ -304,13 +360,35 @@
                 this.showStickerContextMenuParam.mountPos.y = 0;
                 
                 if (emitParam.result != 'none') {
-                    if (emitParam.result == 'openStickerColorChangeWindow') {
+                    if (emitParam.result == 'openStickerEditWindow') {
+                        const idBaseName = this.getStickerIdBaseName();
+                        const stickerId = `${idBaseName}${idNo}`; 
+                    
+                        const stickerElem = document.getElementById(stickerId);
+            
+                        const arrayIndex = stickerElem.dataset.arrayIndex;
+                        
+                        this.showStickerEditWindowParam.isShow = true;
+                        this.showStickerEditWindowParam.idNo = idNo;
+                        this.showStickerEditWindowParam.stickerParam = this.stickerParams[arrayIndex];
+                    } else if (emitParam.result == 'openStickerColorChangeWindow') {
                         this.showStickerColorChangeWindowParam.isShow = true;
                         this.showStickerColorChangeWindowParam.idNo = idNo;
                     } else if (emitParam.result == 'openStickerTextAddWindow') {
                         this.showStickerTextAddWindowParam.isShow = true;
                         this.showStickerTextAddWindowParam.idNo = idNo;
                     }
+                }
+            },
+
+            onHideStickerEditWindow: function (emitParam) {
+                console.log('onHideStickerEditWindow', emitParam.event);
+                
+                this.showStickerEditWindowParam.isShow = false;
+                this.showStickerEditWindowParam.idNo = null;
+
+                if (emitParam.result != 'none') {
+                    // TODO(kawadakoujisun):
                 }
             },
             

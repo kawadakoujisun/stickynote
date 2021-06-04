@@ -158,30 +158,46 @@ Route::get('/work-mount', function() {
 				'pos_top'  => $stickerInfoItemPos->pos_top,
 				'pos_left' => $stickerInfoItemPos->pos_left,
 				'color'    => $stickerInfoItemColor->color,
+				// 'contents' => array(),  // この後要素数0であっても必ず配列を設定します。
 			];
 			
+			$contents = array();
+			
 			if ($stickerContentLinks) {
-				$texts = array();
-				
 				foreach ($stickerContentLinks as $contentLink) {
-					$item_id = $contentLink->item_id;
-					if ($contentLink->item_type == \App\Sticker::$contentItemType['text']) {
+					$item_type = $contentLink->item_type;
+					$item_id   = $contentLink->item_id;
+					
+					$link = [
+						'id'        => $contentLink->id,
+						'item_type' => $item_type,
+						'item_id'   => $item_id,
+					];
+					
+					if ($item_type == \App\Sticker::$contentItemType['text']) {
 						if ($stickerContentItemTexts) {
 							$contentItemText = $stickerContentItemTexts->where('id', $item_id)->first();
 							if ($contentItemText) {
 								$text = $contentItemText->text;
 								if ($text) {
-							        array_push($texts, $text);
+									$item = [
+										'text' => $text,
+									];
+									
+									$content = [
+										'link' => $link,
+										'item' => $item,
+									];
+									
+							        array_push($contents, $content);
 								}
 							}
 						}
 					}
 				}
-				
-				if(count($texts) > 0) {
-					$stickerParam['texts'] = $texts;
-				}
 			}
+			
+			$stickerParam['contents'] = $contents;
 			
 			array_push($stickerParams, $stickerParam);
 		}
@@ -245,17 +261,42 @@ Route::post('/work-sticker-content-item-text-create', function(Request $request)
 		$text = $request->reqParam['text'];
 		
 		// テキストを作成し、データベースに保存する
-		$sticker->createContentItemText([
+		list($contentLink, $contentItem) = $sticker->createContentItemText([
 		    'text' => $text,
 		]);
 	    
 	    // イベント
 	    $eventParam = [
-	    	'id'      => $sticker->id,
-	    	'text'    => $text,
-	    	'user_id' => $request->user_id,
+	    	'id'                => $sticker->id,
+	    	'content_link_id'   => $contentLink->id,
+	    	'content_item_type' => $contentLink->item_type,
+	    	'content_item_id'   => $contentLink->item_id,
+	    	'text'              => $text,
+	    	'user_id'           => $request->user_id,
 	    ];
 	    
 	    event((new \App\Events\StickerContentItemTextCreate($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+	}
+});
+
+Route::delete('/work-sticker-content-item-text-destroy', function(Request $request) {
+	$sticker = \App\Sticker::findOrFail($request->reqParam['id']);
+
+	if ($sticker) {
+		$content_link_id = $request->reqParam['content_link_id'];
+		
+		// テキストを削除し、データベースに保存する
+		$sticker->destroyContentItem([
+		    'content_link_id' => $content_link_id,
+		]);
+	    
+	    // イベント
+	    $eventParam = [
+	    	'id'              => $sticker->id,
+	    	'content_link_id' => $content_link_id,
+	    	'user_id'         => $request->user_id,
+	    ];
+	    
+	    event((new \App\Events\StickerContentItemTextDestroy($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
 	}
 });
