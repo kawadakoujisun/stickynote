@@ -21,7 +21,7 @@
                 </button>
             </form>
 
-            <div><button @click.prevent="onClickClose">閉じる</button></div>
+            <div><button @click.prevent="onClickClose">戻る</button></div>
         </div>
     </div>
 </template>

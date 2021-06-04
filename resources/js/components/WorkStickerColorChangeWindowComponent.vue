@@ -14,7 +14,7 @@
             <div><button @click.prevent="onClickColorYellow">黄色</button></div>
             <div><button @click.prevent="onClickColorGreen">緑</button></div>
             <div><button @click.prevent="onClickColorPink">ピンク</button></div>
-            <div><button @click.prevent="onClickClose">閉じる</button></div>
+            <div><button @click.prevent="onClickClose">戻る</button></div>
         </div>
     </div>
 </template>

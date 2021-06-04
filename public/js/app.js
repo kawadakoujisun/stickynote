@@ -3010,22 +3010,24 @@ __webpack_require__.r(__webpack_exports__);
           this.showStickerEditWindowParam.isShow = true;
           this.showStickerEditWindowParam.idNo = idNo;
           this.showStickerEditWindowParam.stickerParam = this.stickerParams[arrayIndex];
+        }
+      }
+    },
+    onHideStickerEditWindow: function onHideStickerEditWindow(emitParam) {
+      console.log('onHideStickerEditWindow', emitParam.event);
+      var idNo = this.showStickerEditWindowParam.idNo;
+      this.showStickerEditWindowParam.isShow = false;
+      this.showStickerEditWindowParam.idNo = null;
+      this.showStickerEditWindowParam.stickerParam = null;
+
+      if (emitParam.result != 'none') {
+        if (emitParam.result == 'removeText') {// ここに来る前にテキストを削除しているので、ここでは何もしない
         } else if (emitParam.result == 'openStickerColorChangeWindow') {
           this.showStickerColorChangeWindowParam.isShow = true;
           this.showStickerColorChangeWindowParam.idNo = idNo;
         } else if (emitParam.result == 'openStickerTextAddWindow') {
           this.showStickerTextAddWindowParam.isShow = true;
           this.showStickerTextAddWindowParam.idNo = idNo;
-        }
-      }
-    },
-    onHideStickerEditWindow: function onHideStickerEditWindow(emitParam) {
-      console.log('onHideStickerEditWindow', emitParam.event);
-      this.showStickerEditWindowParam.isShow = false;
-      this.showStickerEditWindowParam.idNo = null;
-
-      if (emitParam.result != 'none') {
-        if (emitParam.result == 'removeText') {// ここに来る前にテキストを削除しているので、ここでは何もしない
         }
       }
     },
@@ -3312,7 +3314,6 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
-//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     showStickerContextMenuProps: Object
@@ -3352,27 +3353,18 @@ __webpack_require__.r(__webpack_exports__);
       };
       this.$emit('hide-sticker-context-menu-custom-event', emitParam);
     },
+    onClickClose: function onClickClose(e) {
+      var emitParam = {
+        event: e,
+        result: 'none'
+      };
+      this.$emit('hide-sticker-context-menu-custom-event', emitParam);
+    },
     onClickEdit: function onClickEdit(e) {
       console.log('onClickEdit');
       var emitParam = {
         event: e,
         result: 'openStickerEditWindow'
-      };
-      this.$emit('hide-sticker-context-menu-custom-event', emitParam);
-    },
-    onClickChangeColor: function onClickChangeColor(e) {
-      console.log('onClickChangeColor');
-      var emitParam = {
-        event: e,
-        result: 'openStickerColorChangeWindow'
-      };
-      this.$emit('hide-sticker-context-menu-custom-event', emitParam);
-    },
-    onClickAddText: function onClickAddText(e) {
-      console.log('onClickAddText');
-      var emitParam = {
-        event: e,
-        result: 'openStickerTextAddWindow'
       };
       this.$emit('hide-sticker-context-menu-custom-event', emitParam);
     }
@@ -3542,6 +3534,22 @@ __webpack_require__.r(__webpack_exports__);
       var emitParam = {
         event: e,
         result: 'none'
+      };
+      this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+    },
+    onClickChangeColor: function onClickChangeColor(e) {
+      console.log('onClickChangeColor');
+      var emitParam = {
+        event: e,
+        result: 'openStickerColorChangeWindow'
+      };
+      this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+    },
+    onClickAddText: function onClickAddText(e) {
+      console.log('onClickAddText');
+      var emitParam = {
+        event: e,
+        result: 'openStickerTextAddWindow'
       };
       this.$emit('hide-sticker-edit-window-custom-event', emitParam);
     }
@@ -47047,7 +47055,7 @@ var render = function() {
                   }
                 }
               },
-              [_vm._v("閉じる")]
+              [_vm._v("戻る")]
             )
           ])
         ]
@@ -47138,26 +47146,11 @@ var render = function() {
                 on: {
                   click: function($event) {
                     $event.preventDefault()
-                    return _vm.onClickChangeColor($event)
+                    return _vm.onClickClose($event)
                   }
                 }
               },
-              [_vm._v("色を変更")]
-            )
-          ]),
-          _vm._v(" "),
-          _c("div", [
-            _c(
-              "button",
-              {
-                on: {
-                  click: function($event) {
-                    $event.preventDefault()
-                    return _vm.onClickAddText($event)
-                  }
-                }
-              },
-              [_vm._v("テキストを追加")]
+              [_vm._v("戻る")]
             )
           ])
         ]
@@ -47300,7 +47293,7 @@ var render = function() {
                   on: {
                     click: function($event) {
                       $event.preventDefault()
-                      return _vm.onClickClose($event)
+                      return _vm.onClickChangeColor($event)
                     }
                   }
                 },
@@ -47315,7 +47308,7 @@ var render = function() {
                   on: {
                     click: function($event) {
                       $event.preventDefault()
-                      return _vm.onClickClose($event)
+                      return _vm.onClickAddText($event)
                     }
                   }
                 },
@@ -47334,7 +47327,7 @@ var render = function() {
                     }
                   }
                 },
-                [_vm._v("閉じる")]
+                [_vm._v("戻る")]
               )
             ])
           ])
@@ -47453,7 +47446,7 @@ var render = function() {
                   }
                 }
               },
-              [_vm._v("閉じる")]
+              [_vm._v("戻る")]
             )
           ])
         ]

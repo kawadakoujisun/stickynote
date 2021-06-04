@@ -35,9 +35,9 @@
             <div
                 class="sticker-edit-buttons-outer-class"
             >
-                <div><button @click.prevent="onClickClose">色を変更</button></div>
-                <div><button @click.prevent="onClickClose">テキストを追加</button></div>
-                <div><button @click.prevent="onClickClose">閉じる</button></div>
+                <div><button @click.prevent="onClickChangeColor">色を変更</button></div>
+                <div><button @click.prevent="onClickAddText">テキストを追加</button></div>
+                <div><button @click.prevent="onClickClose">戻る</button></div>
             </div>
         </div>
     </div>
@@ -168,11 +168,29 @@
                     this.$emit('hide-sticker-edit-window-custom-event', emitParam);
                 }
             },
-            
+
             onClickClose: function (e) {
                 const emitParam = {
                     event: e,
                     result: 'none',
+                };
+                this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+            },
+            
+            onClickChangeColor: function (e) {
+                console.log('onClickChangeColor');
+                const emitParam = {
+                    event: e,
+                    result: 'openStickerColorChangeWindow',
+                };
+                this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+            },
+            
+            onClickAddText: function (e) {
+                console.log('onClickAddText');
+                const emitParam = {
+                    event: e,
+                    result: 'openStickerTextAddWindow',
                 };
                 this.$emit('hide-sticker-edit-window-custom-event', emitParam);
             },

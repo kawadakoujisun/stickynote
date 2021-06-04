@@ -429,12 +429,6 @@
                         this.showStickerEditWindowParam.isShow = true;
                         this.showStickerEditWindowParam.idNo = idNo;
                         this.showStickerEditWindowParam.stickerParam = this.stickerParams[arrayIndex];
-                    } else if (emitParam.result == 'openStickerColorChangeWindow') {
-                        this.showStickerColorChangeWindowParam.isShow = true;
-                        this.showStickerColorChangeWindowParam.idNo = idNo;
-                    } else if (emitParam.result == 'openStickerTextAddWindow') {
-                        this.showStickerTextAddWindowParam.isShow = true;
-                        this.showStickerTextAddWindowParam.idNo = idNo;
                     }
                 }
             },
@@ -442,12 +436,21 @@
             onHideStickerEditWindow: function (emitParam) {
                 console.log('onHideStickerEditWindow', emitParam.event);
                 
+                const idNo = this.showStickerEditWindowParam.idNo;
+                
                 this.showStickerEditWindowParam.isShow = false;
                 this.showStickerEditWindowParam.idNo = null;
+                this.showStickerEditWindowParam.stickerParam = null;
 
                 if (emitParam.result != 'none') {
                     if (emitParam.result == 'removeText') {
                         // ここに来る前にテキストを削除しているので、ここでは何もしない
+                    } else if (emitParam.result == 'openStickerColorChangeWindow') {
+                        this.showStickerColorChangeWindowParam.isShow = true;
+                        this.showStickerColorChangeWindowParam.idNo = idNo;
+                    } else if (emitParam.result == 'openStickerTextAddWindow') {
+                        this.showStickerTextAddWindowParam.isShow = true;
+                        this.showStickerTextAddWindowParam.idNo = idNo;
                     }
                 }
             },
