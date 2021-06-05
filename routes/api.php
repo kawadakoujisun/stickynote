@@ -161,6 +161,23 @@ Route::post('/work-sticker-create', function(Request $request) {
 	event((new \App\Events\StickerCreate($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
 });
 
+Route::delete('/work-sticker-destroy', function(Request $request) {
+	$sticker = \App\Sticker::findOrFail($request->reqParam['id']);
+
+	if ($sticker) {
+		// ふせんを削除し、データベースに保存する
+		$sticker->delete();
+	    
+	    // イベント
+	    $eventParam = [
+	    	'id'      => $sticker->id,
+	    	'user_id' => $request->user_id,
+	    ];
+	    
+	    event((new \App\Events\StickerDestroy($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+	}
+});
+
 Route::get('/work-mount', function() {
 	$stickerParams = array();
 

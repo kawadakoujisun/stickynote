@@ -27,6 +27,10 @@ Broadcast::channel('sticker-create-channel.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
 
+Broadcast::channel('sticker-destroy-channel.{id}', function ($user, $id) {
+    return (int) $user->id === (int) $id;
+});
+
 Broadcast::channel('sticker-info-item-pos-update-channel.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });

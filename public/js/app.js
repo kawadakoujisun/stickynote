@@ -2860,8 +2860,33 @@ __webpack_require__.r(__webpack_exports__);
       };
 
       _this.stickerParams.push(stickerParam); // 見た目更新
-      // this.stickerParamsを増やすと勝手に行われるようなので、何もしなくてよい。
+      // this.stickerParamsに追加すると勝手に見た目の更新も行われたので、何もしなくてよい。
+      // ↑
+      // directivesのsticker-custom-directiveのbindが呼ばれているおかげで見た目が更新される。
+      // 追加したstickerParamについてだけsticker-custom-directiveのbindが呼ばれている（既存のstickerParamについては呼ばれない）。
 
+    });
+    window.Echo["private"]('sticker-destroy-channel.' + window.laravel.user['id']).listen('StickerDestroy', function (response) {
+      console.log('window.Echo.private sticker-destroy-channel listen'); // データ更新
+
+      var stickerIndex = null;
+
+      for (var i = 0; i < _this.stickerParams.length; ++i) {
+        var stickerParam = _this.stickerParams[i];
+
+        if (stickerParam.id == response.eventParam.id) {
+          stickerIndex = i;
+          break;
+        }
+      }
+
+      if (stickerIndex !== null) {
+        _this.stickerParams.splice(stickerIndex, 1); // 見た目更新
+        // this.stickerParamsから削除すると勝手に見た目の更新も行われたので、何もしなくてよい。
+        // ↑
+        // なぜ見た目が更新されたのかはよく分からない。
+
+      }
     });
     window.Echo["private"]('sticker-info-item-pos-update-channel.' + window.laravel.user['id']).listen('StickerInfoItemPosUpdate', function (response) {
       console.log('window.Echo.private sticker-info-item-pos-update-channel listen');
@@ -2994,9 +3019,9 @@ __webpack_require__.r(__webpack_exports__);
   directives: {
     'sticker-custom-directive': {
       bind: function bind(el, binding) {
+        console.log('sticker-custom-directive bind', binding.value.index);
         var stickerParam = binding.value.stickerParam;
         var index = binding.value.index;
-        console.log('binding.value.index', index);
         var colorHex = '000000' + stickerParam['color'].toString(16);
         colorHex = colorHex.substr(colorHex.length - 6);
         el.style.top = "".concat(stickerParam['pos_top'], "px");
@@ -3027,6 +3052,15 @@ __webpack_require__.r(__webpack_exports__);
             el.appendChild(divTextElem);
           }
         }
+      },
+      inserted: function inserted(el, binding) {
+        console.log('sticker-custom-directive inserted', binding.value.index);
+      },
+      update: function update(el, binding) {
+        console.log('sticker-custom-directive update', binding.value.index);
+      },
+      componentUpdated: function componentUpdated(el, binding) {
+        console.log('sticker-custom-directive componentUpdated', binding.value.index);
       }
     }
   },
@@ -3146,6 +3180,7 @@ __webpack_require__.r(__webpack_exports__);
           this.showStickerEditWindowParam.isShow = true;
           this.showStickerEditWindowParam.idNo = idNo;
           this.showStickerEditWindowParam.stickerParam = this.stickerParams[arrayIndex];
+        } else if (emitParam.result == 'destroySticker') {// ここに来る前にふせんを削除しているので、ここでは何もしない
         }
       }
     },
@@ -3450,6 +3485,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     showStickerContextMenuProps: Object
@@ -3501,6 +3537,27 @@ __webpack_require__.r(__webpack_exports__);
       var emitParam = {
         event: e,
         result: 'openStickerEditWindow'
+      };
+      this.$emit('hide-sticker-context-menu-custom-event', emitParam);
+    },
+    onClickDestroy: function onClickDestroy(e) {
+      // ふせんを削除する
+      console.log('onClickDestroy');
+      console.log('axios.delete');
+      var reqParam = {
+        id: this.showStickerContextMenuProps.idNo
+      };
+      axios["delete"](window.laravel.asset + '/api/work-sticker-destroy', {
+        data: {
+          reqParam: reqParam,
+          user_id: window.laravel.user['id']
+        }
+      }).then(function (response) {// 特にすることなし
+      }); // 親に戻る
+
+      var emitParam = {
+        event: e,
+        result: 'destroySticker'
       };
       this.$emit('hide-sticker-context-menu-custom-event', emitParam);
     }
@@ -47224,7 +47281,7 @@ var render = function() {
               expression: "{ stickerParam: stickerParam, index: index }"
             }
           ],
-          key: index,
+          key: stickerParam.id,
           staticClass: "sticker-class",
           on: {
             mousedown: function($event) {
@@ -47521,6 +47578,21 @@ var render = function() {
                 }
               },
               [_vm._v("編集")]
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", [
+            _c(
+              "button",
+              {
+                on: {
+                  click: function($event) {
+                    $event.preventDefault()
+                    return _vm.onClickDestroy($event)
+                  }
+                }
+              },
+              [_vm._v("削除")]
             )
           ]),
           _vm._v(" "),

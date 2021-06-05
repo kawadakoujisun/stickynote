@@ -10,6 +10,7 @@
             @click.self.prevent="onClickStickerContextMenu"
         >
             <div><button @click.prevent="onClickEdit">編集</button></div>
+            <div><button @click.prevent="onClickDestroy">削除</button></div>
             <div><button @click.prevent="onClickClose">戻る</button></div>
         </div>
     </div>
@@ -72,6 +73,34 @@
                 const emitParam = {
                     event: e,
                     result: 'openStickerEditWindow',
+                };
+                this.$emit('hide-sticker-context-menu-custom-event', emitParam);
+            },
+            
+            onClickDestroy: function (e) {
+                // ふせんを削除する
+                console.log('onClickDestroy');
+                
+                console.log('axios.delete');
+                                    
+                const reqParam = {
+                    id: this.showStickerContextMenuProps.idNo,
+                };
+                
+                axios.delete(window.laravel.asset + '/api/work-sticker-destroy', {
+                    data: {
+                        reqParam: reqParam,
+                        user_id: window.laravel.user['id'],
+                    },
+                })
+                    .then(response => {
+                        // 特にすることなし
+                    });
+
+                // 親に戻る
+                const emitParam = {
+                    event: e,
+                    result: 'destroySticker',
                 };
                 this.$emit('hide-sticker-context-menu-custom-event', emitParam);
             },

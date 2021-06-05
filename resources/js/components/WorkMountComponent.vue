@@ -7,7 +7,7 @@
     >
         <div
             v-for="(stickerParam, index) in stickerParams"
-            v-bind:key="index"
+            v-bind:key="stickerParam.id"
             v-sticker-custom-directive="{ stickerParam: stickerParam, index: index }"
             class="sticker-class"
             @mousedown.left="onChildMouseDownLeft"
@@ -145,6 +145,31 @@
                     // directivesのsticker-custom-directiveのbindが呼ばれているおかげで見た目が更新される。
                     // 追加したstickerParamについてだけsticker-custom-directiveのbindが呼ばれている（既存のstickerParamについては呼ばれない）。
                 });                
+                
+            window.Echo.private('sticker-destroy-channel.' + window.laravel.user['id'])
+                .listen('StickerDestroy', response => {
+                    console.log('window.Echo.private sticker-destroy-channel listen');
+                    
+                    // データ更新
+                    let stickerIndex = null;
+                    for (let i = 0; i < this.stickerParams.length; ++i) {
+                        const stickerParam = this.stickerParams[i];
+                        if (stickerParam.id == response.eventParam.id) {
+                            stickerIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    if (stickerIndex !== null) {
+                        this.stickerParams.splice(stickerIndex, 1);
+
+                        // 見た目更新
+                        // this.stickerParamsから削除すると勝手に見た目の更新も行われたので、何もしなくてよい。
+                        // ↑
+                        // なぜ見た目が更新されたのかはよく分からない。
+                        // v-bind:keyに設定している値でなくなったものを消してくれているようだ。
+                    }
+                });
                 
             window.Echo.private('sticker-info-item-pos-update-channel.' + window.laravel.user['id'])
                 .listen('StickerInfoItemPosUpdate', response => {
@@ -288,10 +313,10 @@
         directives: {
             'sticker-custom-directive': {
                 bind: function (el, binding) {
+                    console.log('sticker-custom-directive bind', binding.value.index);
+                    
                     const stickerParam = binding.value.stickerParam;
                     const index        = binding.value.index;
-
-                    console.log('binding.value.index', index);
                     
                     let colorHex = '000000' + stickerParam['color'].toString(16);
                     colorHex = colorHex.substr(colorHex.length - 6);
@@ -321,6 +346,18 @@
                             el.appendChild(divTextElem);
                         }
                     }
+                },
+                
+                inserted: function(el, binding) {
+                    console.log('sticker-custom-directive inserted', binding.value.index);
+                },
+                
+                update: function (el, binding) {
+                    console.log('sticker-custom-directive update', binding.value.index);
+                },
+                
+                componentUpdated: function (el, binding) {
+                    console.log('sticker-custom-directive componentUpdated', binding.value.index);
                 },
             },
         },
@@ -451,6 +488,8 @@
                         this.showStickerEditWindowParam.isShow = true;
                         this.showStickerEditWindowParam.idNo = idNo;
                         this.showStickerEditWindowParam.stickerParam = this.stickerParams[arrayIndex];
+                    } else if(emitParam.result == 'destroySticker') {
+                        // ここに来る前にふせんを削除しているので、ここでは何もしない
                     }
                 }
             },
