@@ -2583,6 +2583,117 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ }),
 
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMenuBarComponent.vue?vue&type=script&lang=js&":
+/*!*******************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkMenuBarComponent.vue?vue&type=script&lang=js& ***!
+  \*******************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  data: function data() {
+    return {
+      activeMainMenu: '',
+      activeSubMenu: ''
+    };
+  },
+  methods: {
+    //
+    // メイン
+    //
+    onClickMainFile: function onClickMainFile(e) {
+      if (this.activeMainMenu !== 'mainFile') {
+        this.activeMainMenu = 'mainFile';
+        this.activeSubMenu = '';
+      }
+    },
+    onClickMainInsert: function onClickMainInsert(e) {
+      if (this.activeSubMenu !== 'mainInsert') {
+        this.activeMainMenu = 'mainInsert';
+        this.activeSubMenu = '';
+      }
+    },
+    //
+    // ファイルサブ
+    //
+    onClickFileSubImport: function onClickFileSubImport(e) {
+      this.activeSubMenu = '';
+    },
+    onClickFileSubDonwload: function onClickFileSubDonwload(e) {
+      this.activeSubMenu = 'fileSubDownload';
+    },
+    onClickFileSubClose: function onClickFileSubClose(e) {
+      this.activeMainMenu = '';
+      this.activeSubMenu = '';
+    },
+    //
+    // ファイルサブのダウンロード
+    //
+    onClickFileSubDownloadText: function onClickFileSubDownloadText(e) {},
+    onClickFileSubDownloadCsv: function onClickFileSubDownloadCsv(e) {},
+    onClickFileSubDownloadClose: function onClickFileSubDownloadClose(e) {
+      this.activeSubMenu = '';
+    },
+    //
+    // 挿入サブ
+    //
+    onClickInsertSubSticker: function onClickInsertSubSticker(e) {
+      this.activeSubMenu = '';
+    },
+    onClickInsertSubClose: function onClickInsertSubClose(e) {
+      this.activeMainMenu = '';
+      this.activeSubMenu = '';
+    }
+  }
+});
+
+/***/ }),
+
 /***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=script&lang=js&":
 /*!*****************************************************************************************************************************************************************************!*\
   !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkMountComponent.vue?vue&type=script&lang=js& ***!
@@ -8154,6 +8265,25 @@ exports.push([module.i, "\n.drag-frame[data-v-4548932c] {\n    width:  800px;\n 
 
 /***/ }),
 
+/***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=0&id=76707645&scoped=true&lang=css&":
+/*!**************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=0&id=76707645&scoped=true&lang=css& ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 40px 40px 2px;\n    padding: 0;\n}\n.menu-bar-button-outer-class[data-v-76707645] {\n    display: inline-block;\n}\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    left:   0;\n    top:    30px;  /* メニューバーの下の位置 */\n    width:  100%;  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    height: 920px;  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.menu-bar-main-file-window-class[data-v-76707645] {\n    position: absolute;\n    left:   0;\n    top:    30px;\n    width:  120px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-main-insert-window-class[data-v-76707645] {\n    position: absolute;\n    left:   80px;\n    top:    30px;\n    width:  120px;\n    height: 60px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-file-sub-download-window-class[data-v-76707645] {\n    position: absolute;\n    left:   120px;\n    top:    60px;\n    width:  300px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
 /***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css&":
 /*!************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css& ***!
@@ -8166,7 +8296,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 40px;\n    padding: 0;\n}\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:  200px;\n    height: 200px;\n    border: 1px solid #000;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n", ""]);
+exports.push([module.i, "\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 2px 40px 40px;\n    padding: 0;\n}\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:  200px;\n    height: 200px;\n    border: 1px solid #000;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n", ""]);
 
 // exports
 
@@ -45672,6 +45802,36 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=0&id=76707645&scoped=true&lang=css&":
+/*!******************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=0&id=76707645&scoped=true&lang=css& ***!
+  \******************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkMenuBarComponent.vue?vue&type=style&index=0&id=76707645&scoped=true&lang=css& */ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=0&id=76707645&scoped=true&lang=css&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css&":
 /*!****************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css& ***!
@@ -46777,6 +46937,206 @@ var render = function() {
         })
       ])
     ])
+  ])
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMenuBarComponent.vue?vue&type=template&id=76707645&scoped=true&":
+/*!***********************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkMenuBarComponent.vue?vue&type=template&id=76707645&scoped=true& ***!
+  \***********************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c("div", { staticClass: "menu-bar-class" }, [
+    _c("div", { staticClass: "menu-bar-button-outer-class" }, [
+      _c(
+        "button",
+        {
+          on: {
+            click: function($event) {
+              $event.preventDefault()
+              return _vm.onClickMainFile($event)
+            }
+          }
+        },
+        [_vm._v("ファイル")]
+      )
+    ]),
+    _vm._v(" "),
+    _c("div", { staticClass: "menu-bar-button-outer-class" }, [
+      _c(
+        "button",
+        {
+          on: {
+            click: function($event) {
+              $event.preventDefault()
+              return _vm.onClickMainInsert($event)
+            }
+          }
+        },
+        [_vm._v("挿入")]
+      )
+    ]),
+    _vm._v(" "),
+    _vm.activeMainMenu !== ""
+      ? _c("div", [_c("div", { staticClass: "menu-bar-window-overlay-class" })])
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.activeMainMenu === "mainFile"
+      ? _c("div", [
+          _c("div", { staticClass: "menu-bar-main-file-window-class" }, [
+            _c("div", [
+              _c(
+                "button",
+                {
+                  on: {
+                    click: function($event) {
+                      $event.preventDefault()
+                      return _vm.onClickFileSubImport($event)
+                    }
+                  }
+                },
+                [_vm._v("インポート")]
+              )
+            ]),
+            _vm._v(" "),
+            _c("div", [
+              _c(
+                "button",
+                {
+                  on: {
+                    click: function($event) {
+                      $event.preventDefault()
+                      return _vm.onClickFileSubDonwload($event)
+                    }
+                  }
+                },
+                [_vm._v("ダウンロード >")]
+              )
+            ]),
+            _vm._v(" "),
+            _c("div", [
+              _c(
+                "button",
+                {
+                  on: {
+                    click: function($event) {
+                      $event.preventDefault()
+                      return _vm.onClickFileSubClose($event)
+                    }
+                  }
+                },
+                [_vm._v("戻る")]
+              )
+            ])
+          ]),
+          _vm._v(" "),
+          _vm.activeSubMenu === "fileSubDownload"
+            ? _c("div", [
+                _c(
+                  "div",
+                  { staticClass: "menu-bar-file-sub-download-window-class" },
+                  [
+                    _c("div", [
+                      _c(
+                        "button",
+                        {
+                          on: {
+                            click: function($event) {
+                              $event.preventDefault()
+                              return _vm.onClickFileSubDownloadText($event)
+                            }
+                          }
+                        },
+                        [_vm._v("テキストのみ : カンマ区切りの値 (.csv)")]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", [
+                      _c(
+                        "button",
+                        {
+                          on: {
+                            click: function($event) {
+                              $event.preventDefault()
+                              return _vm.onClickFileSubDownloadCsv($event)
+                            }
+                          }
+                        },
+                        [_vm._v("全部 : カンマ区切りの値 (.csv) + 各ファイル")]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", [
+                      _c(
+                        "button",
+                        {
+                          on: {
+                            click: function($event) {
+                              $event.preventDefault()
+                              return _vm.onClickFileSubDownloadClose($event)
+                            }
+                          }
+                        },
+                        [_vm._v("戻る")]
+                      )
+                    ])
+                  ]
+                )
+              ])
+            : _vm._e()
+        ])
+      : _vm._e(),
+    _vm._v(" "),
+    _vm.activeMainMenu === "mainInsert"
+      ? _c("div", [
+          _c("div", { staticClass: "menu-bar-main-insert-window-class" }, [
+            _c("div", [
+              _c(
+                "button",
+                {
+                  on: {
+                    click: function($event) {
+                      $event.preventDefault()
+                      return _vm.onClickInsertSubSticker($event)
+                    }
+                  }
+                },
+                [_vm._v("ふせん")]
+              )
+            ]),
+            _vm._v(" "),
+            _c("div", [
+              _c(
+                "button",
+                {
+                  on: {
+                    click: function($event) {
+                      $event.preventDefault()
+                      return _vm.onClickInsertSubClose($event)
+                    }
+                  }
+                },
+                [_vm._v("戻る")]
+              )
+            ])
+          ])
+        ])
+      : _vm._e()
   ])
 }
 var staticRenderFns = []
@@ -59654,6 +60014,7 @@ Vue.component('rect-test', __webpack_require__(/*! ./components/RectTestComponen
 Vue.component('rect-test-2', __webpack_require__(/*! ./components/RectTest2Component.vue */ "./resources/js/components/RectTest2Component.vue")["default"]);
 Vue.component('color-rect-mount', __webpack_require__(/*! ./components/ColorRectMountComponent.vue */ "./resources/js/components/ColorRectMountComponent.vue")["default"]);
 Vue.component('color-rect-context-menu', __webpack_require__(/*! ./components/ColorRectContextMenuComponent.vue */ "./resources/js/components/ColorRectContextMenuComponent.vue")["default"]);
+Vue.component('work-menu-bar', __webpack_require__(/*! ./components/WorkMenuBarComponent.vue */ "./resources/js/components/WorkMenuBarComponent.vue")["default"]);
 Vue.component('work-mount', __webpack_require__(/*! ./components/WorkMountComponent.vue */ "./resources/js/components/WorkMountComponent.vue")["default"]);
 Vue.component('work-sticker-context-menu', __webpack_require__(/*! ./components/WorkStickerContextMenuComponent.vue */ "./resources/js/components/WorkStickerContextMenuComponent.vue")["default"]);
 Vue.component('work-sticker-edit-window', __webpack_require__(/*! ./components/WorkStickerEditWindowComponent.vue */ "./resources/js/components/WorkStickerEditWindowComponent.vue")["default"]);
@@ -60115,6 +60476,93 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_TodoListComponent_vue_vue_type_template_id_5c76bffe___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_TodoListComponent_vue_vue_type_template_id_5c76bffe___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkMenuBarComponent.vue":
+/*!**********************************************************!*\
+  !*** ./resources/js/components/WorkMenuBarComponent.vue ***!
+  \**********************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _WorkMenuBarComponent_vue_vue_type_template_id_76707645_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./WorkMenuBarComponent.vue?vue&type=template&id=76707645&scoped=true& */ "./resources/js/components/WorkMenuBarComponent.vue?vue&type=template&id=76707645&scoped=true&");
+/* harmony import */ var _WorkMenuBarComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./WorkMenuBarComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/WorkMenuBarComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _WorkMenuBarComponent_vue_vue_type_style_index_0_id_76707645_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./WorkMenuBarComponent.vue?vue&type=style&index=0&id=76707645&scoped=true&lang=css& */ "./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=0&id=76707645&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _WorkMenuBarComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _WorkMenuBarComponent_vue_vue_type_template_id_76707645_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _WorkMenuBarComponent_vue_vue_type_template_id_76707645_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  "76707645",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/WorkMenuBarComponent.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkMenuBarComponent.vue?vue&type=script&lang=js&":
+/*!***********************************************************************************!*\
+  !*** ./resources/js/components/WorkMenuBarComponent.vue?vue&type=script&lang=js& ***!
+  \***********************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkMenuBarComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMenuBarComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=0&id=76707645&scoped=true&lang=css&":
+/*!*******************************************************************************************************************!*\
+  !*** ./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=0&id=76707645&scoped=true&lang=css& ***!
+  \*******************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_style_index_0_id_76707645_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkMenuBarComponent.vue?vue&type=style&index=0&id=76707645&scoped=true&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=0&id=76707645&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_style_index_0_id_76707645_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_style_index_0_id_76707645_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_style_index_0_id_76707645_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_style_index_0_id_76707645_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkMenuBarComponent.vue?vue&type=template&id=76707645&scoped=true&":
+/*!*****************************************************************************************************!*\
+  !*** ./resources/js/components/WorkMenuBarComponent.vue?vue&type=template&id=76707645&scoped=true& ***!
+  \*****************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_template_id_76707645_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkMenuBarComponent.vue?vue&type=template&id=76707645&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMenuBarComponent.vue?vue&type=template&id=76707645&scoped=true&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_template_id_76707645_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_template_id_76707645_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

@@ -649,7 +649,7 @@
         height: 900px;
         border: 1px solid #000;
         background-color: #ffffff;
-        margin: 40px;
+        margin: 2px 40px 40px;
         padding: 0;
     }
     

@@ -25,6 +25,7 @@ Vue.component('rect-test', require('./components/RectTestComponent.vue').default
 Vue.component('rect-test-2', require('./components/RectTest2Component.vue').default);
 Vue.component('color-rect-mount', require('./components/ColorRectMountComponent.vue').default);
 Vue.component('color-rect-context-menu', require('./components/ColorRectContextMenuComponent.vue').default);
+Vue.component('work-menu-bar', require('./components/WorkMenuBarComponent.vue').default);
 Vue.component('work-mount', require('./components/WorkMountComponent.vue').default);
 Vue.component('work-sticker-context-menu', require('./components/WorkStickerContextMenuComponent.vue').default);
 Vue.component('work-sticker-edit-window', require('./components/WorkStickerEditWindowComponent.vue').default);
