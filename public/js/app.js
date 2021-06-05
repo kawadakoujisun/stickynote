@@ -2885,15 +2885,17 @@ __webpack_require__.r(__webpack_exports__);
         // this.stickerParamsから削除すると勝手に見た目の更新も行われたので、何もしなくてよい。
         // ↑
         // なぜ見た目が更新されたのかはよく分からない。
+        // v-bind:keyに設定している値でなくなったものを消してくれているようだ。
 
       }
     });
     window.Echo["private"]('sticker-info-item-pos-update-channel.' + window.laravel.user['id']).listen('StickerInfoItemPosUpdate', function (response) {
       console.log('window.Echo.private sticker-info-item-pos-update-channel listen');
+      var idNo = response.eventParam.id;
 
       var idBaseName = _this.getStickerIdBaseName();
 
-      var updateId = "".concat(idBaseName).concat(response.eventParam.id);
+      var updateId = "".concat(idBaseName).concat(idNo);
       var updateElem = document.getElementById(updateId);
 
       if (updateElem) {
@@ -2902,9 +2904,13 @@ __webpack_require__.r(__webpack_exports__);
           var posTop = response.eventParam.pos_top;
           var posLeft = response.eventParam.pos_left; // データ更新
 
-          var index = updateElem.dataset.arrayIndex;
-          _this.stickerParams[index]['pos_top'] = posTop;
-          _this.stickerParams[index]['pos_left'] = posLeft; // 見た目更新
+          var index = _this.getStickerParamIndex(idNo);
+
+          if (index !== null) {
+            _this.stickerParams[index]['pos_top'] = posTop;
+            _this.stickerParams[index]['pos_left'] = posLeft;
+          } // 見た目更新
+
 
           updateElem.style.top = "".concat(posTop, "px");
           updateElem.style.left = "".concat(posLeft, "px");
@@ -2913,17 +2919,22 @@ __webpack_require__.r(__webpack_exports__);
     });
     window.Echo["private"]('sticker-info-item-color-update-channel.' + window.laravel.user['id']).listen('StickerInfoItemColorUpdate', function (response) {
       console.log('window.Echo.private sticker-info-item-color-update-channel listen');
+      var idNo = response.eventParam.id;
 
       var idBaseName = _this.getStickerIdBaseName();
 
-      var updateId = "".concat(idBaseName).concat(response.eventParam.id);
+      var updateId = "".concat(idBaseName).concat(idNo);
       var updateElem = document.getElementById(updateId);
 
       if (updateElem) {
         var color = response.eventParam.color; // データ更新
 
-        var index = updateElem.dataset.arrayIndex;
-        _this.stickerParams[index]['color'] = color; // 見た目更新
+        var index = _this.getStickerParamIndex(idNo);
+
+        if (index !== null) {
+          _this.stickerParams[index]['color'] = color;
+        } // 見た目更新
+
 
         var colorHex = '000000' + color.toString(16);
         colorHex = colorHex.substr(colorHex.length - 6);
@@ -2932,36 +2943,41 @@ __webpack_require__.r(__webpack_exports__);
     });
     window.Echo["private"]('sticker-content-item-text-create-channel.' + window.laravel.user['id']).listen('StickerContentItemTextCreate', function (response) {
       console.log('window.Echo.private sticker-content-item-text-create-channel listen');
+      var idNo = response.eventParam.id;
 
       var idBaseName = _this.getStickerIdBaseName();
 
-      var updateId = "".concat(idBaseName).concat(response.eventParam.id);
+      var updateId = "".concat(idBaseName).concat(idNo);
       var updateElem = document.getElementById(updateId);
 
       if (updateElem) {
-        var text = response.eventParam.text; // データ更新
+        var text = response.eventParam.text;
+        var contentLinkIdNo = response.eventParam.content_link_id; // データ更新
 
-        var index = updateElem.dataset.arrayIndex;
-        var contents = _this.stickerParams[index]['contents']; // JavaScriptの配列は参照渡し
+        var index = _this.getStickerParamIndex(idNo);
 
-        var content = {
-          link: {
-            id: response.eventParam.content_link_id,
-            item_type: response.eventParam.content_item_type,
-            item_id: response.eventParam.content_item_id
-          },
-          item: {
-            text: text
-          }
-        };
-        contents.push(content); // TODO(kawadakoujisun): id順に並び替える必要あるかも。見た目のdivの並びも。
-        // 見た目更新
+        if (index !== null) {
+          var contents = _this.stickerParams[index]['contents']; // JavaScriptの配列は参照渡し
+
+          var content = {
+            link: {
+              id: contentLinkIdNo,
+              item_type: response.eventParam.content_item_type,
+              item_id: response.eventParam.content_item_id
+            },
+            item: {
+              text: text
+            }
+          };
+          contents.push(content); // TODO(kawadakoujisun): id順に並び替える必要あるかも。見た目のdivの並びも。
+        } // 見た目更新
+
 
         var divTextElem = document.createElement('div');
 
         var contentLinkIdBaseName = _this.getContentLinkIdBaseName();
 
-        divTextElem.id = "".concat(contentLinkIdBaseName).concat(content['link'].id);
+        divTextElem.id = "".concat(contentLinkIdBaseName).concat(contentLinkIdNo);
         divTextElem.innerHTML = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
 
         updateElem.appendChild(divTextElem);
@@ -2969,48 +2985,52 @@ __webpack_require__.r(__webpack_exports__);
     });
     window.Echo["private"]('sticker-content-item-text-destroy-channel.' + window.laravel.user['id']).listen('StickerContentItemTextDestroy', function (response) {
       console.log('window.Echo.private sticker-content-item-text-destroy-channel listen');
+      var idNo = response.eventParam.id;
 
       var idBaseName = _this.getStickerIdBaseName();
 
-      var updateId = "".concat(idBaseName).concat(response.eventParam.id);
+      var updateId = "".concat(idBaseName).concat(idNo);
       var updateElem = document.getElementById(updateId);
 
       if (updateElem) {
-        var contentLinkId = response.eventParam.content_link_id; // データ更新
+        var contentLinkIdNo = response.eventParam.content_link_id; // データ更新
 
-        var index = updateElem.dataset.arrayIndex;
-        var contents = _this.stickerParams[index]['contents']; // JavaScriptの配列は参照渡し
+        var index = _this.getStickerParamIndex(idNo);
 
-        var contentIndex = null;
+        if (index !== null) {
+          var contents = _this.stickerParams[index]['contents']; // JavaScriptの配列は参照渡し
 
-        for (var i = 0; i < contents.length; ++i) {
-          if (contents[i].link.id == contentLinkId) {
-            contentIndex = i;
-            break;
-          }
-        }
+          var contentIndex = null;
 
-        if (contentIndex !== null) {
-          contents.splice(contentIndex, 1); // 見た目更新
-
-          var contentLinkIdBaseName = _this.getContentLinkIdBaseName();
-
-          var divItemElemId = "".concat(contentLinkIdBaseName).concat(contentLinkId); // TODO(kawadakoujisun): refを使えばループを回さなくて済むか？
-
-          var childElems = updateElem.childNodes;
-          var divItemElem = null;
-
-          for (var _i = 0; _i < childElems.length; ++_i) {
-            var childElem = childElems.item(_i);
-
-            if (childElem.id == divItemElemId) {
-              divItemElem = childElem;
+          for (var i = 0; i < contents.length; ++i) {
+            if (contents[i].link.id == contentLinkIdNo) {
+              contentIndex = i;
               break;
             }
           }
 
-          if (divItemElem !== null) {
-            updateElem.removeChild(divItemElem);
+          if (contentIndex !== null) {
+            contents.splice(contentIndex, 1); // 見た目更新
+
+            var contentLinkIdBaseName = _this.getContentLinkIdBaseName();
+
+            var divItemElemId = "".concat(contentLinkIdBaseName).concat(contentLinkIdNo); // TODO(kawadakoujisun): refを使えばループを回さなくて済むか？
+
+            var childElems = updateElem.childNodes;
+            var divItemElem = null;
+
+            for (var _i = 0; _i < childElems.length; ++_i) {
+              var childElem = childElems.item(_i);
+
+              if (childElem.id == divItemElemId) {
+                divItemElem = childElem;
+                break;
+              }
+            }
+
+            if (divItemElem !== null) {
+              updateElem.removeChild(divItemElem);
+            }
           }
         }
       }
@@ -3032,8 +3052,6 @@ __webpack_require__.r(__webpack_exports__);
         var idBaseName = 'sticker-id-'; // 調べている時間がないので直書きしておく。
 
         el.id = "".concat(idBaseName).concat(stickerParam['id']);
-        el.dataset.arrayIndex = index; // data-array-index
-
         var contents = stickerParam['contents'];
 
         for (var i = 0; i < contents.length; ++i) {
@@ -3175,11 +3193,14 @@ __webpack_require__.r(__webpack_exports__);
         if (emitParam.result == 'openStickerEditWindow') {
           var idBaseName = this.getStickerIdBaseName();
           var stickerId = "".concat(idBaseName).concat(idNo);
-          var stickerElem = document.getElementById(stickerId);
-          var arrayIndex = stickerElem.dataset.arrayIndex;
           this.showStickerEditWindowParam.isShow = true;
           this.showStickerEditWindowParam.idNo = idNo;
-          this.showStickerEditWindowParam.stickerParam = this.stickerParams[arrayIndex];
+          this.showStickerEditWindowParam.stickerParam = null;
+          var index = this.getStickerParamIndex(idNo);
+
+          if (index !== null) {
+            this.showStickerEditWindowParam.stickerParam = this.stickerParams[index];
+          }
         } else if (emitParam.result == 'destroySticker') {// ここに来る前にふせんを削除しているので、ここでは何もしない
         }
       }
@@ -3353,6 +3374,23 @@ __webpack_require__.r(__webpack_exports__);
     },
     getContentLinkIdBaseName: function getContentLinkIdBaseName() {
       return 'content-link-id-';
+    },
+    // stickerParams配列において、引数で与えたidを持つstickerParamが何番目(0開始)かを取得する。
+    // 戻り値がnullのときは、idを持つstickerParamは存在しない。
+    // 配列の添え字なので0のこともあるので、nullと0は区別すること（if (index !== null) と判定するとよい）。
+    getStickerParamIndex: function getStickerParamIndex(id) {
+      var index = null;
+
+      for (var i = 0; i < this.stickerParams.length; ++i) {
+        var stickerParam = this.stickerParams[i];
+
+        if (stickerParam.id == id) {
+          index = i;
+          break;
+        }
+      }
+
+      return index;
     },
     getMountBorderWidth: function getMountBorderWidth() {
       return 1;

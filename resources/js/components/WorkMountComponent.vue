@@ -175,8 +175,10 @@
                 .listen('StickerInfoItemPosUpdate', response => {
                     console.log('window.Echo.private sticker-info-item-pos-update-channel listen');
                     
+                    const idNo = response.eventParam.id;
+                    
                     const idBaseName = this.getStickerIdBaseName();
-                    const updateId = `${idBaseName}${response.eventParam.id}`; 
+                    const updateId = `${idBaseName}${idNo}`; 
                     
                     const updateElem = document.getElementById(updateId);
                     
@@ -186,9 +188,11 @@
                             const posLeft = response.eventParam.pos_left;
                         
                             // データ更新
-                            const index = updateElem.dataset.arrayIndex;
-                            this.stickerParams[index]['pos_top']  = posTop;
-                            this.stickerParams[index]['pos_left'] = posLeft;
+                            const index = this.getStickerParamIndex(idNo);
+                            if (index !== null) {
+                                this.stickerParams[index]['pos_top']  = posTop;
+                                this.stickerParams[index]['pos_left'] = posLeft;
+                            }
                         
                             // 見た目更新
                             updateElem.style.top  = `${posTop}px`;
@@ -201,16 +205,21 @@
                 .listen('StickerInfoItemColorUpdate', response => {
                     console.log('window.Echo.private sticker-info-item-color-update-channel listen');
                     
+                    const idNo = response.eventParam.id;
+                    
                     const idBaseName = this.getStickerIdBaseName();
-                    const updateId = `${idBaseName}${response.eventParam.id}`; 
+                    const updateId = `${idBaseName}${idNo}`; 
                     
                     const updateElem = document.getElementById(updateId);
                     
                     if (updateElem) {
-                        const color = response.eventParam.color; 
+                        const color = response.eventParam.color;
+                        
                         // データ更新
-                        const index = updateElem.dataset.arrayIndex;
-                        this.stickerParams[index]['color'] = color;
+                        const index = this.getStickerParamIndex(idNo);
+                        if (index !== null) {
+                            this.stickerParams[index]['color'] = color;
+                        }
                         
                         // 見た目更新
                         let colorHex = '000000' + color.toString(16);
@@ -223,36 +232,41 @@
                 .listen('StickerContentItemTextCreate', response => {
                     console.log('window.Echo.private sticker-content-item-text-create-channel listen');
                     
+                    const idNo = response.eventParam.id;
+                    
                     const idBaseName = this.getStickerIdBaseName();
-                    const updateId = `${idBaseName}${response.eventParam.id}`; 
+                    const updateId = `${idBaseName}${idNo}`; 
                     
                     const updateElem = document.getElementById(updateId);
                     
                     if (updateElem) {
                         const text = response.eventParam.text;
+                        const contentLinkIdNo = response.eventParam.content_link_id;
                         
                         // データ更新
-                        const index = updateElem.dataset.arrayIndex;
-                        const contents = this.stickerParams[index]['contents'];  // JavaScriptの配列は参照渡し
-                        
-                        const content = {
-                            link: {
-                                id:        response.eventParam.content_link_id,
-                                item_type: response.eventParam.content_item_type,
-                                item_id:   response.eventParam.content_item_id,
-                            },
-                            item: {
-                                text: text,
-                            },
-                        };
-                        
-                        contents.push(content);  // TODO(kawadakoujisun): id順に並び替える必要あるかも。見た目のdivの並びも。
+                        const index = this.getStickerParamIndex(idNo);
+                        if (index !== null) {
+                            const contents = this.stickerParams[index]['contents'];  // JavaScriptの配列は参照渡し
+                            
+                            const content = {
+                                link: {
+                                    id:        contentLinkIdNo,
+                                    item_type: response.eventParam.content_item_type,
+                                    item_id:   response.eventParam.content_item_id,
+                                },
+                                item: {
+                                    text: text,
+                                },
+                            };
+                            
+                            contents.push(content);  // TODO(kawadakoujisun): id順に並び替える必要あるかも。見た目のdivの並びも。
+                        }
                         
                         // 見た目更新
                         const divTextElem = document.createElement('div');
                         
                         const contentLinkIdBaseName = this.getContentLinkIdBaseName();
-                        divTextElem.id = `${contentLinkIdBaseName}${content['link'].id}`;
+                        divTextElem.id = `${contentLinkIdBaseName}${contentLinkIdNo}`;
                         
                         divTextElem.innerHTML = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
                         updateElem.appendChild(divTextElem);
@@ -263,47 +277,51 @@
                 .listen('StickerContentItemTextDestroy', response => {
                     console.log('window.Echo.private sticker-content-item-text-destroy-channel listen');
                     
+                    const idNo = response.eventParam.id;
+                    
                     const idBaseName = this.getStickerIdBaseName();
-                    const updateId = `${idBaseName}${response.eventParam.id}`; 
+                    const updateId = `${idBaseName}${idNo}`; 
                     
                     const updateElem = document.getElementById(updateId);
                     
                     if (updateElem) {
-                        const contentLinkId = response.eventParam.content_link_id;
+                        const contentLinkIdNo = response.eventParam.content_link_id;
                         
                         // データ更新
-                        const index = updateElem.dataset.arrayIndex;
-                        const contents = this.stickerParams[index]['contents'];  // JavaScriptの配列は参照渡し
-                        
-                        let contentIndex = null;
-                        for (let i = 0; i < contents.length; ++i) {
-                            if (contents[i].link.id == contentLinkId) {
-                                contentIndex = i;
-                                break;
-                            }
-                        }
-                        
-                        if (contentIndex !== null) {
-                            contents.splice(contentIndex, 1);
+                        const index = this.getStickerParamIndex(idNo);
+                        if (index !== null) {
+                            const contents = this.stickerParams[index]['contents'];  // JavaScriptの配列は参照渡し
                             
-                            // 見た目更新
-                            const contentLinkIdBaseName = this.getContentLinkIdBaseName();
-                            const divItemElemId = `${contentLinkIdBaseName}${contentLinkId}`;
-                                // TODO(kawadakoujisun): refを使えばループを回さなくて済むか？
-                            
-                            const childElems = updateElem.childNodes;
-
-                            let divItemElem = null;
-                            for (let i = 0; i < childElems.length; ++i) {
-                                const childElem = childElems.item(i);
-                                if (childElem.id == divItemElemId) {
-                                    divItemElem = childElem;
+                            let contentIndex = null;
+                            for (let i = 0; i < contents.length; ++i) {
+                                if (contents[i].link.id == contentLinkIdNo) {
+                                    contentIndex = i;
                                     break;
                                 }
                             }
-                            
-                            if (divItemElem !== null) {
-                                updateElem.removeChild(divItemElem);
+                        
+                            if (contentIndex !== null) {
+                                contents.splice(contentIndex, 1);
+                                
+                                // 見た目更新
+                                const contentLinkIdBaseName = this.getContentLinkIdBaseName();
+                                const divItemElemId = `${contentLinkIdBaseName}${contentLinkIdNo}`;
+                                    // TODO(kawadakoujisun): refを使えばループを回さなくて済むか？
+                                
+                                const childElems = updateElem.childNodes;
+    
+                                let divItemElem = null;
+                                for (let i = 0; i < childElems.length; ++i) {
+                                    const childElem = childElems.item(i);
+                                    if (childElem.id == divItemElemId) {
+                                        divItemElem = childElem;
+                                        break;
+                                    }
+                                }
+                                
+                                if (divItemElem !== null) {
+                                    updateElem.removeChild(divItemElem);
+                                }
                             }
                         }
                     }
@@ -328,8 +346,6 @@
                     // const idBaseName = this.getStickerIdBaseName();  // directives内はthisが使えない？
                     const idBaseName = 'sticker-id-';                   // 調べている時間がないので直書きしておく。
                     el.id = `${idBaseName}${stickerParam['id']}`;
-                    
-                    el.dataset.arrayIndex = index;  // data-array-index
                     
                     const contents = stickerParam['contents'];
                     for (let i = 0; i < contents.length; ++i) {
@@ -480,14 +496,16 @@
                 if (emitParam.result != 'none') {
                     if (emitParam.result == 'openStickerEditWindow') {
                         const idBaseName = this.getStickerIdBaseName();
-                        const stickerId = `${idBaseName}${idNo}`; 
-                    
-                        const stickerElem = document.getElementById(stickerId);
-                        const arrayIndex = stickerElem.dataset.arrayIndex;
+                        const stickerId = `${idBaseName}${idNo}`;
                         
                         this.showStickerEditWindowParam.isShow = true;
                         this.showStickerEditWindowParam.idNo = idNo;
-                        this.showStickerEditWindowParam.stickerParam = this.stickerParams[arrayIndex];
+                        
+                        this.showStickerEditWindowParam.stickerParam = null;
+                        const index = this.getStickerParamIndex(idNo);
+                        if (index !== null) {
+                            this.showStickerEditWindowParam.stickerParam = this.stickerParams[index];
+                        }
                     } else if(emitParam.result == 'destroySticker') {
                         // ここに来る前にふせんを削除しているので、ここでは何もしない
                     }
@@ -694,6 +712,23 @@
             
             getContentLinkIdBaseName: function () {
                 return 'content-link-id-';
+            },
+            
+            // stickerParams配列において、引数で与えたidを持つstickerParamが何番目(0開始)かを取得する。
+            // 戻り値がnullのときは、idを持つstickerParamは存在しない。
+            // 配列の添え字なので0のこともあるので、nullと0は区別すること（if (index !== null) と判定するとよい）。
+            getStickerParamIndex: function (id) {
+                let index = null;
+                
+                for (let i = 0; i < this.stickerParams.length; ++i) {
+                    const stickerParam = this.stickerParams[i];
+                    if (stickerParam.id == id) {
+                        index = i;
+                        break;
+                    }
+                }
+                
+                return index;
             },
             
             getMountBorderWidth: function () {
