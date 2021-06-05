@@ -103,7 +103,22 @@
             // 挿入サブ
             //
             onClickInsertSubSticker: function (e) {
+                this.activeMainMenu = '';
                 this.activeSubMenu = '';
+                
+                // ふせんを作成する
+                console.log('axios.post');
+                                
+                const reqParam = {
+                };
+                
+                axios.post(window.laravel.asset + '/api/work-sticker-create', {
+                    reqParam: reqParam,
+                    user_id: window.laravel.user['id'],
+                })
+                    .then(response => {
+                        // 特にすることなし
+                    });
             },
             
             onClickInsertSubClose: function (e) {

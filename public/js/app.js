@@ -2683,7 +2683,16 @@ __webpack_require__.r(__webpack_exports__);
     // 挿入サブ
     //
     onClickInsertSubSticker: function onClickInsertSubSticker(e) {
-      this.activeSubMenu = '';
+      this.activeMainMenu = '';
+      this.activeSubMenu = ''; // ふせんを作成する
+
+      console.log('axios.post');
+      var reqParam = {};
+      axios.post(window.laravel.asset + '/api/work-sticker-create', {
+        reqParam: reqParam,
+        user_id: window.laravel.user['id']
+      }).then(function (response) {// 特にすることなし
+      });
     },
     onClickInsertSubClose: function onClickInsertSubClose(e) {
       this.activeMainMenu = '';
@@ -2837,6 +2846,22 @@ __webpack_require__.r(__webpack_exports__);
     axios.get(window.laravel.asset + '/api/work-mount').then(function (response) {
       console.log('axios.get');
       _this.stickerParams = response.data;
+    });
+    window.Echo["private"]('sticker-create-channel.' + window.laravel.user['id']).listen('StickerCreate', function (response) {
+      console.log('window.Echo.private sticker-create-channel listen'); // データ更新
+
+      var stickerParam = {
+        'id': response.eventParam.id,
+        'pos_top': response.eventParam.pos_top,
+        'pos_left': response.eventParam.pos_left,
+        'color': response.eventParam.color,
+        'contents': [] // 要素数0であっても必ず配列を設定します。
+
+      };
+
+      _this.stickerParams.push(stickerParam); // 見た目更新
+      // this.stickerParamsを増やすと勝手に行われるようなので、何もしなくてよい。
+
     });
     window.Echo["private"]('sticker-info-item-pos-update-channel.' + window.laravel.user['id']).listen('StickerInfoItemPosUpdate', function (response) {
       console.log('window.Echo.private sticker-info-item-pos-update-channel listen');

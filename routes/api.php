@@ -142,6 +142,25 @@ Route::put('/color-rects', function(Request $request) {
 
 
 
+Route::post('/work-sticker-create', function(Request $request) {
+	// ふせんを作成し、データベースに保存する
+	$sticker = \App\Sticker::createSticker();
+	
+	$stickerInfoItemPos   = $sticker->infoItemPos;
+	$stickerInfoItemColor = $sticker->infoItemColor;
+	
+	// イベント
+	$eventParam = [
+		'id'       => $sticker->id,
+	    'pos_top'  => $stickerInfoItemPos->pos_top,
+	    'pos_left' => $stickerInfoItemPos->pos_left,
+	    'color'    => $stickerInfoItemColor->color,
+	    'user_id'  => $request->user_id,
+	];
+	
+	event((new \App\Events\StickerCreate($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+});
+
 Route::get('/work-mount', function() {
 	$stickerParams = array();
 

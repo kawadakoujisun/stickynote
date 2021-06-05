@@ -124,6 +124,28 @@
                     this.stickerParams = response.data;
                 });
                 
+            window.Echo.private('sticker-create-channel.' + window.laravel.user['id'])
+                .listen('StickerCreate', response => {
+                    console.log('window.Echo.private sticker-create-channel listen');
+                    
+                    // データ更新
+                    const stickerParam = {
+        				'id'       : response.eventParam.id,
+        				'pos_top'  : response.eventParam.pos_top,
+        				'pos_left' : response.eventParam.pos_left,
+        				'color'    : response.eventParam.color,
+        				'contents' : [],  // 要素数0であっても必ず配列を設定します。
+                    };
+                    
+                    this.stickerParams.push(stickerParam);
+                    
+                    // 見た目更新
+                    // this.stickerParamsに追加すると勝手に見た目の更新も行われたので、何もしなくてよい。
+                    // ↑
+                    // directivesのsticker-custom-directiveのbindが呼ばれているおかげで見た目が更新される。
+                    // 追加したstickerParamについてだけsticker-custom-directiveのbindが呼ばれている（既存のstickerParamについては呼ばれない）。
+                });                
+                
             window.Echo.private('sticker-info-item-pos-update-channel.' + window.laravel.user['id'])
                 .listen('StickerInfoItemPosUpdate', response => {
                     console.log('window.Echo.private sticker-info-item-pos-update-channel listen');

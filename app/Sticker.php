@@ -18,6 +18,7 @@ class Sticker extends Model
     
     /**
      * このStickerが所有するStickerInfoItemPos。（StickerInfoItemPosモデルとの関係を定義）
+     * ※StickerInfoItemPosを生成するときはcreateStickerを使用して下さい。
      */
     public function infoItemPos()
     {
@@ -26,6 +27,7 @@ class Sticker extends Model
     
     /**
      * このStickerが所有するStickerInfoItemColor。（StickerInfoItemColorモデルとの関係を定義）
+     * ※StickerInfoItemColorを生成するときはcreateStickerを使用して下さい。
      */
     public function infoItemColor()
     {
@@ -34,7 +36,7 @@ class Sticker extends Model
     
     /**
      * このStickerが所有するStickerContentLink。（StickerContentLinkモデルとの関係を定義）
-     * StickerContentLinkを生成するときはcreateContentItem〇〇を使用して下さい。
+     * ※StickerContentLinkを生成するときはcreateContentItem〇〇を使用して下さい。
      */
     public function contentLinks()
     {
@@ -43,11 +45,28 @@ class Sticker extends Model
     
     /**
      * このStickerが所有するStickerContentItemText。（StickerContentItemTextモデルとの関係を定義）
-     * StickerContentItemTextを生成するするときはcreateContentItemTextを使用して下さい。
+     * ※StickerContentItemTextを生成するするときはcreateContentItemTextを使用して下さい。
      */
     public function contentItemTexts()
     {
         return $this->hasMany(StickerContentItemText::class);
+    }
+    
+    /**
+     * Stickerを新規作成する。
+     * Stickerが所有するStickerInfo〇〇（StickerInfoItemPos、StickerInfoItemColor）も生成する。
+     */
+    public static function createSticker()
+    {
+        $sticker = self::create();
+        $sticker->infoItemPos()->create([
+            'pos_top'  => 0,
+            'pos_left' => 0,
+        ]);
+        $sticker->infoItemColor()->create([
+            'color' => 0xffaaaa,
+        ]);
+        return $sticker;
     }
     
     /**
