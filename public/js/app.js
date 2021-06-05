@@ -2762,6 +2762,8 @@ __webpack_require__.r(__webpack_exports__);
       // 選んだふせん
       //
       targetElem: null,
+      reserveDestroyTargetElem: false,
+      // targetElemがnullでないとき、有効な値が入っている。
       targetElemMountPos: {
         // targetElemがnullでないとき、有効な値が入っている。
         x: 0,
@@ -2867,26 +2869,38 @@ __webpack_require__.r(__webpack_exports__);
 
     });
     window.Echo["private"]('sticker-destroy-channel.' + window.laravel.user['id']).listen('StickerDestroy', function (response) {
-      console.log('window.Echo.private sticker-destroy-channel listen'); // データ更新
+      console.log('window.Echo.private sticker-destroy-channel listen');
+      var idNo = response.eventParam.id;
+      var destroyNow = true;
 
-      var stickerIndex = null;
+      if (_this.targetElem) {
+        var idBaseName = _this.getStickerIdBaseName();
 
-      for (var i = 0; i < _this.stickerParams.length; ++i) {
-        var stickerParam = _this.stickerParams[i];
+        var updateId = "".concat(idBaseName).concat(idNo);
+        var updateElem = document.getElementById(updateId);
 
-        if (stickerParam.id == response.eventParam.id) {
-          stickerIndex = i;
-          break;
+        if (updateElem) {
+          if (_this.targetElem == updateElem) {
+            // 操作中の要素だったら今は更新しない
+            // 削除の予約だけしておく
+            _this.reserveDestroyTargetElem = true;
+            destroyNow = false;
+          }
         }
       }
 
-      if (stickerIndex !== null) {
-        _this.stickerParams.splice(stickerIndex, 1); // 見た目更新
-        // this.stickerParamsから削除すると勝手に見た目の更新も行われたので、何もしなくてよい。
-        // ↑
-        // なぜ見た目が更新されたのかはよく分からない。
-        // v-bind:keyに設定している値でなくなったものを消してくれているようだ。
+      if (destroyNow) {
+        // データ更新
+        var index = _this.getStickerParamIndex(idNo);
 
+        if (index !== null) {
+          _this.stickerParams.splice(index, 1); // 見た目更新
+          // this.stickerParamsから削除すると勝手に見た目の更新も行われたので、何もしなくてよい。
+          // ↑
+          // なぜ見た目が更新されたのかはよく分からない。
+          // v-bind:keyに設定している値でなくなったものを消してくれているようだ。
+
+        }
       }
     });
     window.Echo["private"]('sticker-info-item-pos-update-channel.' + window.laravel.user['id']).listen('StickerInfoItemPosUpdate', function (response) {
@@ -3041,7 +3055,6 @@ __webpack_require__.r(__webpack_exports__);
       bind: function bind(el, binding) {
         console.log('sticker-custom-directive bind', binding.value.index);
         var stickerParam = binding.value.stickerParam;
-        var index = binding.value.index;
         var colorHex = '000000' + stickerParam['color'].toString(16);
         colorHex = colorHex.substr(colorHex.length - 6);
         el.style.top = "".concat(stickerParam['pos_top'], "px");
@@ -3191,15 +3204,16 @@ __webpack_require__.r(__webpack_exports__);
 
       if (emitParam.result != 'none') {
         if (emitParam.result == 'openStickerEditWindow') {
-          var idBaseName = this.getStickerIdBaseName();
-          var stickerId = "".concat(idBaseName).concat(idNo);
           this.showStickerEditWindowParam.isShow = true;
           this.showStickerEditWindowParam.idNo = idNo;
           this.showStickerEditWindowParam.stickerParam = null;
           var index = this.getStickerParamIndex(idNo);
 
           if (index !== null) {
-            this.showStickerEditWindowParam.stickerParam = this.stickerParams[index];
+            this.showStickerEditWindowParam.stickerParam = this.copyStickerParam(this.stickerParams[index]); // this.stickerParams[index]の参照を渡している場合は、
+            // this.showStickerEditWindowParam.stickerParamを使っているときに
+            // this.stickerParams[index]を削除されると困る。
+            // だから、this.stickerParams[index]をコピーした別物を渡すようにした。
           }
         } else if (emitParam.result == 'destroySticker') {// ここに来る前にふせんを削除しているので、ここでは何もしない
         }
@@ -3247,6 +3261,21 @@ __webpack_require__.r(__webpack_exports__);
       this.updateTargetElem();
       clearInterval(this.moveIntervalId);
       this.resetLastUpdateTargetElemParam();
+
+      if (this.reserveDestroyTargetElem) {
+        // 削除の予約が入っているので削除する
+        var idBaseName = this.getStickerIdBaseName();
+        var idNo = this.targetElem.id.substr(idBaseName.length); // データ更新
+
+        var index = this.getStickerParamIndex(idNo);
+
+        if (index !== null) {
+          this.stickerParams.splice(index, 1); // 見た目更新
+          // 勝手に行われるはず（window.Echo.private('sticker-destroy-channel.'のコメント参照）。
+        }
+      }
+
+      this.reserveDestroyTargetElem = false;
       this.targetElem = null;
     },
     updateTargetElem: function updateTargetElem() {
@@ -3391,6 +3420,44 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       return index;
+    },
+    copyStickerParam: function copyStickerParam(src) {
+      var dst = null;
+
+      if (src) {
+        dst = {
+          id: src.id,
+          pos_top: src.pos_top,
+          pos_left: src.pos_left,
+          color: src.color,
+          contents: [] // 要素数0であっても必ず配列を設定します。
+
+        };
+        var contents = [];
+
+        for (var i = 0; i < src.contents.length; ++i) {
+          var srcContent = src.contents[i];
+          var content = {
+            link: {
+              id: srcContent.link.id,
+              item_type: srcContent.link.item_type,
+              item_id: srcContent.link.item_id
+            },
+            // itemには全item_typeのプロパティを設定しておく。
+            // item_typeが違うためにそのプロパティがないときはundefinedになるだけ。
+            // 使う側はitem_typeを確認して、そのitem_typeに存在するプロパティにしか使うときにアクセスしないはずなので、
+            // このような全item_typeのプロパティを設定するやり方でよい。
+            item: {
+              text: srcContent.item.text
+            }
+          };
+          contents.push(content);
+        }
+
+        dst.contents = contents;
+      }
+
+      return dst;
     },
     getMountBorderWidth: function getMountBorderWidth() {
       return 1;

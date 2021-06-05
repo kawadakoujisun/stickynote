@@ -162,7 +162,7 @@ Route::post('/work-sticker-create', function(Request $request) {
 });
 
 Route::delete('/work-sticker-destroy', function(Request $request) {
-	$sticker = \App\Sticker::findOrFail($request->reqParam['id']);
+	$sticker = \App\Sticker::find($request->reqParam['id']);
 
 	if ($sticker) {
 		// ふせんを削除し、データベースに保存する
@@ -243,7 +243,7 @@ Route::get('/work-mount', function() {
 });
 
 Route::put('/work-sticker-info-item-pos-update', function(Request $request) {
-	$sticker = \App\Sticker::findOrFail($request->reqParam['id']);
+	$sticker = \App\Sticker::find($request->reqParam['id']);
 
 	if ($sticker) {
 		$stickerInfoItemPos = $sticker->infoItemPos;
@@ -268,7 +268,7 @@ Route::put('/work-sticker-info-item-pos-update', function(Request $request) {
 });
 
 Route::put('/work-sticker-info-item-color-update', function(Request $request) {
-	$sticker = \App\Sticker::findOrFail($request->reqParam['id']);
+	$sticker = \App\Sticker::find($request->reqParam['id']);
 
 	if ($sticker) {
 		$stickerInfoItemColor = $sticker->infoItemColor;
@@ -291,7 +291,7 @@ Route::put('/work-sticker-info-item-color-update', function(Request $request) {
 });
 
 Route::post('/work-sticker-content-item-text-create', function(Request $request) {
-	$sticker = \App\Sticker::findOrFail($request->reqParam['id']);
+	$sticker = \App\Sticker::find($request->reqParam['id']);
 
 	if ($sticker) {
 		$text = $request->reqParam['text'];
@@ -316,7 +316,7 @@ Route::post('/work-sticker-content-item-text-create', function(Request $request)
 });
 
 Route::delete('/work-sticker-content-item-text-destroy', function(Request $request) {
-	$sticker = \App\Sticker::findOrFail($request->reqParam['id']);
+	$sticker = \App\Sticker::find($request->reqParam['id']);
 
 	if ($sticker) {
 		$content_link_id = $request->reqParam['content_link_id'];
