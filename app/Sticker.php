@@ -62,6 +62,15 @@ class Sticker extends Model
     }    
     
     /**
+     * このStickerが所有するStickerContentItemVideo。（StickerContentItemVideoモデルとの関係を定義）
+     * ※StickerContentItemVideoを生成するするときはcreateContentItemVideoを使用して下さい。
+     */
+    public function contentItemVideos()
+    {
+        return $this->hasMany(StickerContentItemVideo::class);
+    }
+    
+    /**
      * Stickerを新規作成する。
      * Stickerが所有するStickerInfo〇〇（StickerInfoItemPos、StickerInfoItemColor）も生成する。
      */
@@ -107,6 +116,20 @@ class Sticker extends Model
     }    
     
     /**
+     * このStickerが所有するStickerContentItemVideoを生成する。
+     * このStickerが所有するStickerContentLinkを生成し、そこに先ほど生成したもののidを設定する。
+     */
+    public function createContentItemVideo($arg)
+    {
+        $contentItem = $this->contentItemVideos()->create($arg);
+        $contentLink = $this->contentLinks()->create([
+            'item_type' => self::$contentItemType['video'],
+            'item_id'   => $contentItem->id,
+        ]);
+        return [ $contentLink, $contentItem ];
+    }
+    
+    /**
      * このStickerが所有するStickerContentItem〇〇とそれと関連があるStickerContentLinkを削除する。
      */
     public function destroyContentItem($arg)
@@ -125,6 +148,11 @@ class Sticker extends Model
                 }
             } else if ($item_type == self::$contentItemType['image']) {
                 $contentItem = $this->contentItemImages()->where('id', $item_id)->first();
+                if ($contentItem) {
+                    $contentItem->delete();
+                }
+            } else if ($item_type == self::$contentItemType['video']) {
+                $contentItem = $this->contentItemVideos()->where('id', $item_id)->first();
                 if ($contentItem) {
                     $contentItem->delete();
                 }

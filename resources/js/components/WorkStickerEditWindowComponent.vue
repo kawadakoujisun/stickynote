@@ -38,6 +38,7 @@
                 <div><button @click.prevent="onClickChangeColor">色を変更</button></div>
                 <div><button @click.prevent="onClickAddText">テキストを追加</button></div>
                 <div><button @click.prevent="onClickAddImage">画像を追加</button></div>
+                <div><button @click.prevent="onClickAddVideo">動画を追加</button></div>
                 <div><button @click.prevent="onClickClose">戻る</button></div>
             </div>
         </div>
@@ -97,6 +98,9 @@
                     } else if (content['link'].item_type == 2) {  // app/Sticker.phpで値を定義している
                         const imageURL = content['item']['image_url'];
                         spanItemElem.innerHTML = `<img src="${imageURL}" width="200px">`;
+                    } else if (content['link'].item_type == 3) {  // app/Sticker.phpで値を定義している
+                        const videoURL = content['item']['video_url'];
+                        spanItemElem.innerHTML = `<video src="${videoURL}" width="200px" controls autoplay loop></video>`;
                     }
                 },
                 
@@ -191,6 +195,18 @@
                                 });
                                 
                             result = 'removeImage';
+                        } else if (contentItemType == 3) {  // app/Sticker.phpで値を定義している
+                            axios.delete(window.laravel.asset + '/api/work-sticker-content-item-video-destroy', {
+                                data: {
+                                    reqParam: reqParam,
+                                    user_id: window.laravel.user['id'],
+                                },
+                            })
+                                .then(response => {
+                                    // 特にすることなし
+                                });
+                                
+                            result = 'removeVideo';
                         }
                             
                         // 親に戻る
@@ -234,6 +250,15 @@
                 const emitParam = {
                     event: e,
                     result: 'openStickerImageAddWindow',
+                };
+                this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+            },
+
+            onClickAddVideo: function (e) {
+                console.log('onClickAddVideo');
+                const emitParam = {
+                    event: e,
+                    result: 'openStickerVideoAddWindow',
                 };
                 this.$emit('hide-sticker-edit-window-custom-event', emitParam);
             },

@@ -178,6 +178,17 @@ Route::delete('/work-sticker-destroy', function(Request $request) {
 			}
 		}
 		
+		// 動画ファイルの情報を取得し、削除する
+		$stickerContentItemVideos = $sticker->contentItemVideos;
+		if ($stickerContentItemVideos) {
+			foreach ($stickerContentItemVideos as $contentItemVideo) {
+				$videoPublicId = $contentItemVideo->video_public_id;
+		
+				// 動画ファイルを削除する
+        		ImageUtil::destroyVideo($videoPublicId);
+			}
+		}
+		
 		// ふせんを削除し、データベースに保存する
 		$sticker->delete();
 	    
@@ -201,6 +212,7 @@ Route::get('/work-mount', function() {
 		$stickerContentLinks     = $sticker->contentLinks;
 		$stickerContentItemTexts = $sticker->contentItemTexts;
 		$stickerContentItemImages = $sticker->contentItemImages;
+		$stickerContentItemVideos = $sticker->contentItemVideos;
 		
 		if ($stickerInfoItemPos && $stickerInfoItemColor) {
 			$stickerParam = [
@@ -255,6 +267,23 @@ Route::get('/work-mount', function() {
 								$item = [
 								    'image_url'       => $imageURL,
 								    'image_public_id' => $imagePublicId,
+								];
+								
+								$content['item'] = $item;
+								
+							    array_push($contents, $content);
+							}
+						}
+					} else if ($item_type == \App\Sticker::$contentItemType['video']) {
+						if ($stickerContentItemVideos) {
+							$contentItemVideo = $stickerContentItemVideos->where('id', $item_id)->first();
+							if ($contentItemVideo) {
+								$videoURL      = $contentItemVideo->video_url;
+								$videoPublicId = $contentItemVideo->video_public_id;
+								
+								$item = [
+								    'video_url'       => $videoURL,
+								    'video_public_id' => $videoPublicId,
 								];
 								
 								$content['item'] = $item;
@@ -430,5 +459,68 @@ Route::delete('/work-sticker-content-item-image-destroy', function(Request $requ
 	    ];
 	    
 	    event((new \App\Events\StickerContentItemImageDestroy($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+	}
+});
+
+Route::post('/work-sticker-content-item-video-create', function(Request $request) {
+	// Log::debug('my_debug_log: '. 'Route::post /work-sticker-content-item-video-create');
+	// logger($request);
+	
+	$sticker = \App\Sticker::find($request->reqParam['id']);
+
+	if ($sticker) {
+		// 動画ファイルをアップする
+        list($videoURL, $videoPublicId) = ImageUtil::uploadVideo($request->reqParam['selectVideoFileInfo']);
+
+        // ContentItemVideoを作成し、データベースに保存する
+		list($contentLink, $contentItem) = $sticker->createContentItemVideo([
+		    'video_url'       => $videoURL,
+		    'video_public_id' => $videoPublicId,
+		]);
+		
+		// イベント
+	    $eventParam = [
+	    	'id'                => $sticker->id,
+	    	'content_link_id'   => $contentLink->id,
+	    	'content_item_type' => $contentLink->item_type,
+	    	'content_item_id'   => $contentLink->item_id,
+		    'video_url'         => $videoURL,
+		    'video_public_id'   => $videoPublicId,
+	    	'user_id'           => $request->user_id,
+	    ];
+		
+		event((new \App\Events\StickerContentItemVideoCreate($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+	}
+});
+
+Route::delete('/work-sticker-content-item-video-destroy', function(Request $request) {
+	$sticker = \App\Sticker::find($request->reqParam['id']);
+
+	if ($sticker) {
+		$content_link_id = $request->reqParam['content_link_id'];
+		
+		// 動画ファイルの情報を取得する
+		$stickerContentLinks      = $sticker->contentLinks;
+		$stickerContentItemVideos = $sticker->contentItemVideos;
+		$contentLink      = $stickerContentLinks->where('id', $content_link_id)->first();
+		$contentItemVideo = $stickerContentItemVideos->where('id', $contentLink->item_id)->first();
+		$videoPublicId = $contentItemVideo->video_public_id;
+		
+		// 動画ファイルを削除する
+        ImageUtil::destroyVideo($videoPublicId);
+		
+		// ContentItemVideoを削除し、データベースに保存する
+		$sticker->destroyContentItem([
+		    'content_link_id' => $content_link_id,
+		]);
+	    
+	    // イベント
+	    $eventParam = [
+	    	'id'              => $sticker->id,
+	    	'content_link_id' => $content_link_id,
+	    	'user_id'         => $request->user_id,
+	    ];
+	    
+	    event((new \App\Events\StickerContentItemVideoDestroy($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
 	}
 });

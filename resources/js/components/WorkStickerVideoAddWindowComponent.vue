@@ -1,38 +1,42 @@
 <template>
     <div
         v-show="isShow"
-        class="sticker-image-add-window-overlay-class"
-        @click.self.prevent="onClickStickerImageAddWindowOverlay"
+        class="sticker-video-add-window-overlay-class"
+        @click.self.prevent="onClickStickerVideoAddWindowOverlay"
     >
         <div
-            class="sticker-image-add-window-class"
-            id="sticker-image-add-window-id"
-            @click.self.prevent="onClickStickerImageAddWindow"
+            class="sticker-video-add-window-class"
+            id="sticker-video-add-window-id"
+            @click.self.prevent="onClickStickerVideoAddWindow"
         >
-            <img
-                v-show="isImageFileEnabled"
-                id="sticker-image-preview-id"
+            <video
+                v-show="isVideoFileEnabled"
+                id="sticker-video-preview-id"
                 src=""
                 width="200px"
                 height="200px"
+                controls
+                autoplay
+                loop
             >
+            </video>
 
             <form
                 enctype="multipart/form-data"
-                @submit.prevent="onClickAddImage"
+                @submit.prevent="onClickAddVideo"
             >
                 <div>
                     <input
                         type="file"
-                        accept="image/jpeg, image/gif, image/png"
-                        name="selectImageFile"
-                        id="sticker-select-image-file-input-id"
-                        @change="onSelectImageFile"
+                        accept="video/mp4, video/ogg, video/webm"
+                        name="selectVideoFile"
+                        id="sticker-select-video-file-input-id"
+                        @change="onSelectVideoFile"
                     >
                 </div>
                 <div>
                     <button
-                        v-bind:disabled="isImageFileEnabled == false"
+                        v-bind:disabled="isVideoFileEnabled == false"
                         type="submit"
                     >
                         追加
@@ -48,43 +52,43 @@
 <script>
     export default {
         props: {
-            showStickerImageAddWindowProps: Object,
+            showStickerVideoAddWindowProps: Object,
         },
 
         data() {
             return {
-                isShow: this.showStickerImageAddWindowProps.isShow,
+                isShow: this.showStickerVideoAddWindowProps.isShow,
                 
-                isImageFileEnabled: false,
+                isVideoFileEnabled: false,
                 
-                selectImageFileInfo: null,
+                selectVideoFileInfo: null,
             };
         },
         
         watch: {
-            'showStickerImageAddWindowProps.isShow': function(newValue, oldValue) {
-                this.isShow = this.showStickerImageAddWindowProps.isShow;
+            'showStickerVideoAddWindowProps.isShow': function(newValue, oldValue) {
+                this.isShow = this.showStickerVideoAddWindowProps.isShow;
                 
                 // 前の入力が残っているので、消しておく。
                 if (this.isShow) {
-                    const imageElem = document.getElementById('sticker-image-preview-id');
-                    imageElem.src = '';
-                    this.isImageFileEnabled = false;
+                    const videoElem = document.getElementById('sticker-video-preview-id');
+                    videoElem.src = '';
+                    this.isVideoFileEnabled = false;
                     
-                    const inputElem = document.getElementById('sticker-select-image-file-input-id');
+                    const inputElem = document.getElementById('sticker-select-video-file-input-id');
                     inputElem.value = '';
                 }
             },
         },
         
         methods: {
-            onClickStickerImageAddWindowOverlay: function (e) {
-                console.log('onClickStickerImageAddWindowOverlay');
+            onClickStickerVideoAddWindowOverlay: function (e) {
+                console.log('onClickStickerVideoAddWindowOverlay');
                 // 何もしない
             },
             
-            onClickStickerImageAddWindow: function (e) {
-                console.log('onClickStickerImageAddWindow');
+            onClickStickerVideoAddWindow: function (e) {
+                console.log('onClickStickerVideoAddWindow');
                 // 何もしない
             },
             
@@ -93,18 +97,18 @@
                     event: e,
                     result: 'none',
                 };
-                this.$emit('hide-sticker-image-add-window-custom-event', emitParam);
+                this.$emit('hide-sticker-video-add-window-custom-event', emitParam);
             },
             
-            onSelectImageFile: function (e) {
-                console.log('onSelectImageFile');
+            onSelectVideoFile: function (e) {
+                console.log('onSelectVideoFile');
                 
                 // 選んだ画像のプレビュー
                 
                 // まずは非表示にする
-                const imageElem = document.getElementById('sticker-image-preview-id');
-                imageElem.src = '';
-                this.isImageFileEnabled = false;
+                const videoElem = document.getElementById('sticker-video-preview-id');
+                videoElem.src = '';
+                this.isVideoFileEnabled = false;
                 
                 // 画像を選んでいたら表示する
                 if (e.target.files.length >= 1) {
@@ -112,33 +116,33 @@
                     console.log(targetFile);
                     const targetFileType = targetFile.type;
                     
-                    if ( targetFileType == 'image/jpeg'
-                        || targetFileType == 'image/gif'
-                        || targetFileType == 'image/png' ) {
+                    if ( targetFileType == 'video/mp4'
+                        || targetFileType == 'video/ogg'
+                        || targetFileType == 'video/webm' ) {
                         const fileReader = new FileReader();
         
-                        fileReader.onload = this.onLoadSelectImageFile;
+                        fileReader.onload = this.onLoadSelectVideoFile;
                         
                         fileReader.readAsDataURL(targetFile);
                     }
                 }
             },
             
-            onClickAddImage: function (e) {
-                console.log('onClickAddImage');
+            onClickAddVideo: function (e) {
+                console.log('onClickAddVideo');
                 
-                const targetFile = e.target.elements.selectImageFile.files[0];
+                const targetFile = e.target.elements.selectVideoFile.files[0];
                 console.log(targetFile);
                 
                 // 画像をアップロードし、ふせんに追加する
                 console.log('axios.post');
                 
                 const reqParam = {
-                    id: this.showStickerImageAddWindowProps.idNo,
-                    selectImageFileInfo: this.selectImageFileInfo,
+                    id: this.showStickerVideoAddWindowProps.idNo,
+                    selectVideoFileInfo: this.selectVideoFileInfo,
                 };
                 
-                axios.post(window.laravel.asset + '/api/work-sticker-content-item-image-create', {
+                axios.post(window.laravel.asset + '/api/work-sticker-content-item-video-create', {
                     reqParam: reqParam,
                     user_id: window.laravel.user['id'],
                 })
@@ -149,27 +153,27 @@
                 // 親に戻る
                 const emitParam = {
                     event: e,
-                    result: 'addImage',
+                    result: 'addVideo',
                 };
-                this.$emit('hide-sticker-image-add-window-custom-event', emitParam);
+                this.$emit('hide-sticker-video-add-window-custom-event', emitParam);
             },
             
-            onLoadSelectImageFile: function (e) {
-                console.log('onLoadSelectImageFile');
+            onLoadSelectVideoFile: function (e) {
+                console.log('onLoadSelectVideoFile');
                                 
                 // 画像を読み込み終わったので表示する
-                const imageElem = document.getElementById('sticker-image-preview-id');
-                imageElem.src = e.target.result;
-                this.isImageFileEnabled = true;
+                const videoElem = document.getElementById('sticker-video-preview-id');
+                videoElem.src = e.target.result;
+                this.isVideoFileEnabled = true;
                 
-                this.selectImageFileInfo = e.target.result;
+                this.selectVideoFileInfo = e.target.result;
             },
         },
     };
 </script>
 
 <style scoped>
-    .sticker-image-add-window-overlay-class {
+    .sticker-video-add-window-overlay-class {
         position: absolute;
         left:   0;
         top:    0;
@@ -180,7 +184,7 @@
         margin: 0;
     }
     
-    .sticker-image-add-window-class {
+    .sticker-video-add-window-class {
         position: absolute;
         left:   0;
         top:    0;

@@ -2756,6 +2756,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -2849,6 +2854,14 @@ __webpack_require__.r(__webpack_exports__);
       // ふせんに画像を追加するウィンドウに渡すパラメータ
       //
       showStickerImageAddWindowParam: {
+        isShow: false,
+        idNo: null // 要素のidの文字列から抽出した数値
+
+      },
+      //
+      // ふせんに動画を追加するウィンドウに渡すパラメータ
+      //
+      showStickerVideoAddWindowParam: {
         isShow: false,
         idNo: null // 要素のidの文字列から抽出した数値
 
@@ -3063,6 +3076,54 @@ __webpack_require__.r(__webpack_exports__);
 
       _this.removeSticherContentItem(response.eventParam);
     });
+    window.Echo["private"]('sticker-content-item-video-create-channel.' + window.laravel.user['id']).listen('StickerContentItemVideoCreate', function (response) {
+      console.log('window.Echo.private sticker-content-item-video-create-channel listen');
+      var idNo = response.eventParam.id;
+
+      var idBaseName = _this.getStickerIdBaseName();
+
+      var updateId = "".concat(idBaseName).concat(idNo);
+      var updateElem = document.getElementById(updateId);
+
+      if (updateElem) {
+        var videoURL = response.eventParam.video_url;
+        var videoPublicId = response.eventParam.video_public_id;
+        var contentLinkIdNo = response.eventParam.content_link_id; // データ更新
+
+        var index = _this.getStickerParamIndex(idNo);
+
+        if (index !== null) {
+          var contents = _this.stickerParams[index]['contents']; // JavaScriptの配列は参照渡し
+
+          var content = {
+            link: {
+              id: contentLinkIdNo,
+              item_type: response.eventParam.content_item_type,
+              item_id: response.eventParam.content_item_id
+            },
+            item: {
+              video_url: videoURL,
+              video_public_id: videoPublicId
+            }
+          };
+          contents.push(content); // TODO(kawadakoujisun): id順に並び替える必要あるかも。見た目のdivの並びも。
+        } // 見た目更新
+
+
+        var divItemElem = document.createElement('div');
+
+        var contentLinkIdBaseName = _this.getContentLinkIdBaseName();
+
+        divItemElem.id = "".concat(contentLinkIdBaseName).concat(contentLinkIdNo);
+        divItemElem.innerHTML = "<video src=\"".concat(videoURL, "\" width=\"200px\" controls autoplay loop></video>");
+        updateElem.appendChild(divItemElem);
+      }
+    });
+    window.Echo["private"]('sticker-content-item-video-destroy-channel.' + window.laravel.user['id']).listen('StickerContentItemVideoDestroy', function (response) {
+      console.log('window.Echo.private sticker-content-item-video-destroy-channel listen');
+
+      _this.removeSticherContentItem(response.eventParam);
+    });
   },
   directives: {
     'sticker-custom-directive': {
@@ -3099,6 +3160,10 @@ __webpack_require__.r(__webpack_exports__);
             var imageURL = content['item']['image_url'];
             divItemElem.innerHTML = "<img src=\"".concat(imageURL, "\" width=\"200px\">"); // TODO(kawadakoujisun): https://techacademy.jp/my/frontend/frontend2/jquery
             //     const img = new Image();をお手本にして画像を表示してみるか？
+          } else if (content['link'].item_type == 3) {
+            // app/Sticker.phpで値を定義している
+            var videoURL = content['item']['video_url'];
+            divItemElem.innerHTML = "<video src=\"".concat(videoURL, "\" width=\"200px\" controls autoplay loop></video>");
           }
         }
       },
@@ -3247,6 +3312,7 @@ __webpack_require__.r(__webpack_exports__);
       if (emitParam.result != 'none') {
         if (emitParam.result == 'removeText') {// ここに来る前にテキストを削除しているので、ここでは何もしない
         } else if (emitParam.result == 'removeImage') {// ここに来る前に画像を削除しているので、ここでは何もしない
+        } else if (emitParam.result == 'removeVideo') {// ここに来る前に動画を削除しているので、ここでは何もしない
         } else if (emitParam.result == 'openStickerColorChangeWindow') {
           this.showStickerColorChangeWindowParam.isShow = true;
           this.showStickerColorChangeWindowParam.idNo = idNo;
@@ -3256,6 +3322,9 @@ __webpack_require__.r(__webpack_exports__);
         } else if (emitParam.result == 'openStickerImageAddWindow') {
           this.showStickerImageAddWindowParam.isShow = true;
           this.showStickerImageAddWindowParam.idNo = idNo;
+        } else if (emitParam.result == 'openStickerVideoAddWindow') {
+          this.showStickerVideoAddWindowParam.isShow = true;
+          this.showStickerVideoAddWindowParam.idNo = idNo;
         }
       }
     },
@@ -3286,6 +3355,16 @@ __webpack_require__.r(__webpack_exports__);
 
       if (emitParam.result != 'none') {
         if (emitParam.result == 'addImage') {// ここに来る前に画像を追加しているので、ここでは何もしない
+        }
+      }
+    },
+    onHideStickerVideoAddWindow: function onHideStickerVideoAddWindow(emitParam) {
+      console.log('onHideStickerVideoAddWindow', emitParam.event);
+      this.showStickerVideoAddWindowParam.isShow = false;
+      this.showStickerVideoAddWindowParam.idNo = null;
+
+      if (emitParam.result != 'none') {
+        if (emitParam.result == 'addVideo') {// ここに来る前に動画を追加しているので、ここでは何もしない
         }
       }
     },
@@ -3530,7 +3609,9 @@ __webpack_require__.r(__webpack_exports__);
             item: {
               text: srcContent.item.text,
               image_url: srcContent.item.image_url,
-              image_public_id: srcContent.item.image_public_id
+              image_public_id: srcContent.item.image_public_id,
+              video_url: srcContent.item.video_url,
+              video_public_id: srcContent.item.video_public_id
             }
           };
           contents.push(content);
@@ -3808,6 +3889,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     showStickerEditWindowProps: Object
@@ -3853,6 +3935,10 @@ __webpack_require__.r(__webpack_exports__);
           // app/Sticker.phpで値を定義している
           var imageURL = content['item']['image_url'];
           spanItemElem.innerHTML = "<img src=\"".concat(imageURL, "\" width=\"200px\">");
+        } else if (content['link'].item_type == 3) {
+          // app/Sticker.phpで値を定義している
+          var videoURL = content['item']['video_url'];
+          spanItemElem.innerHTML = "<video src=\"".concat(videoURL, "\" width=\"200px\" controls autoplay loop></video>");
         }
       },
       inserted: function inserted(el, binding) {
@@ -3933,6 +4019,16 @@ __webpack_require__.r(__webpack_exports__);
             }).then(function (response) {// 特にすることなし
             });
             result = 'removeImage';
+          } else if (contentItemType == 3) {
+            // app/Sticker.phpで値を定義している
+            axios["delete"](window.laravel.asset + '/api/work-sticker-content-item-video-destroy', {
+              data: {
+                reqParam: reqParam,
+                user_id: window.laravel.user['id']
+              }
+            }).then(function (response) {// 特にすることなし
+            });
+            result = 'removeVideo';
           } // 親に戻る
 
 
@@ -3972,6 +4068,14 @@ __webpack_require__.r(__webpack_exports__);
       var emitParam = {
         event: e,
         result: 'openStickerImageAddWindow'
+      };
+      this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+    },
+    onClickAddVideo: function onClickAddVideo(e) {
+      console.log('onClickAddVideo');
+      var emitParam = {
+        event: e,
+        result: 'openStickerVideoAddWindow'
       };
       this.$emit('hide-sticker-edit-window-custom-event', emitParam);
     }
@@ -4043,7 +4147,6 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       isShow: this.showStickerImageAddWindowProps.isShow,
-      addImageFileName: '',
       isImageFileEnabled: false,
       selectImageFileInfo: null
     };
@@ -4221,6 +4324,159 @@ __webpack_require__.r(__webpack_exports__);
         };
         this.$emit('hide-sticker-text-add-window-custom-event', emitParam);
       }
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=script&lang=js&":
+/*!*********************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=script&lang=js& ***!
+  \*********************************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: {
+    showStickerVideoAddWindowProps: Object
+  },
+  data: function data() {
+    return {
+      isShow: this.showStickerVideoAddWindowProps.isShow,
+      isVideoFileEnabled: false,
+      selectVideoFileInfo: null
+    };
+  },
+  watch: {
+    'showStickerVideoAddWindowProps.isShow': function showStickerVideoAddWindowPropsIsShow(newValue, oldValue) {
+      this.isShow = this.showStickerVideoAddWindowProps.isShow; // 前の入力が残っているので、消しておく。
+
+      if (this.isShow) {
+        var videoElem = document.getElementById('sticker-video-preview-id');
+        videoElem.src = '';
+        this.isVideoFileEnabled = false;
+        var inputElem = document.getElementById('sticker-select-video-file-input-id');
+        inputElem.value = '';
+      }
+    }
+  },
+  methods: {
+    onClickStickerVideoAddWindowOverlay: function onClickStickerVideoAddWindowOverlay(e) {
+      console.log('onClickStickerVideoAddWindowOverlay'); // 何もしない
+    },
+    onClickStickerVideoAddWindow: function onClickStickerVideoAddWindow(e) {
+      console.log('onClickStickerVideoAddWindow'); // 何もしない
+    },
+    onClickClose: function onClickClose(e) {
+      var emitParam = {
+        event: e,
+        result: 'none'
+      };
+      this.$emit('hide-sticker-video-add-window-custom-event', emitParam);
+    },
+    onSelectVideoFile: function onSelectVideoFile(e) {
+      console.log('onSelectVideoFile'); // 選んだ画像のプレビュー
+      // まずは非表示にする
+
+      var videoElem = document.getElementById('sticker-video-preview-id');
+      videoElem.src = '';
+      this.isVideoFileEnabled = false; // 画像を選んでいたら表示する
+
+      if (e.target.files.length >= 1) {
+        var targetFile = e.target.files[0];
+        console.log(targetFile);
+        var targetFileType = targetFile.type;
+
+        if (targetFileType == 'video/mp4' || targetFileType == 'video/ogg' || targetFileType == 'video/webm') {
+          var fileReader = new FileReader();
+          fileReader.onload = this.onLoadSelectVideoFile;
+          fileReader.readAsDataURL(targetFile);
+        }
+      }
+    },
+    onClickAddVideo: function onClickAddVideo(e) {
+      console.log('onClickAddVideo');
+      var targetFile = e.target.elements.selectVideoFile.files[0];
+      console.log(targetFile); // 画像をアップロードし、ふせんに追加する
+
+      console.log('axios.post');
+      var reqParam = {
+        id: this.showStickerVideoAddWindowProps.idNo,
+        selectVideoFileInfo: this.selectVideoFileInfo
+      };
+      axios.post(window.laravel.asset + '/api/work-sticker-content-item-video-create', {
+        reqParam: reqParam,
+        user_id: window.laravel.user['id']
+      }).then(function (response) {// 特にすることなし
+      }); // 親に戻る
+
+      var emitParam = {
+        event: e,
+        result: 'addVideo'
+      };
+      this.$emit('hide-sticker-video-add-window-custom-event', emitParam);
+    },
+    onLoadSelectVideoFile: function onLoadSelectVideoFile(e) {
+      console.log('onLoadSelectVideoFile'); // 画像を読み込み終わったので表示する
+
+      var videoElem = document.getElementById('sticker-video-preview-id');
+      videoElem.src = e.target.result;
+      this.isVideoFileEnabled = true;
+      this.selectVideoFileInfo = e.target.result;
     }
   }
 });
@@ -8853,6 +9109,25 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 // module
 exports.push([module.i, "\n.sticker-text-add-window-overlay-class[data-v-d8ba2e6c] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 1000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.sticker-text-add-window-class[data-v-d8ba2e6c] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  400px;\n    height: 200px;\n    z-index: 1001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=style&index=0&id=5ef490f4&scoped=true&lang=css&":
+/*!****************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=style&index=0&id=5ef490f4&scoped=true&lang=css& ***!
+  \****************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n.sticker-video-add-window-overlay-class[data-v-5ef490f4] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 1000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.sticker-video-add-window-class[data-v-5ef490f4] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  400px;\n    height: 400px;\n    z-index: 1001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n", ""]);
 
 // exports
 
@@ -46492,6 +46767,36 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=style&index=0&id=5ef490f4&scoped=true&lang=css&":
+/*!********************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=style&index=0&id=5ef490f4&scoped=true&lang=css& ***!
+  \********************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerVideoAddWindowComponent.vue?vue&type=style&index=0&id=5ef490f4&scoped=true&lang=css& */ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=style&index=0&id=5ef490f4&scoped=true&lang=css&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/lib/addStyles.js":
 /*!****************************************************!*\
   !*** ./node_modules/style-loader/lib/addStyles.js ***!
@@ -47784,6 +48089,17 @@ var render = function() {
           "hide-sticker-image-add-window-custom-event":
             _vm.onHideStickerImageAddWindow
         }
+      }),
+      _vm._v(" "),
+      _c("work-sticker-video-add-window", {
+        attrs: {
+          "show-sticker-video-add-window-props":
+            _vm.showStickerVideoAddWindowParam
+        },
+        on: {
+          "hide-sticker-video-add-window-custom-event":
+            _vm.onHideStickerVideoAddWindow
+        }
       })
     ],
     2
@@ -48234,6 +48550,21 @@ var render = function() {
                   on: {
                     click: function($event) {
                       $event.preventDefault()
+                      return _vm.onClickAddVideo($event)
+                    }
+                  }
+                },
+                [_vm._v("動画を追加")]
+              )
+            ]),
+            _vm._v(" "),
+            _c("div", [
+              _c(
+                "button",
+                {
+                  on: {
+                    click: function($event) {
+                      $event.preventDefault()
                       return _vm.onClickClose($event)
                     }
                   }
@@ -48478,6 +48809,145 @@ var render = function() {
               _vm._v(" "),
               _c("button", { attrs: { type: "submit" } }, [
                 _vm._v("\n                追加\n            ")
+              ])
+            ]
+          ),
+          _vm._v(" "),
+          _c("div", [
+            _c(
+              "button",
+              {
+                on: {
+                  click: function($event) {
+                    $event.preventDefault()
+                    return _vm.onClickClose($event)
+                  }
+                }
+              },
+              [_vm._v("戻る")]
+            )
+          ])
+        ]
+      )
+    ]
+  )
+}
+var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=template&id=5ef490f4&scoped=true&":
+/*!*************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=template&id=5ef490f4&scoped=true& ***!
+  \*************************************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    {
+      directives: [
+        {
+          name: "show",
+          rawName: "v-show",
+          value: _vm.isShow,
+          expression: "isShow"
+        }
+      ],
+      staticClass: "sticker-video-add-window-overlay-class",
+      on: {
+        click: function($event) {
+          if ($event.target !== $event.currentTarget) {
+            return null
+          }
+          $event.preventDefault()
+          return _vm.onClickStickerVideoAddWindowOverlay($event)
+        }
+      }
+    },
+    [
+      _c(
+        "div",
+        {
+          staticClass: "sticker-video-add-window-class",
+          attrs: { id: "sticker-video-add-window-id" },
+          on: {
+            click: function($event) {
+              if ($event.target !== $event.currentTarget) {
+                return null
+              }
+              $event.preventDefault()
+              return _vm.onClickStickerVideoAddWindow($event)
+            }
+          }
+        },
+        [
+          _c("video", {
+            directives: [
+              {
+                name: "show",
+                rawName: "v-show",
+                value: _vm.isVideoFileEnabled,
+                expression: "isVideoFileEnabled"
+              }
+            ],
+            attrs: {
+              id: "sticker-video-preview-id",
+              src: "",
+              width: "200px",
+              height: "200px",
+              controls: "",
+              autoplay: "",
+              loop: ""
+            }
+          }),
+          _vm._v(" "),
+          _c(
+            "form",
+            {
+              attrs: { enctype: "multipart/form-data" },
+              on: {
+                submit: function($event) {
+                  $event.preventDefault()
+                  return _vm.onClickAddVideo($event)
+                }
+              }
+            },
+            [
+              _c("div", [
+                _c("input", {
+                  attrs: {
+                    type: "file",
+                    accept: "video/mp4, video/ogg, video/webm",
+                    name: "selectVideoFile",
+                    id: "sticker-select-video-file-input-id"
+                  },
+                  on: { change: _vm.onSelectVideoFile }
+                })
+              ]),
+              _vm._v(" "),
+              _c("div", [
+                _c(
+                  "button",
+                  {
+                    attrs: {
+                      disabled: _vm.isVideoFileEnabled == false,
+                      type: "submit"
+                    }
+                  },
+                  [_vm._v("\n                    追加\n                ")]
+                )
               ])
             ]
           ),
@@ -60708,6 +61178,7 @@ Vue.component('work-sticker-edit-window', __webpack_require__(/*! ./components/W
 Vue.component('work-sticker-color-change-window', __webpack_require__(/*! ./components/WorkStickerColorChangeWindowComponent.vue */ "./resources/js/components/WorkStickerColorChangeWindowComponent.vue")["default"]);
 Vue.component('work-sticker-text-add-window', __webpack_require__(/*! ./components/WorkStickerTextAddWindowComponent.vue */ "./resources/js/components/WorkStickerTextAddWindowComponent.vue")["default"]);
 Vue.component('work-sticker-image-add-window', __webpack_require__(/*! ./components/WorkStickerImageAddWindowComponent.vue */ "./resources/js/components/WorkStickerImageAddWindowComponent.vue")["default"]);
+Vue.component('work-sticker-video-add-window', __webpack_require__(/*! ./components/WorkStickerVideoAddWindowComponent.vue */ "./resources/js/components/WorkStickerVideoAddWindowComponent.vue")["default"]);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
  * the page. Then, you may begin adding components to this application
@@ -61773,6 +62244,93 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerTextAddWindowComponent_vue_vue_type_template_id_d8ba2e6c_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerTextAddWindowComponent_vue_vue_type_template_id_d8ba2e6c_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerVideoAddWindowComponent.vue":
+/*!************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerVideoAddWindowComponent.vue ***!
+  \************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _WorkStickerVideoAddWindowComponent_vue_vue_type_template_id_5ef490f4_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./WorkStickerVideoAddWindowComponent.vue?vue&type=template&id=5ef490f4&scoped=true& */ "./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=template&id=5ef490f4&scoped=true&");
+/* harmony import */ var _WorkStickerVideoAddWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./WorkStickerVideoAddWindowComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _WorkStickerVideoAddWindowComponent_vue_vue_type_style_index_0_id_5ef490f4_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./WorkStickerVideoAddWindowComponent.vue?vue&type=style&index=0&id=5ef490f4&scoped=true&lang=css& */ "./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=style&index=0&id=5ef490f4&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _WorkStickerVideoAddWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _WorkStickerVideoAddWindowComponent_vue_vue_type_template_id_5ef490f4_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _WorkStickerVideoAddWindowComponent_vue_vue_type_template_id_5ef490f4_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  "5ef490f4",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/WorkStickerVideoAddWindowComponent.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=script&lang=js&":
+/*!*************************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=script&lang=js& ***!
+  \*************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerVideoAddWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerVideoAddWindowComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerVideoAddWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=style&index=0&id=5ef490f4&scoped=true&lang=css&":
+/*!*********************************************************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=style&index=0&id=5ef490f4&scoped=true&lang=css& ***!
+  \*********************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerVideoAddWindowComponent_vue_vue_type_style_index_0_id_5ef490f4_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerVideoAddWindowComponent.vue?vue&type=style&index=0&id=5ef490f4&scoped=true&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=style&index=0&id=5ef490f4&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerVideoAddWindowComponent_vue_vue_type_style_index_0_id_5ef490f4_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerVideoAddWindowComponent_vue_vue_type_style_index_0_id_5ef490f4_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerVideoAddWindowComponent_vue_vue_type_style_index_0_id_5ef490f4_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerVideoAddWindowComponent_vue_vue_type_style_index_0_id_5ef490f4_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=template&id=5ef490f4&scoped=true&":
+/*!*******************************************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=template&id=5ef490f4&scoped=true& ***!
+  \*******************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerVideoAddWindowComponent_vue_vue_type_template_id_5ef490f4_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerVideoAddWindowComponent.vue?vue&type=template&id=5ef490f4&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerVideoAddWindowComponent.vue?vue&type=template&id=5ef490f4&scoped=true&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerVideoAddWindowComponent_vue_vue_type_template_id_5ef490f4_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerVideoAddWindowComponent_vue_vue_type_template_id_5ef490f4_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

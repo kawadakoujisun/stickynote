@@ -24,6 +24,10 @@ class ImageUtil
         return $uploadApi;
     }
 
+    //
+    // image
+    //
+
     public static function uploadImage($uploadImageFile)
     {
         $uploadApi = self::setupCloudinaryUploadAPI();
@@ -33,7 +37,7 @@ class ImageUtil
             $uploadImageFile,
             [
                 "resource_type" => "image",
-                "folder"        => "stickynote_uploads"
+                "folder"        => "stickynote_uploads/images"
             ]
         );
         
@@ -48,6 +52,47 @@ class ImageUtil
         $uploadApi = self::setupCloudinaryUploadAPI();
         
         // 画像ファイルをCloudinaryから削除する
-        $uploadApi->destroy($destroyImagePublicId);
+        $uploadApi->destroy(
+            $destroyImagePublicId,
+            [
+                "resource_type" => "image",
+            ]
+        );
     }
+    
+    //
+    // video
+    //
+
+    public static function uploadVideo($uploadVideoFile)
+    {
+        $uploadApi = self::setupCloudinaryUploadAPI();
+        
+        // 動画ファイルをCloudinaryにアップする
+        $apiResponse = $uploadApi->upload(
+            $uploadVideoFile,
+            [
+                "resource_type" => "video",
+                "folder"        => "stickynote_uploads/videos"
+            ]
+        );
+        
+        $videoURL      = $apiResponse["secure_url"];
+        $videoPublicId = $apiResponse["public_id"];
+
+        return [$videoURL, $videoPublicId];
+    }
+    
+    public static function destroyVideo($destroyVideoPublicId)
+    {
+        $uploadApi = self::setupCloudinaryUploadAPI();
+        
+        // 動画ファイルをCloudinaryから削除する
+        $uploadApi->destroy(
+            $destroyVideoPublicId,
+            [
+                "resource_type" => "video",
+            ]    
+        );
+    }    
 }

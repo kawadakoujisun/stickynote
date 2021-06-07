@@ -39,6 +39,11 @@
             @hide-sticker-image-add-window-custom-event="onHideStickerImageAddWindow"
         >
         </work-sticker-image-add-window>
+        <work-sticker-video-add-window
+            v-bind:show-sticker-video-add-window-props="showStickerVideoAddWindowParam"
+            @hide-sticker-video-add-window-custom-event="onHideStickerVideoAddWindow"
+        >
+        </work-sticker-video-add-window>        
     </div>
 </template>
 
@@ -124,6 +129,14 @@
                 // ふせんに画像を追加するウィンドウに渡すパラメータ
                 //
                 showStickerImageAddWindowParam: {
+                    isShow: false,
+                    idNo: null,  // 要素のidの文字列から抽出した数値
+                },
+                
+                //
+                // ふせんに動画を追加するウィンドウに渡すパラメータ
+                //
+                showStickerVideoAddWindowParam: {
                     isShow: false,
                     idNo: null,  // 要素のidの文字列から抽出した数値
                 },
@@ -360,6 +373,60 @@
                     
                     this.removeSticherContentItem(response.eventParam);
                 });
+                
+            window.Echo.private('sticker-content-item-video-create-channel.' + window.laravel.user['id'])
+                .listen('StickerContentItemVideoCreate', response => {
+                    console.log('window.Echo.private sticker-content-item-video-create-channel listen');
+                    
+                    const idNo = response.eventParam.id;
+                    
+                    const idBaseName = this.getStickerIdBaseName();
+                    const updateId = `${idBaseName}${idNo}`; 
+                    
+                    const updateElem = document.getElementById(updateId);
+                    
+                    if (updateElem) {
+                        const videoURL      = response.eventParam.video_url;
+                        const videoPublicId = response.eventParam.video_public_id;
+                        const contentLinkIdNo = response.eventParam.content_link_id;
+                        
+                        // データ更新
+                        const index = this.getStickerParamIndex(idNo);
+                        if (index !== null) {
+                            const contents = this.stickerParams[index]['contents'];  // JavaScriptの配列は参照渡し
+                            
+                            const content = {
+                                link: {
+                                    id:        contentLinkIdNo,
+                                    item_type: response.eventParam.content_item_type,
+                                    item_id:   response.eventParam.content_item_id,
+                                },
+                                item: {
+                                    video_url:       videoURL,
+                                    video_public_id: videoPublicId,
+                                },
+                            };
+                            
+                            contents.push(content);  // TODO(kawadakoujisun): id順に並び替える必要あるかも。見た目のdivの並びも。
+                        }
+                        
+                        // 見た目更新
+                        const divItemElem = document.createElement('div');
+                        
+                        const contentLinkIdBaseName = this.getContentLinkIdBaseName();
+                        divItemElem.id = `${contentLinkIdBaseName}${contentLinkIdNo}`;
+                        
+                        divItemElem.innerHTML = `<video src="${videoURL}" width="200px" controls autoplay loop></video>`;
+                        updateElem.appendChild(divItemElem);
+                    }
+                });
+                
+            window.Echo.private('sticker-content-item-video-destroy-channel.' + window.laravel.user['id'])
+                .listen('StickerContentItemVideoDestroy', response => {
+                    console.log('window.Echo.private sticker-content-item-video-destroy-channel listen');
+                    
+                    this.removeSticherContentItem(response.eventParam);
+                });
         },
         
         directives: {
@@ -399,6 +466,9 @@
                             divItemElem.innerHTML = `<img src="${imageURL}" width="200px">`;
                             // TODO(kawadakoujisun): https://techacademy.jp/my/frontend/frontend2/jquery
                             //     const img = new Image();をお手本にして画像を表示してみるか？
+                        } else if (content['link'].item_type == 3) {  // app/Sticker.phpで値を定義している
+                            const videoURL = content['item']['video_url'];
+                            divItemElem.innerHTML = `<video src="${videoURL}" width="200px" controls autoplay loop></video>`;
                         }
                     }
                 },
@@ -566,6 +636,8 @@
                         // ここに来る前にテキストを削除しているので、ここでは何もしない
                     } else if (emitParam.result == 'removeImage') {
                         // ここに来る前に画像を削除しているので、ここでは何もしない
+                    } else if (emitParam.result == 'removeVideo') {
+                        // ここに来る前に動画を削除しているので、ここでは何もしない
                     } else if (emitParam.result == 'openStickerColorChangeWindow') {
                         this.showStickerColorChangeWindowParam.isShow = true;
                         this.showStickerColorChangeWindowParam.idNo = idNo;
@@ -575,6 +647,9 @@
                     } else if (emitParam.result == 'openStickerImageAddWindow') {
                         this.showStickerImageAddWindowParam.isShow = true;
                         this.showStickerImageAddWindowParam.idNo = idNo;
+                    } else if (emitParam.result == 'openStickerVideoAddWindow') {
+                        this.showStickerVideoAddWindowParam.isShow = true;
+                        this.showStickerVideoAddWindowParam.idNo = idNo;
                     }
                 }
             },
@@ -617,6 +692,19 @@
                     }
                 }
             },
+            
+            onHideStickerVideoAddWindow: function (emitParam) {
+                console.log('onHideStickerVideoAddWindow', emitParam.event);
+                
+                this.showStickerVideoAddWindowParam.isShow = false;
+                this.showStickerVideoAddWindowParam.idNo = null;
+
+                if (emitParam.result != 'none') {
+                    if (emitParam.result == 'addVideo') {
+                        // ここに来る前に動画を追加しているので、ここでは何もしない
+                    }
+                }
+            },            
             
             releaseTargetElem: function () {
                 this.updateTargetElem();
@@ -889,6 +977,8 @@
                                 text : srcContent.item.text,
                                 image_url       : srcContent.item.image_url,
                                 image_public_id : srcContent.item.image_public_id,
+                                video_url       : srcContent.item.video_url,
+                                video_public_id : srcContent.item.video_public_id,
                             },
                         };
                         
