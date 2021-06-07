@@ -3077,23 +3077,27 @@ __webpack_require__.r(__webpack_exports__);
 
         var idBaseName = 'sticker-id-'; // 調べている時間がないので直書きしておく。
 
-        el.id = "".concat(idBaseName).concat(stickerParam['id']);
+        el.id = "".concat(idBaseName).concat(stickerParam['id']); // const contentLinkIdBaseName = this.getContentLinkIdBaseName();
+
+        var contentLinkIdBaseName = 'content-link-id-'; // 直書き
+
         var contents = stickerParam['contents'];
 
         for (var i = 0; i < contents.length; ++i) {
           var content = contents[i];
+          var divItemElem = document.createElement('div');
+          divItemElem.id = "".concat(contentLinkIdBaseName).concat(content['link'].id);
+          el.appendChild(divItemElem);
 
           if (content['link'].item_type == 1) {
             // app/Sticker.phpで値を定義している
             var text = content['item']['text'];
-            var divTextElem = document.createElement('div'); // const contentLinkIdBaseName = this.getContentLinkIdBaseName();
-
-            var contentLinkIdBaseName = 'content-link-id-'; // 直書き
-
-            divTextElem.id = "".concat(contentLinkIdBaseName).concat(content['link'].id);
-            divTextElem.innerHTML = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
-
-            el.appendChild(divTextElem);
+            divItemElem.innerHTML = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
+          } else if (content['link'].item_type == 2) {
+            // app/Sticker.phpで値を定義している
+            var imageURL = content['item']['image_url'];
+            divItemElem.innerHTML = "<img src=\"".concat(imageURL, "\" width=\"200px\">"); // TODO(kawadakoujisun): https://techacademy.jp/my/frontend/frontend2/jquery
+            //     const img = new Image();をお手本にして画像を表示してみるか？
           }
         }
       },
@@ -3241,6 +3245,7 @@ __webpack_require__.r(__webpack_exports__);
 
       if (emitParam.result != 'none') {
         if (emitParam.result == 'removeText') {// ここに来る前にテキストを削除しているので、ここでは何もしない
+        } else if (emitParam.result == 'removeImage') {// ここに来る前に画像を削除しているので、ここでは何もしない
         } else if (emitParam.result == 'openStickerColorChangeWindow') {
           this.showStickerColorChangeWindowParam.isShow = true;
           this.showStickerColorChangeWindowParam.idNo = idNo;
@@ -3474,7 +3479,9 @@ __webpack_require__.r(__webpack_exports__);
             // 使う側はitem_typeを確認して、そのitem_typeに存在するプロパティにしか使うときにアクセスしないはずなので、
             // このような全item_typeのプロパティを設定するやり方でよい。
             item: {
-              text: srcContent.item.text
+              text: srcContent.item.text,
+              image_url: srcContent.item.image_url,
+              image_public_id: srcContent.item.image_public_id
             }
           };
           contents.push(content);
@@ -3786,14 +3793,17 @@ __webpack_require__.r(__webpack_exports__);
         var idBaseName = 'content-link-id-';
         el.id = "".concat(idBaseName).concat(content['link'].id);
         var divItemOuterElems = el.getElementsByClassName('sticker-content-item-outer-class');
+        var spanItemElem = document.createElement('span');
+        divItemOuterElems[0].appendChild(spanItemElem);
 
         if (content['link'].item_type == 1) {
           // app/Sticker.phpで値を定義している
           var text = content['item']['text'];
-          var divTextElem = document.createElement('span');
-          divTextElem.innerHTML = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
-
-          divItemOuterElems[0].appendChild(divTextElem);
+          spanItemElem.innerHTML = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
+        } else if (content['link'].item_type == 2) {
+          // app/Sticker.phpで値を定義している
+          var imageURL = content['item']['image_url'];
+          spanItemElem.innerHTML = "<img src=\"".concat(imageURL, "\" width=\"200px\">");
         }
       },
       inserted: function inserted(el, binding) {
@@ -3815,7 +3825,7 @@ __webpack_require__.r(__webpack_exports__);
       console.log('onClickStickerEditWindow'); // 何もしない
     },
     onClickStickerContentRemove: function onClickStickerContentRemove(e) {
-      // テキストを削除する
+      // ContentItem〇〇を削除する
       console.log('onClickStickerContentRemove');
       var idBaseName = 'content-link-id-';
       var contentElem = null;
@@ -3833,26 +3843,56 @@ __webpack_require__.r(__webpack_exports__);
       }
 
       if (contentElem) {
-        var contentLinkId = contentElem.id.substr(idBaseName.length);
-        console.log(contentLinkId);
-        console.log('axios.delete');
-        var reqParam = {
-          id: this.showStickerEditWindowProps.idNo,
-          content_link_id: contentLinkId
-        };
-        axios["delete"](window.laravel.asset + '/api/work-sticker-content-item-text-destroy', {
-          data: {
-            reqParam: reqParam,
-            user_id: window.laravel.user['id']
-          }
-        }).then(function (response) {// 特にすることなし
-        }); // 親に戻る
+        var contentLinkIdNo = contentElem.id.substr(idBaseName.length);
+        console.log(contentLinkIdNo);
+        var contents = this.stickerParam.contents; // JavaScriptの配列は参照渡し
 
-        var emitParam = {
-          event: e,
-          result: 'removeText'
-        };
-        this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+        var contentItemType = null;
+
+        for (var i = 0; i < contents.length; ++i) {
+          if (contents[i].link.id == contentLinkIdNo) {
+            contentItemType = contents[i].link.item_type;
+            break;
+          }
+        }
+
+        if (contentItemType !== null) {
+          console.log('axios.delete');
+          var reqParam = {
+            id: this.showStickerEditWindowProps.idNo,
+            content_link_id: contentLinkIdNo
+          };
+          var result = '';
+
+          if (contentItemType == 1) {
+            // app/Sticker.phpで値を定義している
+            axios["delete"](window.laravel.asset + '/api/work-sticker-content-item-text-destroy', {
+              data: {
+                reqParam: reqParam,
+                user_id: window.laravel.user['id']
+              }
+            }).then(function (response) {// 特にすることなし
+            });
+            result = 'removeText';
+          } else if (contentItemType == 2) {
+            // app/Sticker.phpで値を定義している
+            axios["delete"](window.laravel.asset + '/api/work-sticker-content-item-image-destroy', {
+              data: {
+                reqParam: reqParam,
+                user_id: window.laravel.user['id']
+              }
+            }).then(function (response) {// 特にすることなし
+            });
+            result = 'removeImage';
+          } // 親に戻る
+
+
+          var emitParam = {
+            event: e,
+            result: result
+          };
+          this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+        }
       }
     },
     onClickClose: function onClickClose(e) {
@@ -8668,7 +8708,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 2px 40px 40px;\n    padding: 0;\n}\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:  200px;\n    height: 200px;\n    border: 1px solid #000;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n", ""]);
+exports.push([module.i, "\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 2px 40px 40px;\n    padding: 0;\n}\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:  400px;\n    height: 400px;\n    border: 1px solid #000;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n", ""]);
 
 // exports
 
@@ -8725,7 +8765,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.sticker-edit-window-overlay-class[data-v-1ec0eebc] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 1000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.sticker-edit-window-class[data-v-1ec0eebc] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  400px;\n    height: 400px;\n    z-index: 1001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.sticker-class[data-v-1ec0eebc] {\n    position: absolute;\n    width:  200px;\n    height: 200px;\n    border: 1px solid #000;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n.sticker-content-item-outer-class[data-v-1ec0eebc] {\n    display: inline-block;  /* 2つのdivを横に並べるには、2つともinline-blockにしておかなければならないようだ。 */\n}\n.sticker-content-remove-button-outer-class[data-v-1ec0eebc] {\n    display: inline-block;  /* 2つのdivを横に並べるには、2つともinline-blockにしておかなければならないようだ。 */\n}\n.sticker-edit-buttons-outer-class[data-v-1ec0eebc] {\n    position: absolute;\n    top: 300px;\n}\n", ""]);
+exports.push([module.i, "\n.sticker-edit-window-overlay-class[data-v-1ec0eebc] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 1000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.sticker-edit-window-class[data-v-1ec0eebc] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  440px;\n    height: 600px;\n    z-index: 1001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.sticker-class[data-v-1ec0eebc] {\n    position: absolute;\n    width:  400px;\n    height: 400px;\n    border: 1px solid #000;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n.sticker-content-item-outer-class[data-v-1ec0eebc] {\n    display: inline-block;  /* 2つのdivを横に並べるには、2つともinline-blockにしておかなければならないようだ。 */\n}\n.sticker-content-remove-button-outer-class[data-v-1ec0eebc] {\n    display: inline-block;  /* 2つのdivを横に並べるには、2つともinline-blockにしておかなければならないようだ。 */\n}\n.sticker-edit-buttons-outer-class[data-v-1ec0eebc] {\n    position: absolute;\n    top: 440px;\n}\n", ""]);
 
 // exports
 

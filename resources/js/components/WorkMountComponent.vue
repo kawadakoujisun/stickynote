@@ -373,19 +373,25 @@
                     const idBaseName = 'sticker-id-';                   // 調べている時間がないので直書きしておく。
                     el.id = `${idBaseName}${stickerParam['id']}`;
                     
+                    // const contentLinkIdBaseName = this.getContentLinkIdBaseName();
+                    const contentLinkIdBaseName = 'content-link-id-';  // 直書き
+                            
                     const contents = stickerParam['contents'];
                     for (let i = 0; i < contents.length; ++i) {
                         const content = contents[i];
+                        
+                        const divItemElem = document.createElement('div');
+                        divItemElem.id = `${contentLinkIdBaseName}${content['link'].id}`;
+                        el.appendChild(divItemElem);
+                        
                         if (content['link'].item_type == 1) {  // app/Sticker.phpで値を定義している
                             const text = content['item']['text'];
-                            const divTextElem = document.createElement('div');
-                            
-                            // const contentLinkIdBaseName = this.getContentLinkIdBaseName();
-                            const contentLinkIdBaseName = 'content-link-id-';  // 直書き
-                            divTextElem.id = `${contentLinkIdBaseName}${content['link'].id}`;
-                            
-                            divTextElem.innerHTML = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
-                            el.appendChild(divTextElem);
+                            divItemElem.innerHTML = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
+                        } else if (content['link'].item_type == 2) {  // app/Sticker.phpで値を定義している
+                            const imageURL = content['item']['image_url'];
+                            divItemElem.innerHTML = `<img src="${imageURL}" width="200px">`;
+                            // TODO(kawadakoujisun): https://techacademy.jp/my/frontend/frontend2/jquery
+                            //     const img = new Image();をお手本にして画像を表示してみるか？
                         }
                     }
                 },
@@ -551,6 +557,8 @@
                 if (emitParam.result != 'none') {
                     if (emitParam.result == 'removeText') {
                         // ここに来る前にテキストを削除しているので、ここでは何もしない
+                    } else if (emitParam.result == 'removeImage') {
+                        // ここに来る前に画像を削除しているので、ここでは何もしない
                     } else if (emitParam.result == 'openStickerColorChangeWindow') {
                         this.showStickerColorChangeWindowParam.isShow = true;
                         this.showStickerColorChangeWindowParam.idNo = idNo;
@@ -821,6 +829,8 @@
                             // このような全item_typeのプロパティを設定するやり方でよい。
                             item: {  
                                 text : srcContent.item.text,
+                                image_url       : srcContent.item.image_url,
+                                image_public_id : srcContent.item.image_public_id,
                             },
                         };
                         
@@ -853,8 +863,8 @@
     
     .sticker-class {
         position: absolute;
-        width:  200px;
-        height: 200px;
+        width:  400px;
+        height: 400px;
         border: 1px solid #000;
         margin: 0;
         

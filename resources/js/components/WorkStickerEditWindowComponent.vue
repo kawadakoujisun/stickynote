@@ -88,12 +88,15 @@
                   
                     const divItemOuterElems = el.getElementsByClassName('sticker-content-item-outer-class');
                     
+                    const spanItemElem = document.createElement('span');
+                    divItemOuterElems[0].appendChild(spanItemElem);
+                        
                     if (content['link'].item_type == 1) {  // app/Sticker.phpで値を定義している
                         const text = content['item']['text'];
-                        
-                        const divTextElem = document.createElement('span');
-                        divTextElem.innerHTML = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
-                        divItemOuterElems[0].appendChild(divTextElem);
+                        spanItemElem.innerHTML = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
+                    } else if (content['link'].item_type == 2) {  // app/Sticker.phpで値を定義している
+                        const imageURL = content['item']['image_url'];
+                        spanItemElem.innerHTML = `<img src="${imageURL}" width="200px">`;
                     }
                 },
                 
@@ -123,7 +126,7 @@
             },
             
             onClickStickerContentRemove: function (e) {
-                // テキストを削除する
+                // ContentItem〇〇を削除する
                 console.log('onClickStickerContentRemove');
                 
                 const idBaseName = 'content-link-id-';
@@ -141,32 +144,62 @@
                 }
                 
                 if (contentElem) {
-                    const contentLinkId = contentElem.id.substr(idBaseName.length);
-                    console.log(contentLinkId);
+                    const contentLinkIdNo = contentElem.id.substr(idBaseName.length);
+                    console.log(contentLinkIdNo);
                     
-                    console.log('axios.delete');
-                                    
-                    const reqParam = {
-                        id: this.showStickerEditWindowProps.idNo,
-                        content_link_id: contentLinkId,
-                    };
+                    const contents = this.stickerParam.contents;  // JavaScriptの配列は参照渡し
                     
-                    axios.delete(window.laravel.asset + '/api/work-sticker-content-item-text-destroy', {
-                        data: {
-                            reqParam: reqParam,
-                            user_id: window.laravel.user['id'],
-                        },
-                    })
-                        .then(response => {
-                            // 特にすることなし
-                        });
+                    let contentItemType = null;
+                    for (let i = 0; i < contents.length; ++i) {
+                        if (contents[i].link.id == contentLinkIdNo) {
+                            contentItemType = contents[i].link.item_type;
+                            break;
+                        }
+                    }
                         
-                    // 親に戻る
-                    const emitParam = {
-                        event: e,
-                        result: 'removeText',
-                    };
-                    this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+                    if (contentItemType !== null) {
+                        console.log('axios.delete');
+                                        
+                        const reqParam = {
+                            id: this.showStickerEditWindowProps.idNo,
+                            content_link_id: contentLinkIdNo,
+                        };
+                        
+                        let result = '';
+                        
+                        if (contentItemType == 1) {  // app/Sticker.phpで値を定義している
+                            axios.delete(window.laravel.asset + '/api/work-sticker-content-item-text-destroy', {
+                                data: {
+                                    reqParam: reqParam,
+                                    user_id: window.laravel.user['id'],
+                                },
+                            })
+                                .then(response => {
+                                    // 特にすることなし
+                                });
+                                
+                            result = 'removeText';
+                        } else if (contentItemType == 2) {  // app/Sticker.phpで値を定義している
+                            axios.delete(window.laravel.asset + '/api/work-sticker-content-item-image-destroy', {
+                                data: {
+                                    reqParam: reqParam,
+                                    user_id: window.laravel.user['id'],
+                                },
+                            })
+                                .then(response => {
+                                    // 特にすることなし
+                                });
+                                
+                            result = 'removeImage';
+                        }
+                            
+                        // 親に戻る
+                        const emitParam = {
+                            event: e,
+                            result: result,
+                        };
+                        this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+                    }
                 }
             },
 
@@ -224,8 +257,8 @@
         position: absolute;
         left:   0;
         top:    0;
-        width:  400px;
-        height: 400px;
+        width:  440px;
+        height: 600px;
         z-index: 1001;
         border: 1px solid #000;
         background-color: #aaaaaa;
@@ -234,8 +267,8 @@
     
     .sticker-class {
         position: absolute;
-        width:  200px;
-        height: 200px;
+        width:  400px;
+        height: 400px;
         border: 1px solid #000;
         margin: 0;
         
@@ -255,6 +288,6 @@
     
     .sticker-edit-buttons-outer-class {
         position: absolute;
-        top: 300px;
+        top: 440px;
     }
 </style>
