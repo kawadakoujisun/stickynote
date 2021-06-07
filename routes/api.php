@@ -439,26 +439,34 @@ Route::delete('/work-sticker-content-item-image-destroy', function(Request $requ
 		// 画像ファイルの情報を取得する
 		$stickerContentLinks      = $sticker->contentLinks;
 		$stickerContentItemImages = $sticker->contentItemImages;
-		$contentLink      = $stickerContentLinks->where('id', $content_link_id)->first();
-		$contentItemImage = $stickerContentItemImages->where('id', $contentLink->item_id)->first();
-		$imagePublicId = $contentItemImage->image_public_id;
 		
-		// 画像ファイルを削除する
-        ImageUtil::destroyImage($imagePublicId);
-		
-		// ContentItemImageを削除し、データベースに保存する
-		$sticker->destroyContentItem([
-		    'content_link_id' => $content_link_id,
-		]);
-	    
-	    // イベント
-	    $eventParam = [
-	    	'id'              => $sticker->id,
-	    	'content_link_id' => $content_link_id,
-	    	'user_id'         => $request->user_id,
-	    ];
-	    
-	    event((new \App\Events\StickerContentItemImageDestroy($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+		if ($stickerContentLinks && $stickerContentItemImages) {
+			$contentLink      = $stickerContentLinks->where('id', $content_link_id)->first();
+			if ($contentLink) {
+				$contentItemImage = $stickerContentItemImages->where('id', $contentLink->item_id)->first();
+				
+				if ($contentItemImage) {
+					$imagePublicId = $contentItemImage->image_public_id;
+					
+					// 画像ファイルを削除する
+			        ImageUtil::destroyImage($imagePublicId);
+					
+					// ContentItemImageを削除し、データベースに保存する
+					$sticker->destroyContentItem([
+					    'content_link_id' => $content_link_id,
+					]);
+				    
+				    // イベント
+				    $eventParam = [
+				    	'id'              => $sticker->id,
+				    	'content_link_id' => $content_link_id,
+				    	'user_id'         => $request->user_id,
+				    ];
+				    
+				    event((new \App\Events\StickerContentItemImageDestroy($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+				}
+			}
+		}
 	}
 });
 
@@ -502,25 +510,33 @@ Route::delete('/work-sticker-content-item-video-destroy', function(Request $requ
 		// 動画ファイルの情報を取得する
 		$stickerContentLinks      = $sticker->contentLinks;
 		$stickerContentItemVideos = $sticker->contentItemVideos;
-		$contentLink      = $stickerContentLinks->where('id', $content_link_id)->first();
-		$contentItemVideo = $stickerContentItemVideos->where('id', $contentLink->item_id)->first();
-		$videoPublicId = $contentItemVideo->video_public_id;
 		
-		// 動画ファイルを削除する
-        ImageUtil::destroyVideo($videoPublicId);
-		
-		// ContentItemVideoを削除し、データベースに保存する
-		$sticker->destroyContentItem([
-		    'content_link_id' => $content_link_id,
-		]);
-	    
-	    // イベント
-	    $eventParam = [
-	    	'id'              => $sticker->id,
-	    	'content_link_id' => $content_link_id,
-	    	'user_id'         => $request->user_id,
-	    ];
-	    
-	    event((new \App\Events\StickerContentItemVideoDestroy($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+		if ($stickerContentLinks && $stickerContentItemVideos) {
+			$contentLink      = $stickerContentLinks->where('id', $content_link_id)->first();
+			if ($contentLink) {
+				$contentItemVideo = $stickerContentItemVideos->where('id', $contentLink->item_id)->first();
+				
+				if ($contentItemVideo) {
+					$videoPublicId = $contentItemVideo->video_public_id;
+					
+					// 動画ファイルを削除する
+			        ImageUtil::destroyVideo($videoPublicId);
+					
+					// ContentItemVideoを削除し、データベースに保存する
+					$sticker->destroyContentItem([
+					    'content_link_id' => $content_link_id,
+					]);
+				    
+				    // イベント
+				    $eventParam = [
+				    	'id'              => $sticker->id,
+				    	'content_link_id' => $content_link_id,
+				    	'user_id'         => $request->user_id,
+				    ];
+				    
+				    event((new \App\Events\StickerContentItemVideoDestroy($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+				}
+			}
+		}
 	}
 });
