@@ -397,7 +397,7 @@ Route::post('/work-sticker-content-item-image-create', function(Request $request
 	    	'user_id'           => $request->user_id,
 	    ];
 		
-		//event((new \App\Events\StickerContentItemImageCreate($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+		event((new \App\Events\StickerContentItemImageCreate($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
 	}
 });
 
@@ -429,6 +429,6 @@ Route::delete('/work-sticker-content-item-image-destroy', function(Request $requ
 	    	'user_id'         => $request->user_id,
 	    ];
 	    
-	    //event((new \App\Events\StickerContentItemImageDestroy($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+	    event((new \App\Events\StickerContentItemImageDestroy($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
 	}
 });

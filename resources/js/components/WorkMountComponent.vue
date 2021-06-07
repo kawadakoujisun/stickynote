@@ -290,19 +290,26 @@
                         }
                         
                         // 見た目更新
-                        const divTextElem = document.createElement('div');
+                        const divItemElem = document.createElement('div');
                         
                         const contentLinkIdBaseName = this.getContentLinkIdBaseName();
-                        divTextElem.id = `${contentLinkIdBaseName}${contentLinkIdNo}`;
+                        divItemElem.id = `${contentLinkIdBaseName}${contentLinkIdNo}`;
                         
-                        divTextElem.innerHTML = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
-                        updateElem.appendChild(divTextElem);
+                        divItemElem.innerHTML = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
+                        updateElem.appendChild(divItemElem);
                     }
                 });
                 
             window.Echo.private('sticker-content-item-text-destroy-channel.' + window.laravel.user['id'])
                 .listen('StickerContentItemTextDestroy', response => {
                     console.log('window.Echo.private sticker-content-item-text-destroy-channel listen');
+                    
+                    this.removeSticherContentItem(response.eventParam);
+                });
+
+            window.Echo.private('sticker-content-item-image-create-channel.' + window.laravel.user['id'])
+                .listen('StickerContentItemImageCreate', response => {
+                    console.log('window.Echo.private sticker-content-item-image-create-channel listen');
                     
                     const idNo = response.eventParam.id;
                     
@@ -312,6 +319,8 @@
                     const updateElem = document.getElementById(updateId);
                     
                     if (updateElem) {
+                        const imageURL      = response.eventParam.image_url;
+                        const imagePublicId = response.eventParam.image_public_id;
                         const contentLinkIdNo = response.eventParam.content_link_id;
                         
                         // データ更新
@@ -319,39 +328,37 @@
                         if (index !== null) {
                             const contents = this.stickerParams[index]['contents'];  // JavaScriptの配列は参照渡し
                             
-                            let contentIndex = null;
-                            for (let i = 0; i < contents.length; ++i) {
-                                if (contents[i].link.id == contentLinkIdNo) {
-                                    contentIndex = i;
-                                    break;
-                                }
-                            }
-                        
-                            if (contentIndex !== null) {
-                                contents.splice(contentIndex, 1);
-                                
-                                // 見た目更新
-                                const contentLinkIdBaseName = this.getContentLinkIdBaseName();
-                                const divItemElemId = `${contentLinkIdBaseName}${contentLinkIdNo}`;
-                                    // TODO(kawadakoujisun): refを使えばループを回さなくて済むか？
-                                
-                                const childElems = updateElem.childNodes;
-    
-                                let divItemElem = null;
-                                for (let i = 0; i < childElems.length; ++i) {
-                                    const childElem = childElems.item(i);
-                                    if (childElem.id == divItemElemId) {
-                                        divItemElem = childElem;
-                                        break;
-                                    }
-                                }
-                                
-                                if (divItemElem !== null) {
-                                    updateElem.removeChild(divItemElem);
-                                }
-                            }
+                            const content = {
+                                link: {
+                                    id:        contentLinkIdNo,
+                                    item_type: response.eventParam.content_item_type,
+                                    item_id:   response.eventParam.content_item_id,
+                                },
+                                item: {
+                                    image_url:       imageURL,
+                                    image_public_id: imagePublicId,
+                                },
+                            };
+                            
+                            contents.push(content);  // TODO(kawadakoujisun): id順に並び替える必要あるかも。見た目のdivの並びも。
                         }
+                        
+                        // 見た目更新
+                        const divItemElem = document.createElement('div');
+                        
+                        const contentLinkIdBaseName = this.getContentLinkIdBaseName();
+                        divItemElem.id = `${contentLinkIdBaseName}${contentLinkIdNo}`;
+                        
+                        divItemElem.innerHTML = `<img src="${imageURL}" width="200px">`;
+                        updateElem.appendChild(divItemElem);
                     }
+                });
+                
+            window.Echo.private('sticker-content-item-image-destroy-channel.' + window.laravel.user['id'])
+                .listen('StickerContentItemImageDestroy', response => {
+                    console.log('window.Echo.private sticker-content-item-image-destroy-channel listen');
+                    
+                    this.removeSticherContentItem(response.eventParam);
                 });
         },
         
@@ -774,6 +781,57 @@
                 return modifiedMountPos;
             },
             
+            removeSticherContentItem: function (eventParam) {
+                const idNo = eventParam.id;
+                
+                const idBaseName = this.getStickerIdBaseName();
+                const updateId = `${idBaseName}${idNo}`; 
+                
+                const updateElem = document.getElementById(updateId);
+                
+                if (updateElem) {
+                    const contentLinkIdNo = eventParam.content_link_id;
+                    
+                    // データ更新
+                    const index = this.getStickerParamIndex(idNo);
+                    if (index !== null) {
+                        const contents = this.stickerParams[index]['contents'];  // JavaScriptの配列は参照渡し
+                        
+                        let contentIndex = null;
+                        for (let i = 0; i < contents.length; ++i) {
+                            if (contents[i].link.id == contentLinkIdNo) {
+                                contentIndex = i;
+                                break;
+                            }
+                        }
+                    
+                        if (contentIndex !== null) {
+                            contents.splice(contentIndex, 1);
+                            
+                            // 見た目更新
+                            const contentLinkIdBaseName = this.getContentLinkIdBaseName();
+                            const divItemElemId = `${contentLinkIdBaseName}${contentLinkIdNo}`;
+                                // TODO(kawadakoujisun): refを使えばループを回さなくて済むか？
+                            
+                            const childElems = updateElem.childNodes;
+    
+                            let divItemElem = null;
+                            for (let i = 0; i < childElems.length; ++i) {
+                                const childElem = childElems.item(i);
+                                if (childElem.id == divItemElemId) {
+                                    divItemElem = childElem;
+                                    break;
+                                }
+                            }
+                            
+                            if (divItemElem !== null) {
+                                updateElem.removeChild(divItemElem);
+                            }
+                        }
+                    }
+                }
+            },
+
             getStickerIdBaseName: function () {
                 return 'sticker-id-';
             },

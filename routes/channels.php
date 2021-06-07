@@ -46,3 +46,11 @@ Broadcast::channel('sticker-content-item-text-create-channel.{id}', function ($u
 Broadcast::channel('sticker-content-item-text-destroy-channel.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
+
+Broadcast::channel('sticker-content-item-image-create-channel.{id}', function ($user, $id) {
+    return (int) $user->id === (int) $id;
+});
+
+Broadcast::channel('sticker-content-item-image-destroy-channel.{id}', function ($user, $id) {
+    return (int) $user->id === (int) $id;
+});

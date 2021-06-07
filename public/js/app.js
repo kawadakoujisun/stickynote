@@ -3000,18 +3000,23 @@ __webpack_require__.r(__webpack_exports__);
         } // 見た目更新
 
 
-        var divTextElem = document.createElement('div');
+        var divItemElem = document.createElement('div');
 
         var contentLinkIdBaseName = _this.getContentLinkIdBaseName();
 
-        divTextElem.id = "".concat(contentLinkIdBaseName).concat(contentLinkIdNo);
-        divTextElem.innerHTML = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
+        divItemElem.id = "".concat(contentLinkIdBaseName).concat(contentLinkIdNo);
+        divItemElem.innerHTML = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
 
-        updateElem.appendChild(divTextElem);
+        updateElem.appendChild(divItemElem);
       }
     });
     window.Echo["private"]('sticker-content-item-text-destroy-channel.' + window.laravel.user['id']).listen('StickerContentItemTextDestroy', function (response) {
       console.log('window.Echo.private sticker-content-item-text-destroy-channel listen');
+
+      _this.removeSticherContentItem(response.eventParam);
+    });
+    window.Echo["private"]('sticker-content-item-image-create-channel.' + window.laravel.user['id']).listen('StickerContentItemImageCreate', function (response) {
+      console.log('window.Echo.private sticker-content-item-image-create-channel listen');
       var idNo = response.eventParam.id;
 
       var idBaseName = _this.getStickerIdBaseName();
@@ -3020,6 +3025,8 @@ __webpack_require__.r(__webpack_exports__);
       var updateElem = document.getElementById(updateId);
 
       if (updateElem) {
+        var imageURL = response.eventParam.image_url;
+        var imagePublicId = response.eventParam.image_public_id;
         var contentLinkIdNo = response.eventParam.content_link_id; // データ更新
 
         var index = _this.getStickerParamIndex(idNo);
@@ -3027,40 +3034,34 @@ __webpack_require__.r(__webpack_exports__);
         if (index !== null) {
           var contents = _this.stickerParams[index]['contents']; // JavaScriptの配列は参照渡し
 
-          var contentIndex = null;
-
-          for (var i = 0; i < contents.length; ++i) {
-            if (contents[i].link.id == contentLinkIdNo) {
-              contentIndex = i;
-              break;
+          var content = {
+            link: {
+              id: contentLinkIdNo,
+              item_type: response.eventParam.content_item_type,
+              item_id: response.eventParam.content_item_id
+            },
+            item: {
+              image_url: imageURL,
+              image_public_id: imagePublicId
             }
-          }
+          };
+          contents.push(content); // TODO(kawadakoujisun): id順に並び替える必要あるかも。見た目のdivの並びも。
+        } // 見た目更新
 
-          if (contentIndex !== null) {
-            contents.splice(contentIndex, 1); // 見た目更新
 
-            var contentLinkIdBaseName = _this.getContentLinkIdBaseName();
+        var divItemElem = document.createElement('div');
 
-            var divItemElemId = "".concat(contentLinkIdBaseName).concat(contentLinkIdNo); // TODO(kawadakoujisun): refを使えばループを回さなくて済むか？
+        var contentLinkIdBaseName = _this.getContentLinkIdBaseName();
 
-            var childElems = updateElem.childNodes;
-            var divItemElem = null;
-
-            for (var _i = 0; _i < childElems.length; ++_i) {
-              var childElem = childElems.item(_i);
-
-              if (childElem.id == divItemElemId) {
-                divItemElem = childElem;
-                break;
-              }
-            }
-
-            if (divItemElem !== null) {
-              updateElem.removeChild(divItemElem);
-            }
-          }
-        }
+        divItemElem.id = "".concat(contentLinkIdBaseName).concat(contentLinkIdNo);
+        divItemElem.innerHTML = "<img src=\"".concat(imageURL, "\" width=\"200px\">");
+        updateElem.appendChild(divItemElem);
       }
+    });
+    window.Echo["private"]('sticker-content-item-image-destroy-channel.' + window.laravel.user['id']).listen('StickerContentItemImageDestroy', function (response) {
+      console.log('window.Echo.private sticker-content-item-image-destroy-channel listen');
+
+      _this.removeSticherContentItem(response.eventParam);
     });
   },
   directives: {
@@ -3428,6 +3429,54 @@ __webpack_require__.r(__webpack_exports__);
       if (mountPos.y < 0) modifiedMountPos.y = 0;
       if (mountPos.y + size.height > mountElemSize.height) modifiedMountPos.y = mountElemSize.height - size.height;
       return modifiedMountPos;
+    },
+    removeSticherContentItem: function removeSticherContentItem(eventParam) {
+      var idNo = eventParam.id;
+      var idBaseName = this.getStickerIdBaseName();
+      var updateId = "".concat(idBaseName).concat(idNo);
+      var updateElem = document.getElementById(updateId);
+
+      if (updateElem) {
+        var contentLinkIdNo = eventParam.content_link_id; // データ更新
+
+        var index = this.getStickerParamIndex(idNo);
+
+        if (index !== null) {
+          var contents = this.stickerParams[index]['contents']; // JavaScriptの配列は参照渡し
+
+          var contentIndex = null;
+
+          for (var i = 0; i < contents.length; ++i) {
+            if (contents[i].link.id == contentLinkIdNo) {
+              contentIndex = i;
+              break;
+            }
+          }
+
+          if (contentIndex !== null) {
+            contents.splice(contentIndex, 1); // 見た目更新
+
+            var contentLinkIdBaseName = this.getContentLinkIdBaseName();
+            var divItemElemId = "".concat(contentLinkIdBaseName).concat(contentLinkIdNo); // TODO(kawadakoujisun): refを使えばループを回さなくて済むか？
+
+            var childElems = updateElem.childNodes;
+            var divItemElem = null;
+
+            for (var _i = 0; _i < childElems.length; ++_i) {
+              var childElem = childElems.item(_i);
+
+              if (childElem.id == divItemElemId) {
+                divItemElem = childElem;
+                break;
+              }
+            }
+
+            if (divItemElem !== null) {
+              updateElem.removeChild(divItemElem);
+            }
+          }
+        }
+      }
     },
     getStickerIdBaseName: function getStickerIdBaseName() {
       return 'sticker-id-';
