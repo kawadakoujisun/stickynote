@@ -53,6 +53,15 @@ class Sticker extends Model
     }
     
     /**
+     * このStickerが所有するStickerContentItemImage。（StickerContentItemImageモデルとの関係を定義）
+     * ※StickerContentItemImageを生成するするときはcreateContentItemImageを使用して下さい。
+     */
+    public function contentItemImages()
+    {
+        return $this->hasMany(StickerContentItemImage::class);
+    }    
+    
+    /**
      * Stickerを新規作成する。
      * Stickerが所有するStickerInfo〇〇（StickerInfoItemPos、StickerInfoItemColor）も生成する。
      */
@@ -84,6 +93,20 @@ class Sticker extends Model
     }
     
     /**
+     * このStickerが所有するStickerContentItemImageを生成する。
+     * このStickerが所有するStickerContentLinkを生成し、そこに先ほど生成したもののidを設定する。
+     */
+    public function createContentItemImage($arg)
+    {
+        $contentItem = $this->contentItemImages()->create($arg);
+        $contentLink = $this->contentLinks()->create([
+            'item_type' => self::$contentItemType['image'],
+            'item_id'   => $contentItem->id,
+        ]);
+        return [ $contentLink, $contentItem ];
+    }    
+    
+    /**
      * このStickerが所有するStickerContentItem〇〇とそれと関連があるStickerContentLinkを削除する。
      */
     public function destroyContentItem($arg)
@@ -97,6 +120,11 @@ class Sticker extends Model
             
             if ($item_type == self::$contentItemType['text']) {
                 $contentItem = $this->contentItemTexts()->where('id', $item_id)->first();
+                if ($contentItem) {
+                    $contentItem->delete();
+                }
+            } else if ($item_type == self::$contentItemType['image']) {
+                $contentItem = $this->contentItemImages()->where('id', $item_id)->first();
                 if ($contentItem) {
                     $contentItem->delete();
                 }

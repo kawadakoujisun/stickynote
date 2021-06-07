@@ -336,3 +336,13 @@ Route::delete('/work-sticker-content-item-text-destroy', function(Request $reque
 	    event((new \App\Events\StickerContentItemTextDestroy($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
 	}
 });
+
+Route::post('/work-sticker-content-item-image-create', function(Request $request) {
+	// Log::debug('my_debug_log: '. 'Route::post /work-sticker-content-item-image-create');
+	// logger($request);
+	
+	$sticker = \App\Sticker::find($request->reqParam['id']);
+
+	if ($sticker) {
+	}
+});

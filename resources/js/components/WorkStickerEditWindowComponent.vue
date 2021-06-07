@@ -37,6 +37,7 @@
             >
                 <div><button @click.prevent="onClickChangeColor">色を変更</button></div>
                 <div><button @click.prevent="onClickAddText">テキストを追加</button></div>
+                <div><button @click.prevent="onClickAddImage">画像を追加</button></div>
                 <div><button @click.prevent="onClickClose">戻る</button></div>
             </div>
         </div>
@@ -191,6 +192,15 @@
                 const emitParam = {
                     event: e,
                     result: 'openStickerTextAddWindow',
+                };
+                this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+            },
+            
+            onClickAddImage: function (e) {
+                console.log('onClickAddImage');
+                const emitParam = {
+                    event: e,
+                    result: 'openStickerImageAddWindow',
                 };
                 this.$emit('hide-sticker-edit-window-custom-event', emitParam);
             },

@@ -31,6 +31,7 @@ Vue.component('work-sticker-context-menu', require('./components/WorkStickerCont
 Vue.component('work-sticker-edit-window', require('./components/WorkStickerEditWindowComponent.vue').default);
 Vue.component('work-sticker-color-change-window', require('./components/WorkStickerColorChangeWindowComponent.vue').default);
 Vue.component('work-sticker-text-add-window', require('./components/WorkStickerTextAddWindowComponent.vue').default);
+Vue.component('work-sticker-image-add-window', require('./components/WorkStickerImageAddWindowComponent.vue').default);
 
 /**
  * Next, we will create a fresh Vue application instance and attach it to

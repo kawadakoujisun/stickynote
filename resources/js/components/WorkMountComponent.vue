@@ -34,6 +34,11 @@
             @hide-sticker-text-add-window-custom-event="onHideStickerTextAddWindow"
         >
         </work-sticker-text-add-window>
+        <work-sticker-image-add-window
+            v-bind:show-sticker-image-add-window-props="showStickerImageAddWindowParam"
+            @hide-sticker-image-add-window-custom-event="onHideStickerImageAddWindow"
+        >
+        </work-sticker-image-add-window>
     </div>
 </template>
 
@@ -111,6 +116,14 @@
                 // ふせんにテキストを追加するウィンドウに渡すパラメータ
                 //
                 showStickerTextAddWindowParam: {
+                    isShow: false,
+                    idNo: null,  // 要素のidの文字列から抽出した数値
+                },
+                
+                //
+                // ふせんに画像を追加するウィンドウに渡すパラメータ
+                //
+                showStickerImageAddWindowParam: {
                     isShow: false,
                     idNo: null,  // 要素のidの文字列から抽出した数値
                 },
@@ -544,6 +557,9 @@
                     } else if (emitParam.result == 'openStickerTextAddWindow') {
                         this.showStickerTextAddWindowParam.isShow = true;
                         this.showStickerTextAddWindowParam.idNo = idNo;
+                    } else if (emitParam.result == 'openStickerImageAddWindow') {
+                        this.showStickerImageAddWindowParam.isShow = true;
+                        this.showStickerImageAddWindowParam.idNo = idNo;
                     }
                 }
             },
@@ -572,7 +588,20 @@
                         // ここに来る前にテキストを追加しているので、ここでは何もしない
                     }
                 }
-            },            
+            },
+            
+            onHideStickerImageAddWindow: function (emitParam) {
+                console.log('onHideStickerImageAddWindow', emitParam.event);
+                
+                this.showStickerImageAddWindowParam.isShow = false;
+                this.showStickerImageAddWindowParam.idNo = null;
+
+                if (emitParam.result != 'none') {
+                    if (emitParam.result == 'addImage') {
+                        // ここに来る前に画像を追加しているので、ここでは何もしない
+                    }
+                }
+            },
             
             releaseTargetElem: function () {
                 this.updateTargetElem();
