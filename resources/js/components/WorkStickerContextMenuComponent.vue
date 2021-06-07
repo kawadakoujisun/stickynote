@@ -10,6 +10,8 @@
             @click.self.prevent="onClickStickerContextMenu"
         >
             <div><button @click.prevent="onClickEdit">編集</button></div>
+            <div><button @click.prevent="onClickIncreaseDepth">前面へ移動</button></div>
+            <div><button @click.prevent="onClickDecreaseDepth">背面へ移動</button></div>
             <div><button @click.prevent="onClickDestroy">削除</button></div>
             <div><button @click.prevent="onClickClose">戻る</button></div>
         </div>
@@ -73,6 +75,62 @@
                 const emitParam = {
                     event: e,
                     result: 'openStickerEditWindow',
+                };
+                this.$emit('hide-sticker-context-menu-custom-event', emitParam);
+            },
+            
+            onClickIncreaseDepth: function (e) {
+                // ふせんを前面へ移動する
+                console.log('onClickIncreaseDepth');
+                
+                console.log('axios.put');
+                                    
+                const reqParam = {
+                    id: this.showStickerContextMenuProps.idNo,
+                    change_type : 'increment',
+                    change_value: null,
+                };
+                
+                axios.put(window.laravel.asset + '/api/work-sticker-info-item-depth-update', {
+                    reqParam: reqParam,
+                    user_id: window.laravel.user['id'],
+                })
+                    .then(response => {
+                        // 特にすることなし
+                    });
+
+                // 親に戻る
+                const emitParam = {
+                    event: e,
+                    result: 'increaseDepth',
+                };
+                this.$emit('hide-sticker-context-menu-custom-event', emitParam);
+            },
+            
+            onClickDecreaseDepth: function (e) {
+                // ふせんを背面へ移動する
+                console.log('onClickDecreaseDepth');
+                
+                console.log('axios.put');
+                                    
+                const reqParam = {
+                    id: this.showStickerContextMenuProps.idNo,
+                    change_type : 'decrement',
+                    change_value: null,
+                };
+                
+                axios.put(window.laravel.asset + '/api/work-sticker-info-item-depth-update', {
+                    reqParam: reqParam,
+                    user_id: window.laravel.user['id'],
+                })
+                    .then(response => {
+                        // 特にすることなし
+                    });
+
+                // 親に戻る
+                const emitParam = {
+                    event: e,
+                    result: 'decreaseDepth',
                 };
                 this.$emit('hide-sticker-context-menu-custom-event', emitParam);
             },

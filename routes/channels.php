@@ -35,6 +35,10 @@ Broadcast::channel('sticker-info-item-pos-update-channel.{id}', function ($user,
     return (int) $user->id === (int) $id;
 });
 
+Broadcast::channel('sticker-info-item-depth-update-channel.{id}', function ($user, $id) {
+    return (int) $user->id === (int) $id;
+});
+
 Broadcast::channel('sticker-info-item-color-update-channel.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });

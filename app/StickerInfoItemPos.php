@@ -16,7 +16,7 @@ class StickerInfoItemPos extends Model
     /**
      * このStickerInfoItemPosを所有するSticker。（Stickerモデルとの関係を定義）
      */
-    public function stikcer()
+    public function sticker()
     {
         return $this->belongsTo(Sticker::class);
     }

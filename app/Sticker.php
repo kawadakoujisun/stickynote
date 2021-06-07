@@ -16,6 +16,10 @@ class Sticker extends Model
     // resources/js/components/WorkStickerEditWindowComponent.vue
     // ↑ これらの箇所には「app/Sticker.phpで値を定義している」というコメントをいれてある。
     
+    public static $infoItemDepthDefault = 400;
+    public static $infoItemDepthMin     = 200;
+    public static $infoItemDepthMax     = 600;
+    
     /**
      * このStickerが所有するStickerInfoItemPos。（StickerInfoItemPosモデルとの関係を定義）
      * ※StickerInfoItemPosを生成するときはcreateStickerを使用して下さい。
@@ -24,6 +28,15 @@ class Sticker extends Model
     {
         return $this->hasOne(StickerInfoItemPos::class);
     }
+
+    /**
+     * このStickerが所有するStickerInfoItemDepth。（StickerInfoItemDepthモデルとの関係を定義）
+     * ※StickerInfoItemDepth生成するときはcreateStickerを使用して下さい。
+     */
+    public function infoItemDepth()
+    {
+        return $this->hasOne(StickerInfoItemDepth::class);
+    }    
     
     /**
      * このStickerが所有するStickerInfoItemColor。（StickerInfoItemColorモデルとの関係を定義）
@@ -72,7 +85,11 @@ class Sticker extends Model
     
     /**
      * Stickerを新規作成する。
-     * Stickerが所有するStickerInfo〇〇（StickerInfoItemPos、StickerInfoItemColor）も生成する。
+     * Stickerが所有するStickerInfo〇〇（
+     * StickerInfoItemPos、
+     * StickerInfoItemDepth、
+     * StickerInfoItemColor
+     * ）も生成する。
      */
     public static function createSticker()
     {
@@ -80,6 +97,9 @@ class Sticker extends Model
         $sticker->infoItemPos()->create([
             'pos_top'  => 0,
             'pos_left' => 0,
+        ]);
+        $sticker->infoItemDepth()->create([
+            'depth' => self::$infoItemDepthDefault,
         ]);
         $sticker->infoItemColor()->create([
             'color' => 0xffaaaa,

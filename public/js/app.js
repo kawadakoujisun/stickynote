@@ -2882,6 +2882,7 @@ __webpack_require__.r(__webpack_exports__);
         'id': response.eventParam.id,
         'pos_top': response.eventParam.pos_top,
         'pos_left': response.eventParam.pos_left,
+        'depth': response.eventParam.depth,
         'color': response.eventParam.color,
         'contents': [] // 要素数0であっても必ず配列を設定します。
 
@@ -2955,6 +2956,28 @@ __webpack_require__.r(__webpack_exports__);
           updateElem.style.top = "".concat(posTop, "px");
           updateElem.style.left = "".concat(posLeft, "px");
         }
+      }
+    });
+    window.Echo["private"]('sticker-info-item-depth-update-channel.' + window.laravel.user['id']).listen('StickerInfoItemDepthUpdate', function (response) {
+      console.log('window.Echo.private sticker-info-item-depth-update-channel listen');
+      var idNo = response.eventParam.id;
+
+      var idBaseName = _this.getStickerIdBaseName();
+
+      var updateId = "".concat(idBaseName).concat(idNo);
+      var updateElem = document.getElementById(updateId);
+
+      if (updateElem) {
+        var depth = response.eventParam.depth; // データ更新
+
+        var index = _this.getStickerParamIndex(idNo);
+
+        if (index !== null) {
+          _this.stickerParams[index]['depth'] = depth;
+        } // 見た目更新
+
+
+        updateElem.style.zIndex = depth; // z-index
       }
     });
     window.Echo["private"]('sticker-info-item-color-update-channel.' + window.laravel.user['id']).listen('StickerInfoItemColorUpdate', function (response) {
@@ -3134,6 +3157,8 @@ __webpack_require__.r(__webpack_exports__);
         colorHex = colorHex.substr(colorHex.length - 6);
         el.style.top = "".concat(stickerParam['pos_top'], "px");
         el.style.left = "".concat(stickerParam['pos_left'], "px");
+        el.style.zIndex = stickerParam['depth']; // z-index
+
         el.style.backgroundColor = '#' + colorHex; // background-color
         // const idBaseName = this.getStickerIdBaseName();  // directives内はthisが使えない？
 
@@ -3298,6 +3323,8 @@ __webpack_require__.r(__webpack_exports__);
             // this.stickerParams[index]を削除されると困る。
             // だから、this.stickerParams[index]をコピーした別物を渡すようにした。
           }
+        } else if (emitParam.result == 'increaseDepth') {// ここに来る前にふせんを前面へ移動しているので、ここでは何もしない
+        } else if (emitParam.result == 'decreaseDepth') {// ここに来る前にふせんを背面へ移動しているので、ここでは何もしない
         } else if (emitParam.result == 'destroySticker') {// ここに来る前にふせんを削除しているので、ここでは何もしない
         }
       }
@@ -3588,6 +3615,7 @@ __webpack_require__.r(__webpack_exports__);
           id: src.id,
           pos_top: src.pos_top,
           pos_left: src.pos_left,
+          depth: src.depth,
           color: src.color,
           contents: [] // 要素数0であっても必ず配列を設定します。
 
@@ -3754,6 +3782,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     showStickerContextMenuProps: Object
@@ -3805,6 +3835,48 @@ __webpack_require__.r(__webpack_exports__);
       var emitParam = {
         event: e,
         result: 'openStickerEditWindow'
+      };
+      this.$emit('hide-sticker-context-menu-custom-event', emitParam);
+    },
+    onClickIncreaseDepth: function onClickIncreaseDepth(e) {
+      // ふせんを前面へ移動する
+      console.log('onClickIncreaseDepth');
+      console.log('axios.put');
+      var reqParam = {
+        id: this.showStickerContextMenuProps.idNo,
+        change_type: 'increment',
+        change_value: null
+      };
+      axios.put(window.laravel.asset + '/api/work-sticker-info-item-depth-update', {
+        reqParam: reqParam,
+        user_id: window.laravel.user['id']
+      }).then(function (response) {// 特にすることなし
+      }); // 親に戻る
+
+      var emitParam = {
+        event: e,
+        result: 'increaseDepth'
+      };
+      this.$emit('hide-sticker-context-menu-custom-event', emitParam);
+    },
+    onClickDecreaseDepth: function onClickDecreaseDepth(e) {
+      // ふせんを背面へ移動する
+      console.log('onClickDecreaseDepth');
+      console.log('axios.put');
+      var reqParam = {
+        id: this.showStickerContextMenuProps.idNo,
+        change_type: 'decrement',
+        change_value: null
+      };
+      axios.put(window.laravel.asset + '/api/work-sticker-info-item-depth-update', {
+        reqParam: reqParam,
+        user_id: window.laravel.user['id']
+      }).then(function (response) {// 特にすることなし
+      }); // 親に戻る
+
+      var emitParam = {
+        event: e,
+        result: 'decreaseDepth'
       };
       this.$emit('hide-sticker-context-menu-custom-event', emitParam);
     },
@@ -48333,6 +48405,36 @@ var render = function() {
                 }
               },
               [_vm._v("編集")]
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", [
+            _c(
+              "button",
+              {
+                on: {
+                  click: function($event) {
+                    $event.preventDefault()
+                    return _vm.onClickIncreaseDepth($event)
+                  }
+                }
+              },
+              [_vm._v("前面へ移動")]
+            )
+          ]),
+          _vm._v(" "),
+          _c("div", [
+            _c(
+              "button",
+              {
+                on: {
+                  click: function($event) {
+                    $event.preventDefault()
+                    return _vm.onClickDecreaseDepth($event)
+                  }
+                }
+              },
+              [_vm._v("背面へ移動")]
             )
           ]),
           _vm._v(" "),

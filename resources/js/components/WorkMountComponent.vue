@@ -160,6 +160,7 @@
         				'id'       : response.eventParam.id,
         				'pos_top'  : response.eventParam.pos_top,
         				'pos_left' : response.eventParam.pos_left,
+        				'depth'    : response.eventParam.depth,
         				'color'    : response.eventParam.color,
         				'contents' : [],  // 要素数0であっても必ず配列を設定します。
                     };
@@ -238,6 +239,31 @@
                             updateElem.style.top  = `${posTop}px`;
                             updateElem.style.left = `${posLeft}px`;
                         }
+                    }
+                });
+                
+            window.Echo.private('sticker-info-item-depth-update-channel.' + window.laravel.user['id'])
+                .listen('StickerInfoItemDepthUpdate', response => {
+                    console.log('window.Echo.private sticker-info-item-depth-update-channel listen');
+                    
+                    const idNo = response.eventParam.id;
+                    
+                    const idBaseName = this.getStickerIdBaseName();
+                    const updateId = `${idBaseName}${idNo}`; 
+                    
+                    const updateElem = document.getElementById(updateId);
+                    
+                    if (updateElem) {
+                        const depth = response.eventParam.depth;
+                        
+                        // データ更新
+                        const index = this.getStickerParamIndex(idNo);
+                        if (index !== null) {
+                            this.stickerParams[index]['depth'] = depth;
+                        }
+                        
+                        // 見た目更新
+                        updateElem.style.zIndex = depth;  // z-index
                     }
                 });
                 
@@ -441,6 +467,7 @@
                     
                     el.style.top  = `${stickerParam['pos_top']}px`;
                     el.style.left = `${stickerParam['pos_left']}px`;
+                    el.style.zIndex = stickerParam['depth'];  // z-index
                     el.style.backgroundColor = '#'+colorHex;  // background-color
                     
                     // const idBaseName = this.getStickerIdBaseName();  // directives内はthisが使えない？
@@ -616,6 +643,10 @@
                             // this.stickerParams[index]を削除されると困る。
                             // だから、this.stickerParams[index]をコピーした別物を渡すようにした。
                         }
+                    } else if(emitParam.result == 'increaseDepth') {
+                        // ここに来る前にふせんを前面へ移動しているので、ここでは何もしない
+                    } else if(emitParam.result == 'decreaseDepth') {
+                        // ここに来る前にふせんを背面へ移動しているので、ここでは何もしない
                     } else if(emitParam.result == 'destroySticker') {
                         // ここに来る前にふせんを削除しているので、ここでは何もしない
                     }
@@ -953,6 +984,7 @@
                         id       : src.id,
                         pos_top  : src.pos_top,
                         pos_left : src.pos_left,
+                        depth    : src.depth,
                         color    : src.color,
                         contents : [],  // 要素数0であっても必ず配列を設定します。
                     };

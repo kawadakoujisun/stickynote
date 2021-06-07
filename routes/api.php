@@ -149,6 +149,7 @@ Route::post('/work-sticker-create', function(Request $request) {
 	$sticker = \App\Sticker::createSticker();
 	
 	$stickerInfoItemPos   = $sticker->infoItemPos;
+	$stickerInfoItemDepth = $sticker->infoItemDepth;
 	$stickerInfoItemColor = $sticker->infoItemColor;
 	
 	// イベント
@@ -156,6 +157,7 @@ Route::post('/work-sticker-create', function(Request $request) {
 		'id'       => $sticker->id,
 	    'pos_top'  => $stickerInfoItemPos->pos_top,
 	    'pos_left' => $stickerInfoItemPos->pos_left,
+	    'depth'    => $stickerInfoItemDepth->depth,
 	    'color'    => $stickerInfoItemColor->color,
 	    'user_id'  => $request->user_id,
 	];
@@ -208,17 +210,19 @@ Route::get('/work-mount', function() {
     $stickers = \App\Sticker::all();
     foreach ($stickers as $sticker) {
 		$stickerInfoItemPos      = $sticker->infoItemPos;
+		$stickerInfoItemDepth    = $sticker->infoItemDepth;
 		$stickerInfoItemColor    = $sticker->infoItemColor;
 		$stickerContentLinks     = $sticker->contentLinks;
 		$stickerContentItemTexts = $sticker->contentItemTexts;
 		$stickerContentItemImages = $sticker->contentItemImages;
 		$stickerContentItemVideos = $sticker->contentItemVideos;
 		
-		if ($stickerInfoItemPos && $stickerInfoItemColor) {
+		if ($stickerInfoItemPos && $stickerInfoItemDepth && $stickerInfoItemColor) {
 			$stickerParam = [
 				'id'       => $sticker->id,
 				'pos_top'  => $stickerInfoItemPos->pos_top,
 				'pos_left' => $stickerInfoItemPos->pos_left,
+				'depth'    => $stickerInfoItemDepth->depth,
 				'color'    => $stickerInfoItemColor->color,
 				// 'contents' => array(),  // この後要素数0であっても必ず配列を設定します。
 			];
@@ -325,6 +329,64 @@ Route::put('/work-sticker-info-item-pos-update', function(Request $request) {
 	    	];
 	    	
 	    	event((new \App\Events\StickerInfoItemPosUpdate($eventParam))->dontBroadcastToCurrentUser());
+		}
+	}
+});
+
+Route::put('/work-sticker-info-item-depth-update', function(Request $request) {
+	$sticker = \App\Sticker::find($request->reqParam['id']);
+
+	if ($sticker) {
+		$stickerInfoItemDepth = $sticker->infoItemDepth;
+		if ($stickerInfoItemDepth) {
+			$changeType = $request->reqParam['change_type'];
+
+			if ($changeType == 'increment') {  // インクリメント
+				// 値を1増やして、データベースに保存する
+				$stickerInfoItemDepth->increment('depth');
+			} else if ($changeType == 'decrement') {  // デクリメント
+				// 値を1減らして、データベースに保存する
+				$stickerInfoItemDepth->decrement('depth');
+			} else if ($changeType == 'set') {  // 値を設定
+				$changeValue = $request->reqParam['change_value'];
+				// 値を設定する
+				$stickerInfoItemDepth->depth = $changeValue;
+				// データベースに保存する
+	    		$stickerInfoItemDepth->save();
+			}
+			
+			// 値を範囲内におさめる
+			$depthMin = \App\Sticker::$infoItemDepthMin;
+			$depthMax = \App\Sticker::$infoItemDepthMax;
+			
+			$isModified = false;
+			$modifiedDepth = $stickerInfoItemDepth->depth;
+			if ($modifiedDepth < $depthMin) {
+				$modifiedDepth = $depthMin;
+				$isModified = true;
+			} else if ($modifiedDepth > $depthMax) {
+				$modifiedDepth = $depthMax;
+				$isModified = true;
+			}
+			
+			if ($isModified) {
+				// 値を設定する
+				$stickerInfoItemDepth->depth = $modifiedDepth;
+				// データベースに保存する
+	    		$stickerInfoItemDepth->save();
+			}
+			// TODO(kawadakoujisun): $isModifiedがtrueになるようなときはデータベースに2回書き込んでいることになる。
+			//     「現在の値をチェックして値を変更し保存する」という一連の流れにおいて割り込ませないようにして、
+			//     データベースへの書き込みは1回で済ますようにしたほうがいいか？
+	    	
+	    	// イベント
+	    	$eventParam = [
+	    		'id'      => $sticker->id,
+	    		'depth'   => $stickerInfoItemDepth->depth,
+	    		'user_id' => $request->user_id,
+	    	];
+	    	
+	    	event((new \App\Events\StickerInfoItemDepthUpdate($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
 		}
 	}
 });

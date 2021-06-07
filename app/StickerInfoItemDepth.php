@@ -4,10 +4,10 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
-class StickerInfoItemColor extends Model
+class StickerInfoItemDepth extends Model
 {
     protected $fillable = [
-        'color',
+        'depth',
     ];
 
     /**
