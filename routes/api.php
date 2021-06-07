@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 
+use App\ProjectWork\ImageUtil;  // 追加
+
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -165,6 +167,17 @@ Route::delete('/work-sticker-destroy', function(Request $request) {
 	$sticker = \App\Sticker::find($request->reqParam['id']);
 
 	if ($sticker) {
+		// 画像ファイルの情報を取得し、削除する
+		$stickerContentItemImages = $sticker->contentItemImages;
+		if ($stickerContentItemImages) {
+			foreach ($stickerContentItemImages as $contentItemImage) {
+				$imagePublicId = $contentItemImage->image_public_id;
+		
+				// 画像ファイルを削除する
+        		ImageUtil::destroyImage($imagePublicId);
+			}
+		}
+		
 		// ふせんを削除し、データベースに保存する
 		$sticker->delete();
 	    
@@ -187,6 +200,7 @@ Route::get('/work-mount', function() {
 		$stickerInfoItemColor    = $sticker->infoItemColor;
 		$stickerContentLinks     = $sticker->contentLinks;
 		$stickerContentItemTexts = $sticker->contentItemTexts;
+		$stickerContentItemImages = $sticker->contentItemImages;
 		
 		if ($stickerInfoItemPos && $stickerInfoItemColor) {
 			$stickerParam = [
@@ -210,6 +224,11 @@ Route::get('/work-mount', function() {
 						'item_id'   => $item_id,
 					];
 					
+					$content = [
+						'link' => $link,
+						// 'item' => $item,  // この後'item'を設定します。
+					];
+					
 					if ($item_type == \App\Sticker::$contentItemType['text']) {
 						if ($stickerContentItemTexts) {
 							$contentItemText = $stickerContentItemTexts->where('id', $item_id)->first();
@@ -220,13 +239,27 @@ Route::get('/work-mount', function() {
 										'text' => $text,
 									];
 									
-									$content = [
-										'link' => $link,
-										'item' => $item,
-									];
-									
+									$content['item'] = $item;
+
 							        array_push($contents, $content);
 								}
+							}
+						}
+					} else if ($item_type == \App\Sticker::$contentItemType['image']) {
+						if ($stickerContentItemImages) {
+							$contentItemImage = $stickerContentItemImages->where('id', $item_id)->first();
+							if ($contentItemImage) {
+								$imageURL      = $contentItemImage->image_url;
+								$imagePublicId = $contentItemImage->image_public_id;
+								
+								$item = [
+								    'image_url'       => $imageURL,
+								    'image_public_id' => $imagePublicId,
+								];
+								
+								$content['item'] = $item;
+								
+							    array_push($contents, $content);
 							}
 						}
 					}
@@ -344,5 +377,58 @@ Route::post('/work-sticker-content-item-image-create', function(Request $request
 	$sticker = \App\Sticker::find($request->reqParam['id']);
 
 	if ($sticker) {
+		// 画像ファイルをアップする
+        list($imageURL, $imagePublicId) = ImageUtil::uploadImage($request->reqParam['selectImageFileInfo']);
+        
+        // ContentItemImageを作成し、データベースに保存する
+		list($contentLink, $contentItem) = $sticker->createContentItemImage([
+		    'image_url'       => $imageURL,
+		    'image_public_id' => $imagePublicId,
+		]);
+		
+		// イベント
+	    $eventParam = [
+	    	'id'                => $sticker->id,
+	    	'content_link_id'   => $contentLink->id,
+	    	'content_item_type' => $contentLink->item_type,
+	    	'content_item_id'   => $contentLink->item_id,
+		    'image_url'         => $imageURL,
+		    'image_public_id'   => $imagePublicId,
+	    	'user_id'           => $request->user_id,
+	    ];
+		
+		//event((new \App\Events\StickerContentItemImageCreate($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+	}
+});
+
+Route::delete('/work-sticker-content-item-image-destroy', function(Request $request) {
+	$sticker = \App\Sticker::find($request->reqParam['id']);
+
+	if ($sticker) {
+		$content_link_id = $request->reqParam['content_link_id'];
+		
+		// 画像ファイルの情報を取得する
+		$stickerContentLinks      = $sticker->contentLinks;
+		$stickerContentItemImages = $sticker->contentItemImages;
+		$contentLink      = $stickerContentLinks->where('id', $content_link_id)->first();
+		$contentItemImage = $stickerContentItemImages->where('id', $contentLink->item_id)->first();
+		$imagePublicId = $contentItemImage->image_public_id;
+		
+		// 画像ファイルを削除する
+        ImageUtil::destroyImage($imagePublicId);
+		
+		// ContentItemImageを削除し、データベースに保存する
+		$sticker->destroyContentItem([
+		    'content_link_id' => $content_link_id,
+		]);
+	    
+	    // イベント
+	    $eventParam = [
+	    	'id'              => $sticker->id,
+	    	'content_link_id' => $content_link_id,
+	    	'user_id'         => $request->user_id,
+	    ];
+	    
+	    //event((new \App\Events\StickerContentItemImageDestroy($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
 	}
 });

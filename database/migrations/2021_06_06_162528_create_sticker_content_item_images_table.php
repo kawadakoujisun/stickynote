@@ -19,6 +19,9 @@ class CreateStickerContentItemImagesTable extends Migration
             $table->string('image_url', 2048);  // URLは2048とっておいたほうがよいそうなので2047にしなかった。
             $table->string('image_public_id', 255);
             $table->timestamps();
+            
+            // 外部キー制約
+            $table->foreign('sticker_id')->references('id')->on('stickers')->onDelete('cascade');
         });
     }
 
