@@ -163,6 +163,8 @@
                 this.isImageFileEnabled = true;
                 
                 this.selectImageFileInfo = e.target.result;
+                
+                // console.log(this.selectImageFileInfo);
             },
         },
     };

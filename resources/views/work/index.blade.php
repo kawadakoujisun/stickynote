@@ -23,7 +23,14 @@
             window.laravel.user = {!! Auth::user() !!};
             window.laravel.asset = "{!! asset('') !!}";
         </script>
-
+        
+        <!--
+        <script src="{{ asset('/js/lib/zlib/zip.min.js') }}"></script>
+        <script src="{{ asset('/js/lib/zlib/unzip.min.js') }}"></script>
+        -->
+        
+        <script src="{{ asset('/js/lib/jszip/jszip.min.js') }}"></script>
+        
         <script src="{{ asset('/js/app.js') }}"></script>
     </body>
 </html>
