@@ -156,7 +156,32 @@
                     console.log('window.Echo.private sticky-note-import-channel listen');
                     
                     const importStickerParams = response.eventParam.stickerParams;
+                    
+                    console.log(this.stickerParams);
                     console.log(importStickerParams);
+                    
+                    // データ更新
+                    const targetStickerParams = [];  // 要素なし or 操作中の要素のみ
+                    
+                    // 操作中の要素については今は更新しない
+                    if (this.targetElem) {
+                        // 削除の予約だけしておく
+                        this.reserveDestroyTargetElem = true;                        
+                        
+                        // 操作中の要素はtargetStickerParams配列にいれておく
+                        const idBaseName = this.getStickerIdBaseName();
+                        const idNo = this.targetElem.id.substr(idBaseName.length);
+                        
+                        const index = this.getStickerParamIndex(idNo);
+                        targetStickerParams.push(this.stickerParams[index]);
+                    }
+                    
+                    // インポートしてきた配列をtargetStickerParams配列に結合する
+                    this.stickerParams = targetStickerParams.concat(importStickerParams);
+                    console.log(this.stickerParams);
+                    
+                    // 見た目更新
+                    // this.stickerParamsを更新すると勝手に見た目の更新も行われたので、何もしなくてよい。
                 });
                 
             window.Echo.private('sticker-create-channel.' + window.laravel.user['id'])

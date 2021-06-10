@@ -152,10 +152,21 @@ Route::post('/work-sticky-note-import', function(Request $request) {
 	}
 	
 	// ふせんを作る
+	$dstStickerParams = array();
+	
 	$srcStickerParams = $request->reqParam['stickerParams'];
 	foreach ($srcStickerParams as $srcStickerParam) {
 		// ふせんを作成し、データベースに保存する
 		$sticker = \App\Sticker::createSticker();
+		
+		$dstStickerParam = [
+			'id' => $sticker->id,
+			// 'pos_top'  => ,
+			// 'pos_left' => ,
+			// 'depth'    => ,
+			// 'color'    => ,
+			// 'contents' => array(),  // 要素数0であっても必ず配列を設定します。			
+		];
 		
 		if ($sticker) {
 			// infoItemPos
@@ -165,6 +176,9 @@ Route::post('/work-sticky-note-import', function(Request $request) {
 				$stickerInfoItemPos->pos_left = $srcStickerParam['pos_left'];
 				// データベースに保存する
 		    	$stickerInfoItemPos->save();
+		    	
+		    	$dstStickerParam['pos_top']  = $stickerInfoItemPos->pos_top;
+		    	$dstStickerParam['pos_left'] = $stickerInfoItemPos->pos_left;
 			}
 			
 			// infoItemDepth
@@ -173,6 +187,8 @@ Route::post('/work-sticky-note-import', function(Request $request) {
 				$stickerInfoItemDepth->depth = $srcStickerParam['depth'];
 				// データベースに保存する
 	    		$stickerInfoItemDepth->save();
+	    		
+	    		$dstStickerParam['depth']  = $stickerInfoItemDepth->depth;
 			}
 			
 			// infoItemColor
@@ -181,9 +197,12 @@ Route::post('/work-sticky-note-import', function(Request $request) {
 				$stickerInfoItemColor->color = $srcStickerParam['color'];
 				// データベースに保存する
 		    	$stickerInfoItemColor->save();
+		    	
+		    	$dstStickerParam['color'] = $stickerInfoItemColor->color;
 			}
 			
 			// contentItem
+			$dstContents = array();
 			$srcContents = $srcStickerParam['contents'];
 			foreach ($srcContents as $srcContent) {
 				if ($srcContent['link']['item_type'] == \App\Sticker::$contentItemType['text']) {
@@ -191,6 +210,18 @@ Route::post('/work-sticky-note-import', function(Request $request) {
 					list($contentLink, $contentItem) = $sticker->createContentItemText([
 		    			'text' => $srcContent['item']['text'],
 					]);
+					
+					$dstContent = [
+						'link' => [
+							'id'        => $contentLink->id,
+							'item_type' => $contentLink->item_type,
+							'item_id'   => $contentLink->item_id,
+						],
+						'item' => [
+							'text' => $contentItem->text,
+						],
+					];
+					array_push($dstContents, $dstContent);
 				} else if ($srcContent['link']['item_type'] == \App\Sticker::$contentItemType['image']) {
 					if (array_key_exists('item_info', $srcContent)) {  // ファイルがあるなら特別なプロパティitem_infoが用意してある
 						// 画像ファイルをアップする
@@ -201,6 +232,19 @@ Route::post('/work-sticky-note-import', function(Request $request) {
 						    'image_url'       => $imageURL,
 						    'image_public_id' => $imagePublicId,
 						]);
+						
+						$dstContent = [
+							'link' => [
+								'id'        => $contentLink->id,
+								'item_type' => $contentLink->item_type,
+								'item_id'   => $contentLink->item_id,
+							],
+							'item' => [
+								'image_url'       => $contentItem->image_url,
+								'image_public_id' => $contentItem->image_public_id,
+							],
+						];
+						array_push($dstContents, $dstContent);
 					}
 				} else if ($srcContent['link']['item_type'] == \App\Sticker::$contentItemType['video']) {
 					if (array_key_exists('item_info', $srcContent)) {  // ファイルがあるなら特別なプロパティitem_infoが用意してある
@@ -212,15 +256,32 @@ Route::post('/work-sticky-note-import', function(Request $request) {
 						    'video_url'       => $videoURL,
 						    'video_public_id' => $videoPublicId,
 						]);
+						
+						$dstContent = [
+							'link' => [
+								'id'        => $contentLink->id,
+								'item_type' => $contentLink->item_type,
+								'item_id'   => $contentLink->item_id,
+							],
+							'item' => [
+								'video_url'       => $contentItem->video_url,
+								'video_public_id' => $contentItem->video_public_id,
+							],
+						];
+						array_push($dstContents, $dstContent);
 					}
 				}
 			}
+			
+			$dstStickerParam['contents'] = $dstContents;
+			
+			array_push($dstStickerParams, $dstStickerParam);
 		}
 	}
 	
 	// イベント
 	$eventParam = [
-		'stickerParams' => $srcStickerParams,
+		'stickerParams' => $dstStickerParams,
 	    'user_id'       => $request->user_id,
 	];	
 

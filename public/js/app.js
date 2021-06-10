@@ -3328,7 +3328,29 @@ __webpack_require__.r(__webpack_exports__);
     window.Echo["private"]('sticky-note-import-channel.' + window.laravel.user['id']).listen('StickyNoteImport', function (response) {
       console.log('window.Echo.private sticky-note-import-channel listen');
       var importStickerParams = response.eventParam.stickerParams;
-      console.log(importStickerParams);
+      console.log(_this.stickerParams);
+      console.log(importStickerParams); // データ更新
+
+      var targetStickerParams = []; // 要素なし or 操作中の要素のみ
+      // 操作中の要素については今は更新しない
+
+      if (_this.targetElem) {
+        // 削除の予約だけしておく
+        _this.reserveDestroyTargetElem = true; // 操作中の要素はtargetStickerParams配列にいれておく
+
+        var idBaseName = _this.getStickerIdBaseName();
+
+        var idNo = _this.targetElem.id.substr(idBaseName.length);
+
+        var index = _this.getStickerParamIndex(idNo);
+
+        targetStickerParams.push(_this.stickerParams[index]);
+      } // インポートしてきた配列をtargetStickerParams配列に結合する
+
+
+      _this.stickerParams = targetStickerParams.concat(importStickerParams);
+      console.log(_this.stickerParams); // 見た目更新
+      // this.stickerParamsを更新すると勝手に見た目の更新も行われたので、何もしなくてよい。
     });
     window.Echo["private"]('sticker-create-channel.' + window.laravel.user['id']).listen('StickerCreate', function (response) {
       console.log('window.Echo.private sticker-create-channel listen'); // データ更新
