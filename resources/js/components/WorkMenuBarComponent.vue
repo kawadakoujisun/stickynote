@@ -121,8 +121,9 @@
                         // ファイルが読み込まれた後に行う処理
                         reader.addEventListener("load", () => {
                             // 読み込んだJSONをJavaScriptのオブジェクトに変換する
-                            const stickerParams = JSON.parse(reader.result);
-                            console.log(stickerParams);
+                            const stickyNoteData = JSON.parse(reader.result);
+                            console.log(stickyNoteData);
+                            const stickerParams = stickyNoteData.sticker_params;
                             // routes/api.phpのRoute::postのwork-sticky-note-importにて、
                             // 特別なプロパティitem_infoがなければ画像や動画を追加しないようにしてあるので、
                             // テキストだけ抽出するというようなことはしなくてもよい。
@@ -199,8 +200,9 @@
                                 zipContent.files[jsonFileName].async('string')
                                 .then((jsonData) => {  // this.を使いたかったので、.then(function(jsonData) {からアロー関数に変えた。
                                     // 読み込んだJSONをJavaScriptのオブジェクトに変換する
-                                    const stickerParams = JSON.parse(jsonData);
-                                    console.log(stickerParams);
+                                    const stickyNoteData = JSON.parse(jsonData);
+                                    console.log(stickyNoteData);
+                                    const stickerParams = stickyNoteData.sticker_params;
                                     
                                     // 画像や動画ファイルを探し、取得する
                                     const uncompressInfos = [];
@@ -360,10 +362,11 @@
                         console.log('axios.get');
                         
                         const stickerParams = response.data;
-                        const stickerParamsJson = JSON.stringify(stickerParams, null, '\t');
+                        // JSON
+                        const stickyNoteJson = this.getStickyNoteJson(stickerParams);
                         
                         // ダウンロード
-                        let blob = new Blob([stickerParamsJson], {type:"application/json"});
+                        let blob = new Blob([stickyNoteJson], {type:"application/json"});
                         let link = document.createElement('a');
                         link.href = URL.createObjectURL(blob);
                         link.download = 'stickynote.json';
@@ -423,10 +426,24 @@
             
             //
             // 各種関数
-            //            
+            //
+            getStickyNoteJson: function (stickerParams) {
+                const stickyNoteData = {
+                    file_info: {
+                        app_name: 'stickynote',
+                        version: '0.1.0',
+                    },
+                    sticker_params: stickerParams,
+                };
+                
+                const stickyNoteJson = JSON.stringify(stickyNoteData, null, '\t');
+                
+                return stickyNoteJson;
+            },
+            
             downloadAll: async function (stickerParams) {
                 // JSON
-                const stickerParamsJson = JSON.stringify(stickerParams, null, '\t');
+                const stickyNoteJson = this.getStickyNoteJson(stickerParams);
                 
                 // 画像や動画のURL
                 const sources = [];
@@ -490,7 +507,7 @@
                 });
                 
                 // フォルダにJSONを追加
-                folder.file('stickynote.json', stickerParamsJson);
+                folder.file('stickynote.json', stickyNoteJson);
                 
                 // zipを生成
                 zip.generateAsync({ type: "blob" })

@@ -2730,8 +2730,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
           reader.addEventListener("load", function () {
             // 読み込んだJSONをJavaScriptのオブジェクトに変換する
-            var stickerParams = JSON.parse(reader.result);
-            console.log(stickerParams); // routes/api.phpのRoute::postのwork-sticky-note-importにて、
+            var stickyNoteData = JSON.parse(reader.result);
+            console.log(stickyNoteData);
+            var stickerParams = stickyNoteData.sticker_params; // routes/api.phpのRoute::postのwork-sticky-note-importにて、
             // 特別なプロパティitem_infoがなければ画像や動画を追加しないようにしてあるので、
             // テキストだけ抽出するというようなことはしなくてもよい。
             // データベースを更新する
@@ -2798,8 +2799,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
               zipContent.files[jsonFileName].async('string').then(function (jsonData) {
                 // this.を使いたかったので、.then(function(jsonData) {からアロー関数に変えた。
                 // 読み込んだJSONをJavaScriptのオブジェクトに変換する
-                var stickerParams = JSON.parse(jsonData);
-                console.log(stickerParams); // 画像や動画ファイルを探し、取得する
+                var stickyNoteData = JSON.parse(jsonData);
+                console.log(stickyNoteData);
+                var stickerParams = stickyNoteData.sticker_params; // 画像や動画ファイルを探し、取得する
 
                 var uncompressInfos = [];
                 var uncompressFuncs = [];
@@ -2953,15 +2955,19 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     // ファイルサブのダウンロード
     //
     onClickFileSubDownloadText: function onClickFileSubDownloadText(e) {
+      var _this2 = this;
+
       this.activeMainMenu = '';
       this.activeSubMenu = '';
       console.log('onClickFileSubDownloadText');
       axios.get(window.laravel.asset + '/api/work-mount').then(function (response) {
         console.log('axios.get');
-        var stickerParams = response.data;
-        var stickerParamsJson = JSON.stringify(stickerParams, null, '\t'); // ダウンロード
+        var stickerParams = response.data; // JSON
 
-        var blob = new Blob([stickerParamsJson], {
+        var stickyNoteJson = _this2.getStickyNoteJson(stickerParams); // ダウンロード
+
+
+        var blob = new Blob([stickyNoteJson], {
           type: "application/json"
         });
         var link = document.createElement('a');
@@ -2974,7 +2980,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       });
     },
     onClickFileSubDownloadAll: function onClickFileSubDownloadAll(e) {
-      var _this2 = this;
+      var _this3 = this;
 
       this.activeMainMenu = '';
       this.activeSubMenu = '';
@@ -2983,7 +2989,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         console.log('axios.get');
         var stickerParams = response.data;
 
-        _this2.downloadAll(stickerParams);
+        _this3.downloadAll(stickerParams);
       });
     },
     onClickFileSubDownloadClose: function onClickFileSubDownloadClose(e) {
@@ -3010,16 +3016,27 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     },
     //
     // 各種関数
-    //            
+    //
+    getStickyNoteJson: function getStickyNoteJson(stickerParams) {
+      var stickyNoteData = {
+        file_info: {
+          app_name: 'stickynote',
+          version: '0.1.0'
+        },
+        sticker_params: stickerParams
+      };
+      var stickyNoteJson = JSON.stringify(stickyNoteData, null, '\t');
+      return stickyNoteJson;
+    },
     downloadAll: function () {
       var _downloadAll = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(stickerParams) {
-        var stickerParamsJson, sources, stickerIndex, stickerParam, contents, contentIndex, content, itemPromises, items, zip, folderName, folder;
+        var stickyNoteJson, sources, stickerIndex, stickerParam, contents, contentIndex, content, itemPromises, items, zip, folderName, folder;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 // JSON
-                stickerParamsJson = JSON.stringify(stickerParams, null, '\t'); // 画像や動画のURL
+                stickyNoteJson = this.getStickyNoteJson(stickerParams); // 画像や動画のURL
 
                 sources = [];
 
@@ -3098,7 +3115,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                   }
                 }); // フォルダにJSONを追加
 
-                folder.file('stickynote.json', stickerParamsJson); // zipを生成
+                folder.file('stickynote.json', stickyNoteJson); // zipを生成
 
                 zip.generateAsync({
                   type: "blob"
@@ -3118,7 +3135,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                 return _context.stop();
             }
           }
-        }, _callee);
+        }, _callee, this);
       }));
 
       function downloadAll(_x) {
