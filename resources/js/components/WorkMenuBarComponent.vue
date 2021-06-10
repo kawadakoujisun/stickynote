@@ -24,8 +24,8 @@
             <!-- ファイル > ダウンロード -->
             <div v-if="activeSubMenu === 'fileSubDownload'">
                 <div class="menu-bar-file-sub-download-window-class">
-                    <div><button @click.prevent="onClickFileSubDownloadText">テキストのみ : カンマ区切りの値 (.csv)</button></div>
-                    <div><button @click.prevent="onClickFileSubDownloadCsv">全部 : カンマ区切りの値 (.csv) + 各ファイル</button></div>
+                    <div><button @click.prevent="onClickFileSubDownloadText">テキストのみ(.json)</button></div>
+                    <div><button @click.prevent="onClickFileSubDownloadAll">全部(.zip)</button></div>
                     <div><button @click.prevent="onClickFileSubDownloadClose">戻る</button></div>
                 </div>
             </div>
@@ -90,11 +90,44 @@
             // ファイルサブのダウンロード
             //
             onClickFileSubDownloadText: function (e) {
+                this.activeMainMenu = '';
+                this.activeSubMenu = '';                
+                
                 console.log('onClickFileSubDownloadText');
+                
+                axios.get(window.laravel.asset + '/api/work-mount')
+                    .then(response => {
+                        console.log('axios.get');
+                        
+                        const stickerParams = response.data;
+                        const stickerParamsJson = JSON.stringify(stickerParams, null, '\t');
+                        
+                        // ダウンロード
+                        let blob = new Blob([stickerParamsJson], {type:"application/json"});
+                        let link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = 'stickynote.json';
+        
+                        link.style.display = 'none';
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                    });
             },
             
-            onClickFileSubDownloadCsv: function (e) {
+            onClickFileSubDownloadAll: function (e) {
+                this.activeMainMenu = '';
+                this.activeSubMenu = '';                
                 
+                console.log('onClickFileSubDownloadAll');
+                
+                axios.get(window.laravel.asset + '/api/work-mount')
+                    .then(response => {
+                        console.log('axios.get');
+                        
+                        const stickerParams = response.data;
+                        this.downloadAll(stickerParams);
+                    });
             },
             
             onClickFileSubDownloadClose: function (e) {
@@ -126,6 +159,92 @@
             onClickInsertSubClose: function (e) {
                 this.activeMainMenu = '';
                 this.activeSubMenu = '';
+            },
+            
+            //
+            // 各種関数
+            //            
+            downloadAll: async function (stickerParams) {
+                // JSON
+                const stickerParamsJson = JSON.stringify(stickerParams, null, '\t');
+                
+                // 画像や動画のURL
+                const sources = [];
+                
+                for (let stickerIndex = 0; stickerIndex < stickerParams.length; ++stickerIndex) {
+                    const sticker = stickerParams[stickerIndex];
+                    const contents = sticker.contents;
+                    
+                    for (let contentIndex = 0; contentIndex < contents.length; ++contentIndex) {
+                        const content = contents[contentIndex];
+                        if (content.link.item_type == 2) {  // app/Sticker.phpで値を定義してい
+                            sources.push(content.item.image_url);
+                        } else if (content.link.item_type == 3) {  // app/Sticker.phpで値を定義してい
+                            sources.push(content.item.video_url);
+                        }
+                    }
+                }
+                
+                // 画像や動画を収集する非同期リクエスト
+                const itemPromises = sources.map(
+                    (source) => {
+                        const itemPromise = new Promise(
+                            (resolve, reject) => {
+                                const xhr = new XMLHttpRequest();
+                                xhr.open('GET', source, true);
+                                xhr.responseType = "blob";
+                                
+                                xhr.onload = function() {
+                                    // resolveでデータとファイル名を渡す
+                                    const fileName = source.slice(source.lastIndexOf("/") + 1);
+                                    resolve({ data: this.response, fileName: fileName });
+                                };
+                                
+                                // rejectだとawait Promise.allを抜けてしまうので、resolveでデータなしを渡す
+                                xhr.onerror   = () => resolve({ data: null });
+                                xhr.onabort   = () => resolve({ data: null });
+                                xhr.ontimeout = () => resolve({ data: null });
+
+                                xhr.send();
+                            }
+                        );
+                        return itemPromise;
+                    }
+                );
+                
+                // 画像や動画を全て収集できるまで待つ
+                const items = await Promise.all(itemPromises);
+                
+                // zip
+                const zip = new JSZip();
+                
+                // フォルダ作成
+                const folderName = "stickynote";
+                const folder = zip.folder(folderName);
+                
+                // フォルダに画像や動画を追加
+                items.forEach(item => {
+                    if (item.data && item.fileName) {
+                        folder.file(item.fileName, item.data);
+                    }
+                });
+                
+                // フォルダにJSONを追加
+                folder.file('stickynote.json', stickerParamsJson);
+                
+                // zipを生成
+                zip.generateAsync({ type: "blob" })
+                .then(blob => {
+                    // ダウンロード
+                    let link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'stickynote.zip';
+            
+                    link.style.display = 'none';
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                });
             },
         },
     };

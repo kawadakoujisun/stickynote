@@ -12,6 +12,7 @@ class Sticker extends Model
         'video' => 3,
     ];
     // ↑ $contentItemTypeで定義しているのと同じ値を使っている箇所
+    // resources/js/components/WorkMenuBarComponent.vue
     // resources/js/components/WorkMountComponent.vue
     // resources/js/components/WorkStickerEditWindowComponent.vue
     // ↑ これらの箇所には「app/Sticker.phpで値を定義している」というコメントをいれてある。
