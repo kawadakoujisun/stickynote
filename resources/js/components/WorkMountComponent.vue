@@ -150,6 +150,14 @@
                     
                     this.stickerParams = response.data;
                 });
+ 
+            window.Echo.private('sticky-note-import-channel.' + window.laravel.user['id'])
+                .listen('StickyNoteImport', response => {
+                    console.log('window.Echo.private sticky-note-import-channel listen');
+                    
+                    const importStickerParams = response.eventParam.stickerParams;
+                    console.log(importStickerParams);
+                });
                 
             window.Echo.private('sticker-create-channel.' + window.laravel.user['id'])
                 .listen('StickerCreate', response => {

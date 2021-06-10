@@ -4,6 +4,8 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 
+use App\ProjectWork\ImageUtil;  // 追加
+
 class Sticker extends Model
 {
     public static $contentItemType = [
@@ -106,6 +108,38 @@ class Sticker extends Model
             'color' => 0xffaaaa,
         ]);
         return $sticker;
+    }
+    
+    /*
+     * このStickerを削除する。
+     * このStickerが所有する画像ファイルや動画ファイルも削除する。
+     */
+    public function destroySticker()
+    {
+		// 画像ファイルの情報を取得し、削除する
+		$stickerContentItemImages = $this->contentItemImages;
+		if ($stickerContentItemImages) {
+			foreach ($stickerContentItemImages as $contentItemImage) {
+				$imagePublicId = $contentItemImage->image_public_id;
+		
+				// 画像ファイルを削除する
+        		ImageUtil::destroyImage($imagePublicId);
+			}
+		}
+		
+		// 動画ファイルの情報を取得し、削除する
+		$stickerContentItemVideos = $this->contentItemVideos;
+		if ($stickerContentItemVideos) {
+			foreach ($stickerContentItemVideos as $contentItemVideo) {
+				$videoPublicId = $contentItemVideo->video_public_id;
+		
+				// 動画ファイルを削除する
+        		ImageUtil::destroyVideo($videoPublicId);
+			}
+		}
+		
+		// ふせんを削除し、データベースに保存する
+		$this->delete();
     }
     
     /**

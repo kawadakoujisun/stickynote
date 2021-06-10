@@ -23,6 +23,10 @@ Broadcast::channel('color-rect-update-channel.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });
 
+Broadcast::channel('sticky-note-import-channel.{id}', function ($user, $id) {
+    return (int) $user->id === (int) $id;
+});
+
 Broadcast::channel('sticker-create-channel.{id}', function ($user, $id) {
     return (int) $user->id === (int) $id;
 });

@@ -2612,6 +2612,21 @@ function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) { try
 
 function _asyncToGenerator(fn) { return function () { var self = this, args = arguments; return new Promise(function (resolve, reject) { var gen = fn.apply(self, args); function _next(value) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value); } function _throw(err) { asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err); } _next(undefined); }); }; }
 
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
+//
+//
+//
+//
+//
+//
+//
+//
+//
 //
 //
 //
@@ -2682,14 +2697,256 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     // ファイルサブ
     //
     onClickFileSubImport: function onClickFileSubImport(e) {
-      this.activeSubMenu = '';
-      console.log('onClickFileSubImport');
+      this.activeSubMenu = 'fileSubImport';
     },
     onClickFileSubDonwload: function onClickFileSubDonwload(e) {
       this.activeSubMenu = 'fileSubDownload';
     },
     onClickFileSubClose: function onClickFileSubClose(e) {
       this.activeMainMenu = '';
+      this.activeSubMenu = '';
+    },
+    //
+    // ファイルサブのインポート
+    //
+    onClickFileSubImportText: function onClickFileSubImportText(e) {
+      this.activeMainMenu = '';
+      this.activeSubMenu = '';
+      console.log('onClickFileSubImportText'); // HTMLのinput要素を生成
+
+      var input = document.createElement("input");
+      input.type = "file";
+      input.accept = "application/json"; // ファイルが指定された後に行う処理
+
+      input.addEventListener("change", function (e) {
+        var file = e.target.files[0];
+
+        if (file) {
+          console.log(file.name); // ファイル名
+
+          var reader = new FileReader(); // ファイルの非同期読み込み
+
+          reader.readAsText(file); // ファイルが読み込まれた後に行う処理
+
+          reader.addEventListener("load", function () {
+            // 読み込んだJSONをJavaScriptのオブジェクトに変換する
+            var stickerParams = JSON.parse(reader.result);
+            console.log(stickerParams); // routes/api.phpのRoute::postのwork-sticky-note-importにて、
+            // 特別なプロパティitem_infoがなければ画像や動画を追加しないようにしてあるので、
+            // テキストだけ抽出するというようなことはしなくてもよい。
+            // データベースを更新する
+
+            console.log('axios.post');
+            var reqParam = {
+              stickerParams: stickerParams
+            };
+            axios.post(window.laravel.asset + '/api/work-sticky-note-import', {
+              reqParam: reqParam,
+              user_id: window.laravel.user['id']
+            }).then(function (response) {// 特にすることなし
+            });
+          });
+        }
+      }); // 「ファイルを開く」ダイアログを表示
+
+      input.style.display = 'none';
+      document.body.appendChild(input);
+      input.click();
+      document.body.removeChild(input);
+    },
+    onClickFileSubImportAll: function onClickFileSubImportAll(e) {
+      var _this = this;
+
+      this.activeMainMenu = '';
+      this.activeSubMenu = '';
+      console.log('onClickFileSubImportAll'); // HTMLのinput要素を生成
+
+      var input = document.createElement("input");
+      input.type = "file";
+      input.accept = "application/zip"; // ファイルが指定された後に行う処理
+
+      input.addEventListener("change", function (e) {
+        var file = e.target.files[0];
+
+        if (file) {
+          console.log(file.name); // ファイル名
+
+          var zip = new JSZip(); // ファイルの非同期読み込み
+
+          zip.loadAsync(file).then(function (zipContent) {
+            // this.を使いたかったので、.then(function(zipContent) {からアロー関数に変えた。
+            // ファイルが読み込まれた後に行う処理
+            console.log(zipContent); // zipに含まれているファイル名を取得しながら、JSONファイルを探す
+
+            var compressFileNames = [];
+            var jsonFileName = null;
+
+            for (var key in zipContent.files) {
+              var value = zipContent.files[key];
+              console.log(key, value.name, value.dir);
+              compressFileNames.push(value.name); // 拡張子jsonか？
+
+              var extName = value.name.match(/[^.]+$/);
+
+              if (extName == 'json') {
+                jsonFileName = value.name; // break;  // compressFileNamesを作りながらなのでbreakはしないので、コメントアウトしておく。
+              }
+            } // JSONファイル取得
+
+
+            if (jsonFileName) {
+              zipContent.files[jsonFileName].async('string').then(function (jsonData) {
+                // this.を使いたかったので、.then(function(jsonData) {からアロー関数に変えた。
+                // 読み込んだJSONをJavaScriptのオブジェクトに変換する
+                var stickerParams = JSON.parse(jsonData);
+                console.log(stickerParams); // 画像や動画ファイルを探し、取得する
+
+                var uncompressInfos = [];
+                var uncompressFuncs = [];
+
+                for (var stickerIndex = 0; stickerIndex < stickerParams.length; ++stickerIndex) {
+                  var stickerParam = stickerParams[stickerIndex];
+                  var contents = stickerParam.contents;
+
+                  for (var contentIndex = 0; contentIndex < contents.length; ++contentIndex) {
+                    var content = contents[contentIndex];
+                    var source = null;
+
+                    if (content.link.item_type == 2) {
+                      // app/Sticker.phpで値を定義している
+                      source = content.item.image_url;
+                    } else if (content.link.item_type == 3) {
+                      // app/Sticker.phpで値を定義している
+                      source = content.item.video_url;
+                    }
+
+                    if (source) {
+                      console.log(source); // contentのitemが画像か動画のとき
+
+                      var itemFileNameA = source.slice(source.lastIndexOf("/") + 1); // lastIndexOfは値が見つからない場合は-1
+
+                      var itemFileName = null;
+
+                      var _iterator = _createForOfIteratorHelper(compressFileNames),
+                          _step;
+
+                      try {
+                        for (_iterator.s(); !(_step = _iterator.n()).done;) {
+                          var compressFileName = _step.value;
+                          var itemFileNameB = compressFileName.slice(compressFileName.lastIndexOf("/") + 1); // lastIndexOfは値が見つからない場合は-1
+
+                          if (itemFileNameA == itemFileNameB) {
+                            itemFileName = compressFileName;
+                            break;
+                          }
+                        }
+                      } catch (err) {
+                        _iterator.e(err);
+                      } finally {
+                        _iterator.f();
+                      }
+
+                      if (itemFileName) {
+                        console.log(itemFileName);
+
+                        var _extName = itemFileName.match(/[^.]+$/); // 拡張子
+                        // 画像や動画ファイルがzipに含まれているので、取得する
+
+
+                        var uncompressInfo = {
+                          stickerIndex: stickerIndex,
+                          contentIndex: contentIndex,
+                          contentItemType: content.link.item_type,
+                          extName: _extName
+                        };
+                        uncompressInfos.push(uncompressInfo);
+                        uncompressFuncs.push(zipContent.files[itemFileName].async('base64'));
+                      }
+                    }
+                  }
+                }
+
+                if (uncompressFuncs.length >= 1) {
+                  Promise.all(uncompressFuncs).then(function (uncompressData) {
+                    // this.を使いたかったので、.then(function(uncompressData) {からアロー関数に変えた。
+                    // 読み込んだ画像や動画をDataURLにする
+                    for (var dataIndex = 0; dataIndex < uncompressData.length; ++dataIndex) {
+                      // TODO(kawadakoujisun): このbase64から16進数へ変換する処理は間違っているかもしれない。要確認！
+                      // ファイルの先頭数バイトからMIMEタイプを取得する
+                      var header64 = uncompressData[dataIndex].slice(0, 16);
+                      var headerRaw = atob(header64);
+                      var header16 = '';
+
+                      for (var charIndex = 0; charIndex < headerRaw.length; ++charIndex) {
+                        header16 += headerRaw.charCodeAt(charIndex).toString(16);
+                      }
+
+                      var mimeType = _this.getMimeTypeFromHeader(header16);
+
+                      console.log(header64, headerRaw, header16, mimeType);
+
+                      if (mimeType) {
+                        // DataURL
+                        var dataURL = 'data:' + mimeType + ';base64,' + uncompressData[dataIndex]; // 新しいプロパティitem_infoを追加し、DataURLを設定する。
+                        // ファイルがあるかどうかは、この特別なプロパティitem_infoがあるかどうかで判定する。
+
+                        var info = uncompressInfos[dataIndex];
+
+                        if (info.contentItemType == 2) {
+                          // app/Sticker.phpで値を定義している
+                          stickerParams[info.stickerIndex].contents[info.contentIndex].item_info = {
+                            selectImageFileInfo: dataURL
+                          };
+                        } else if (info.contentItemType == 3) {
+                          // app/Sticker.phpで値を定義している
+                          stickerParams[info.stickerIndex].contents[info.contentIndex].item_info = {
+                            selectVideoFileInfo: dataURL
+                          };
+                        }
+                      }
+                    } // 特別なプロパティitem_infoを足した後の状態を確認
+
+
+                    console.log(stickerParams); // データベースを更新する
+
+                    console.log('axios.post');
+                    var reqParam = {
+                      stickerParams: stickerParams
+                    };
+                    axios.post(window.laravel.asset + '/api/work-sticky-note-import', {
+                      reqParam: reqParam,
+                      user_id: window.laravel.user['id']
+                    }).then(function (response) {// 特にすることなし
+                    });
+                  });
+                } else {
+                  // TODO(kawadakoujisun): Promise.all(uncompressFuncs)の配列が空だったときの挙動次第では
+                  //     axios.postを1か所だけにできるはず。要確認！
+                  {
+                    // データベースを更新する
+                    console.log('axios.post');
+                    var reqParam = {
+                      stickerParams: stickerParams
+                    };
+                    axios.post(window.laravel.asset + '/api/work-sticky-note-import', {
+                      reqParam: reqParam,
+                      user_id: window.laravel.user['id']
+                    }).then(function (response) {// 特にすることなし
+                    });
+                  }
+                }
+              });
+            }
+          });
+        }
+      }); // 「ファイルを開く」ダイアログを表示
+
+      input.style.display = 'none';
+      document.body.appendChild(input);
+      input.click();
+      document.body.removeChild(input);
+    },
+    onClickFileSubImportClose: function onClickFileSubImportClose(e) {
       this.activeSubMenu = '';
     },
     //
@@ -2717,7 +2974,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       });
     },
     onClickFileSubDownloadAll: function onClickFileSubDownloadAll(e) {
-      var _this = this;
+      var _this2 = this;
 
       this.activeMainMenu = '';
       this.activeSubMenu = '';
@@ -2726,7 +2983,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
         console.log('axios.get');
         var stickerParams = response.data;
 
-        _this.downloadAll(stickerParams);
+        _this2.downloadAll(stickerParams);
       });
     },
     onClickFileSubDownloadClose: function onClickFileSubDownloadClose(e) {
@@ -2756,7 +3013,7 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
     //            
     downloadAll: function () {
       var _downloadAll = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(stickerParams) {
-        var stickerParamsJson, sources, stickerIndex, sticker, contents, contentIndex, content, itemPromises, items, zip, folderName, folder;
+        var stickerParamsJson, sources, stickerIndex, stickerParam, contents, contentIndex, content, itemPromises, items, zip, folderName, folder;
         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -2767,17 +3024,17 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
                 sources = [];
 
                 for (stickerIndex = 0; stickerIndex < stickerParams.length; ++stickerIndex) {
-                  sticker = stickerParams[stickerIndex];
-                  contents = sticker.contents;
+                  stickerParam = stickerParams[stickerIndex];
+                  contents = stickerParam.contents;
 
                   for (contentIndex = 0; contentIndex < contents.length; ++contentIndex) {
                     content = contents[contentIndex];
 
                     if (content.link.item_type == 2) {
-                      // app/Sticker.phpで値を定義してい
+                      // app/Sticker.phpで値を定義している
                       sources.push(content.item.image_url);
                     } else if (content.link.item_type == 3) {
-                      // app/Sticker.phpで値を定義してい
+                      // app/Sticker.phpで値を定義している
                       sources.push(content.item.video_url);
                     }
                   }
@@ -2792,7 +3049,8 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
 
                     xhr.onload = function () {
                       // resolveでデータとファイル名を渡す
-                      var fileName = source.slice(source.lastIndexOf("/") + 1);
+                      var fileName = source.slice(source.lastIndexOf("/") + 1); // lastIndexOfは値が見つからない場合は-1
+
                       resolve({
                         data: this.response,
                         fileName: fileName
@@ -2868,7 +3126,28 @@ function _asyncToGenerator(fn) { return function () { var self = this, args = ar
       }
 
       return downloadAll;
-    }()
+    }(),
+    getMimeTypeFromHeader: function getMimeTypeFromHeader(header) {
+      var mimeType = null;
+
+      if (header.startsWith('ffd8ff')) {
+        mimeType = 'image/jpeg';
+      } else if (header.startsWith('47494638')) {
+        mimeType = 'image/gif';
+      } else if (header.startsWith('89504e47')) {
+        mimeType = 'image/png';
+      } else if (header.startsWith('00020')) {
+        mimeType = 'video/mp4';
+      } //{
+      //    mimeType = 'video/ogg';
+      //}
+      //{
+      //    mimeType = 'video/webm';
+      //}
+
+
+      return mimeType;
+    }
   }
 });
 
@@ -3045,6 +3324,11 @@ __webpack_require__.r(__webpack_exports__);
     axios.get(window.laravel.asset + '/api/work-mount').then(function (response) {
       console.log('axios.get');
       _this.stickerParams = response.data;
+    });
+    window.Echo["private"]('sticky-note-import-channel.' + window.laravel.user['id']).listen('StickyNoteImport', function (response) {
+      console.log('window.Echo.private sticky-note-import-channel listen');
+      var importStickerParams = response.eventParam.stickerParams;
+      console.log(importStickerParams);
     });
     window.Echo["private"]('sticker-create-channel.' + window.laravel.user['id']).listen('StickerCreate', function (response) {
       console.log('window.Echo.private sticker-create-channel listen'); // データ更新
@@ -9237,7 +9521,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 40px 40px 2px;\n    padding: 0;\n}\n.menu-bar-button-outer-class[data-v-76707645] {\n    display: inline-block;\n}\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    left:   0;\n    top:    30px;  /* メニューバーの下の位置 */\n    width:  100%;  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    height: 920px;  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.menu-bar-main-file-window-class[data-v-76707645] {\n    position: absolute;\n    left:   0;\n    top:    30px;\n    width:  120px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-main-insert-window-class[data-v-76707645] {\n    position: absolute;\n    left:   80px;\n    top:    30px;\n    width:  120px;\n    height: 60px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-file-sub-download-window-class[data-v-76707645] {\n    position: absolute;\n    left:   120px;\n    top:    60px;\n    width:  300px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n", ""]);
+exports.push([module.i, "\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 40px 40px 2px;\n    padding: 0;\n}\n.menu-bar-button-outer-class[data-v-76707645] {\n    display: inline-block;\n}\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    left:   0;\n    top:    30px;  /* メニューバーの下の位置 */\n    width:  100%;  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    height: 920px;  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.menu-bar-main-file-window-class[data-v-76707645] {\n    position: absolute;\n    left:   0;\n    top:    30px;\n    width:  120px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-main-insert-window-class[data-v-76707645] {\n    position: absolute;\n    left:   80px;\n    top:    30px;\n    width:  120px;\n    height: 60px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-file-sub-import-window-class[data-v-76707645] {\n    position: absolute;\n    left:   120px;\n    top:    30px;\n    width:  300px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-file-sub-download-window-class[data-v-76707645] {\n    position: absolute;\n    left:   120px;\n    top:    60px;\n    width:  300px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n", ""]);
 
 // exports
 
@@ -48827,7 +49111,7 @@ var render = function() {
                     }
                   }
                 },
-                [_vm._v("インポート")]
+                [_vm._v("インポート >")]
               )
             ]),
             _vm._v(" "),
@@ -48861,6 +49145,61 @@ var render = function() {
               )
             ])
           ]),
+          _vm._v(" "),
+          _vm.activeSubMenu === "fileSubImport"
+            ? _c("div", [
+                _c(
+                  "div",
+                  { staticClass: "menu-bar-file-sub-import-window-class" },
+                  [
+                    _c("div", [
+                      _c(
+                        "button",
+                        {
+                          on: {
+                            click: function($event) {
+                              $event.preventDefault()
+                              return _vm.onClickFileSubImportText($event)
+                            }
+                          }
+                        },
+                        [_vm._v("テキストのみ(.json)")]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", [
+                      _c(
+                        "button",
+                        {
+                          on: {
+                            click: function($event) {
+                              $event.preventDefault()
+                              return _vm.onClickFileSubImportAll($event)
+                            }
+                          }
+                        },
+                        [_vm._v("全部(.zip)")]
+                      )
+                    ]),
+                    _vm._v(" "),
+                    _c("div", [
+                      _c(
+                        "button",
+                        {
+                          on: {
+                            click: function($event) {
+                              $event.preventDefault()
+                              return _vm.onClickFileSubImportClose($event)
+                            }
+                          }
+                        },
+                        [_vm._v("戻る")]
+                      )
+                    ])
+                  ]
+                )
+              ])
+            : _vm._e(),
           _vm._v(" "),
           _vm.activeSubMenu === "fileSubDownload"
             ? _c("div", [

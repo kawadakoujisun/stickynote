@@ -144,6 +144,89 @@ Route::put('/color-rects', function(Request $request) {
 
 
 
+Route::post('/work-sticky-note-import', function(Request $request) {
+	// 既存のふせんを全て削除し、データベースに保存する
+	$stickers = \App\Sticker::all();
+	foreach ($stickers as $sticker) {
+		$sticker->destroySticker();
+	}
+	
+	// ふせんを作る
+	$srcStickerParams = $request->reqParam['stickerParams'];
+	foreach ($srcStickerParams as $srcStickerParam) {
+		// ふせんを作成し、データベースに保存する
+		$sticker = \App\Sticker::createSticker();
+		
+		if ($sticker) {
+			// infoItemPos
+			$stickerInfoItemPos = $sticker->infoItemPos;
+			if ($stickerInfoItemPos) {
+				$stickerInfoItemPos->pos_top  = $srcStickerParam['pos_top'];
+				$stickerInfoItemPos->pos_left = $srcStickerParam['pos_left'];
+				// データベースに保存する
+		    	$stickerInfoItemPos->save();
+			}
+			
+			// infoItemDepth
+			$stickerInfoItemDepth = $sticker->infoItemDepth;
+			if ($stickerInfoItemDepth) {
+				$stickerInfoItemDepth->depth = $srcStickerParam['depth'];
+				// データベースに保存する
+	    		$stickerInfoItemDepth->save();
+			}
+			
+			// infoItemColor
+			$stickerInfoItemColor = $sticker->infoItemColor;
+			if ($stickerInfoItemColor) {
+				$stickerInfoItemColor->color = $srcStickerParam['color'];
+				// データベースに保存する
+		    	$stickerInfoItemColor->save();
+			}
+			
+			// contentItem
+			$srcContents = $srcStickerParam['contents'];
+			foreach ($srcContents as $srcContent) {
+				if ($srcContent['link']['item_type'] == \App\Sticker::$contentItemType['text']) {
+					// テキストを作成し、データベースに保存する
+					list($contentLink, $contentItem) = $sticker->createContentItemText([
+		    			'text' => $srcContent['item']['text'],
+					]);
+				} else if ($srcContent['link']['item_type'] == \App\Sticker::$contentItemType['image']) {
+					if (array_key_exists('item_info', $srcContent)) {  // ファイルがあるなら特別なプロパティitem_infoが用意してある
+						// 画像ファイルをアップする
+				        list($imageURL, $imagePublicId) = ImageUtil::uploadImage($srcContent['item_info']['selectImageFileInfo']);
+				        
+				        // ContentItemImageを作成し、データベースに保存する
+						list($contentLink, $contentItem) = $sticker->createContentItemImage([
+						    'image_url'       => $imageURL,
+						    'image_public_id' => $imagePublicId,
+						]);
+					}
+				} else if ($srcContent['link']['item_type'] == \App\Sticker::$contentItemType['video']) {
+					if (array_key_exists('item_info', $srcContent)) {  // ファイルがあるなら特別なプロパティitem_infoが用意してある
+						// 動画ファイルをアップする
+				        list($videoURL, $videoPublicId) = ImageUtil::uploadVideo($srcContent['item_info']['selectVideoFileInfo']);
+				
+				        // ContentItemVideoを作成し、データベースに保存する
+						list($contentLink, $contentItem) = $sticker->createContentItemVideo([
+						    'video_url'       => $videoURL,
+						    'video_public_id' => $videoPublicId,
+						]);
+					}
+				}
+			}
+		}
+	}
+	
+	// イベント
+	$eventParam = [
+		'stickerParams' => $srcStickerParams,
+	    'user_id'       => $request->user_id,
+	];	
+
+	event((new \App\Events\StickyNoteImport($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+});
+	
 Route::post('/work-sticker-create', function(Request $request) {
 	// ふせんを作成し、データベースに保存する
 	$sticker = \App\Sticker::createSticker();

@@ -16,9 +16,18 @@
         <!-- ファイル -->
         <div v-if="activeMainMenu === 'mainFile'">
             <div class="menu-bar-main-file-window-class">
-                <div><button @click.prevent="onClickFileSubImport">インポート</button></div>
+                <div><button @click.prevent="onClickFileSubImport">インポート &gt;</button></div>
                 <div><button @click.prevent="onClickFileSubDonwload">ダウンロード &gt;</button></div>
                 <div><button @click.prevent="onClickFileSubClose">戻る</button></div>
+            </div>
+
+            <!-- ファイル > インポート -->
+            <div v-if="activeSubMenu === 'fileSubImport'">
+                <div class="menu-bar-file-sub-import-window-class">
+                    <div><button @click.prevent="onClickFileSubImportText">テキストのみ(.json)</button></div>
+                    <div><button @click.prevent="onClickFileSubImportAll">全部(.zip)</button></div>
+                    <div><button @click.prevent="onClickFileSubImportClose">戻る</button></div>
+                </div>
             </div>
 
             <!-- ファイル > ダウンロード -->
@@ -72,9 +81,7 @@
             // ファイルサブ
             //
             onClickFileSubImport: function (e) {
-                this.activeSubMenu = '';
-                
-                console.log('onClickFileSubImport');
+                this.activeSubMenu = 'fileSubImport';
             },
             
             onClickFileSubDonwload: function (e) {
@@ -85,7 +92,260 @@
                 this.activeMainMenu = '';
                 this.activeSubMenu = '';
             },
+
+            //
+            // ファイルサブのインポート
+            //
+            onClickFileSubImportText: function (e) {
+                this.activeMainMenu = '';
+                this.activeSubMenu = '';
                 
+                console.log('onClickFileSubImportText');
+                
+                // HTMLのinput要素を生成
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "application/json";
+                
+                // ファイルが指定された後に行う処理
+                input.addEventListener("change", e => {
+                    const file = e.target.files[0];
+                    
+                    if (file) {
+                        console.log(file.name);  // ファイル名
+                        
+                        const reader = new FileReader();
+                        // ファイルの非同期読み込み
+                        reader.readAsText(file);
+
+                        // ファイルが読み込まれた後に行う処理
+                        reader.addEventListener("load", () => {
+                            // 読み込んだJSONをJavaScriptのオブジェクトに変換する
+                            const stickerParams = JSON.parse(reader.result);
+                            console.log(stickerParams);
+                            // routes/api.phpのRoute::postのwork-sticky-note-importにて、
+                            // 特別なプロパティitem_infoがなければ画像や動画を追加しないようにしてあるので、
+                            // テキストだけ抽出するというようなことはしなくてもよい。
+                            
+                            // データベースを更新する
+                            console.log('axios.post');
+                            
+                            const reqParam = {
+                                stickerParams: stickerParams,
+                            };
+                            
+                            axios.post(window.laravel.asset + '/api/work-sticky-note-import', {
+                                reqParam: reqParam,
+                                user_id: window.laravel.user['id'],
+                            })
+                                .then(response => {
+                                    // 特にすることなし
+                                });
+                        });
+                    }
+                });
+                
+                // 「ファイルを開く」ダイアログを表示
+                input.style.display = 'none';
+                document.body.appendChild(input);
+                input.click();
+                document.body.removeChild(input);
+            },
+            
+            onClickFileSubImportAll: function (e) {
+                this.activeMainMenu = '';
+                this.activeSubMenu = '';
+                
+                console.log('onClickFileSubImportAll');
+                
+                // HTMLのinput要素を生成
+                const input = document.createElement("input");
+                input.type = "file";
+                input.accept = "application/zip";                
+                
+                // ファイルが指定された後に行う処理
+                input.addEventListener("change", e => {
+                    const file = e.target.files[0];
+                    
+                    if (file) {
+                        console.log(file.name);  // ファイル名
+                        
+                        const zip = new JSZip();
+                        // ファイルの非同期読み込み
+                        zip.loadAsync(file)
+                        .then((zipContent) => {  // this.を使いたかったので、.then(function(zipContent) {からアロー関数に変えた。
+                            // ファイルが読み込まれた後に行う処理
+                            console.log(zipContent);
+                        
+                            // zipに含まれているファイル名を取得しながら、JSONファイルを探す
+                            const compressFileNames = [];
+                            let jsonFileName = null;
+                            for(const key in zipContent.files) {
+                                const value = zipContent.files[key];
+                                console.log(key, value.name, value.dir);
+                                
+                                compressFileNames.push(value.name);
+                                
+                                // 拡張子jsonか？
+                                const extName = value.name.match(/[^.]+$/);
+                                if (extName == 'json') {
+                                    jsonFileName = value.name;
+                                    // break;  // compressFileNamesを作りながらなのでbreakはしないので、コメントアウトしておく。
+                                }
+                            }
+                        
+                            // JSONファイル取得
+                            if (jsonFileName) {
+                                zipContent.files[jsonFileName].async('string')
+                                .then((jsonData) => {  // this.を使いたかったので、.then(function(jsonData) {からアロー関数に変えた。
+                                    // 読み込んだJSONをJavaScriptのオブジェクトに変換する
+                                    const stickerParams = JSON.parse(jsonData);
+                                    console.log(stickerParams);
+                                    
+                                    // 画像や動画ファイルを探し、取得する
+                                    const uncompressInfos = [];
+                                    const uncompressFuncs = [];
+                                    
+                                    for (let stickerIndex = 0; stickerIndex < stickerParams.length; ++stickerIndex) {
+                                        const stickerParam = stickerParams[stickerIndex];
+                                        const contents = stickerParam.contents;
+                                        
+                                        for (let contentIndex = 0; contentIndex < contents.length; ++contentIndex) {
+                                            const content = contents[contentIndex];
+ 
+                                            let source = null;
+                                            if (content.link.item_type == 2) {  // app/Sticker.phpで値を定義している
+                                                source = content.item.image_url;
+                                            } else if (content.link.item_type == 3) {  // app/Sticker.phpで値を定義している
+                                                source = content.item.video_url;
+                                            }
+                                            
+                                            if (source) {
+                                                console.log(source);
+                                                
+                                                // contentのitemが画像か動画のとき
+                                                const itemFileNameA = source.slice(source.lastIndexOf("/") + 1);  // lastIndexOfは値が見つからない場合は-1
+                                                
+                                                let itemFileName = null;
+                                                for (const compressFileName of compressFileNames) {
+                                                    const itemFileNameB = compressFileName.slice(compressFileName.lastIndexOf("/") + 1);  // lastIndexOfは値が見つからない場合は-1
+                                                    if (itemFileNameA == itemFileNameB) {
+                                                        itemFileName = compressFileName;
+                                                        break;
+                                                    }
+                                                }
+                                                
+                                                if (itemFileName) {
+                                                    console.log(itemFileName);
+                                                    
+                                                    const extName = itemFileName.match(/[^.]+$/);  // 拡張子
+                                                    
+                                                    // 画像や動画ファイルがzipに含まれているので、取得する
+                                                    const uncompressInfo = {
+                                                        stickerIndex:    stickerIndex,
+                                                        contentIndex:    contentIndex,
+                                                        contentItemType: content.link.item_type,
+                                                        extName:         extName,
+                                                    };
+                                                    
+                                                    uncompressInfos.push(uncompressInfo);
+                                                    uncompressFuncs.push(zipContent.files[itemFileName].async('base64'));
+                                                }
+                                            }
+                                        }
+                                    }
+                                    
+                                    if (uncompressFuncs.length >= 1) {
+                                        Promise.all(uncompressFuncs)
+                                        .then((uncompressData) => {  // this.を使いたかったので、.then(function(uncompressData) {からアロー関数に変えた。
+                                            // 読み込んだ画像や動画をDataURLにする
+                                            for (let dataIndex=0; dataIndex<uncompressData.length; ++dataIndex) {
+                                                // TODO(kawadakoujisun): このbase64から16進数へ変換する処理は間違っているかもしれない。要確認！
+                                                // ファイルの先頭数バイトからMIMEタイプを取得する
+                                                const header64 = uncompressData[dataIndex].slice(0, 16);
+                                                const headerRaw = atob(header64);
+                                                const header16 = '';
+                                                for (let charIndex=0; charIndex<headerRaw.length; ++charIndex) {
+                                                    header16 += headerRaw.charCodeAt(charIndex).toString(16);
+                                                }
+
+                                                const mimeType = this.getMimeTypeFromHeader(header16);
+                                                console.log(header64, headerRaw, header16, mimeType);
+
+                                                if (mimeType) {
+                                                    // DataURL
+                                                    const dataURL = 'data:' + mimeType + ';base64,' + uncompressData[dataIndex];
+                                                
+                                                    // 新しいプロパティitem_infoを追加し、DataURLを設定する。
+                                                    // ファイルがあるかどうかは、この特別なプロパティitem_infoがあるかどうかで判定する。
+                                                    const info = uncompressInfos[dataIndex];
+                                                    if (info.contentItemType == 2) {  // app/Sticker.phpで値を定義している
+                                                        stickerParams[info.stickerIndex].contents[info.contentIndex].item_info = {
+                                                            selectImageFileInfo: dataURL,
+                                                        };
+                                                    } else if (info.contentItemType == 3) {  // app/Sticker.phpで値を定義している
+                                                        stickerParams[info.stickerIndex].contents[info.contentIndex].item_info = {
+                                                            selectVideoFileInfo: dataURL,
+                                                        };
+                                                    }
+                                                }
+                                            }
+                                            
+                                            // 特別なプロパティitem_infoを足した後の状態を確認
+                                            console.log(stickerParams);
+                                    
+                                            // データベースを更新する
+                                            console.log('axios.post');
+                                            
+                                            const reqParam = {
+                                                stickerParams: stickerParams,
+                                            };
+                                            
+                                            axios.post(window.laravel.asset + '/api/work-sticky-note-import', {
+                                                reqParam: reqParam,
+                                                user_id: window.laravel.user['id'],
+                                            })
+                                                .then(response => {
+                                                    // 特にすることなし
+                                                });
+                                        });
+                                    } else {
+                                        // TODO(kawadakoujisun): Promise.all(uncompressFuncs)の配列が空だったときの挙動次第では
+                                        //     axios.postを1か所だけにできるはず。要確認！
+                                        {
+                                            // データベースを更新する
+                                            console.log('axios.post');
+                                            
+                                            const reqParam = {
+                                                stickerParams: stickerParams,
+                                            };
+                                            
+                                            axios.post(window.laravel.asset + '/api/work-sticky-note-import', {
+                                                reqParam: reqParam,
+                                                user_id: window.laravel.user['id'],
+                                            })
+                                                .then(response => {
+                                                    // 特にすることなし
+                                                });
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+
+                // 「ファイルを開く」ダイアログを表示
+                input.style.display = 'none';
+                document.body.appendChild(input);
+                input.click();
+                document.body.removeChild(input);
+            },
+            
+            onClickFileSubImportClose: function (e) {
+                this.activeSubMenu = '';
+            },            
+            
             //
             // ファイルサブのダウンロード
             //
@@ -172,14 +432,14 @@
                 const sources = [];
                 
                 for (let stickerIndex = 0; stickerIndex < stickerParams.length; ++stickerIndex) {
-                    const sticker = stickerParams[stickerIndex];
-                    const contents = sticker.contents;
+                    const stickerParam = stickerParams[stickerIndex];
+                    const contents = stickerParam.contents;
                     
                     for (let contentIndex = 0; contentIndex < contents.length; ++contentIndex) {
                         const content = contents[contentIndex];
-                        if (content.link.item_type == 2) {  // app/Sticker.phpで値を定義してい
+                        if (content.link.item_type == 2) {  // app/Sticker.phpで値を定義している
                             sources.push(content.item.image_url);
-                        } else if (content.link.item_type == 3) {  // app/Sticker.phpで値を定義してい
+                        } else if (content.link.item_type == 3) {  // app/Sticker.phpで値を定義している
                             sources.push(content.item.video_url);
                         }
                     }
@@ -196,7 +456,7 @@
                                 
                                 xhr.onload = function() {
                                     // resolveでデータとファイル名を渡す
-                                    const fileName = source.slice(source.lastIndexOf("/") + 1);
+                                    const fileName = source.slice(source.lastIndexOf("/") + 1);  // lastIndexOfは値が見つからない場合は-1
                                     resolve({ data: this.response, fileName: fileName });
                                 };
                                 
@@ -246,6 +506,28 @@
                     document.body.removeChild(link);
                 });
             },
+            
+            getMimeTypeFromHeader: function (header) {
+                let mimeType = null;
+                
+                if (header.startsWith('ffd8ff')) {
+                    mimeType = 'image/jpeg';
+                } else if (header.startsWith('47494638')) {
+                    mimeType = 'image/gif';
+                } else if (header.startsWith('89504e47')) {
+                    mimeType = 'image/png';
+                } else if (header.startsWith('00020')) {
+                    mimeType = 'video/mp4';
+                }
+                //{
+                //    mimeType = 'video/ogg';
+                //}
+                //{
+                //    mimeType = 'video/webm';
+                //}
+
+                return mimeType;
+            }
         },
     };
 </script>
@@ -299,6 +581,18 @@
         background-color: #aaaaaa;
         margin: 0;
     }
+    
+    .menu-bar-file-sub-import-window-class {
+        position: absolute;
+        left:   120px;
+        top:    30px;
+        width:  300px;
+        height: 90px;
+        z-index: 2001;
+        border: 1px solid #000;
+        background-color: #aaaaaa;
+        margin: 0;        
+    }    
     
     .menu-bar-file-sub-download-window-class {
         position: absolute;
