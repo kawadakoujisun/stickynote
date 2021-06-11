@@ -6,6 +6,9 @@
         <div class="menu-bar-button-outer-class">
             <button @click.prevent="onClickMainInsert">挿入</button>
         </div>
+        <div class="menu-bar-button-outer-class">
+            <button @click.prevent="onClickMainUser">ユーザー</button>
+        </div>
 
         <!-- 背景 -->
         <div v-if="activeMainMenu !== ''">
@@ -47,6 +50,15 @@
                 <div><button @click.prevent="onClickInsertSubClose">戻る</button></div>
             </div>
         </div>
+        
+        <!-- ユーザー -->
+        <div v-if="activeMainMenu === 'mainUser'">
+            <div class="menu-bar-main-user-window-class">
+                <div><button @click.prevent="onClickUserSubRead">閲覧のみ</button></div>
+                <div><button @click.prevent="onClickUserSubLogout">Logout</button></div>
+                <div><button @click.prevent="onClickUserSubClose">戻る</button></div>
+            </div>
+        </div>
     </div>
 </template>
 
@@ -71,8 +83,15 @@
             },
             
             onClickMainInsert: function (e) {
-                if (this.activeSubMenu !== 'mainInsert') {
+                if (this.activeMainMenu !== 'mainInsert') {
                     this.activeMainMenu = 'mainInsert';
+                    this.activeSubMenu = '';
+                }
+            },
+            
+            onClickMainUser: function (e) {
+                if (this.activeSubMenu !== 'mainUser') {
+                    this.activeMainMenu = 'mainUser';
                     this.activeSubMenu = '';
                 }
             },
@@ -435,6 +454,51 @@
                 this.activeSubMenu = '';
             },
             
+            
+            //
+            // ユーザーサブ
+            //            
+            onClickUserSubRead: function (e) {
+                this.activeMainMenu = '';
+                this.activeSubMenu = '';
+                
+                const link = document.createElement('a');
+                link.href = window.laravel.asset + '/';
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                console.log('onClickUserSubRead end');
+                // this.debug_sleep(2000);
+                // ここまで来てからページ遷移するようなので
+                // document.body.removeChild(link);
+                // まで完了していると思われる。
+            },
+            
+            onClickUserSubLogout: function (e) {
+                this.activeMainMenu = '';
+                this.activeSubMenu = '';
+                
+                const link = document.createElement('a');
+                link.href = window.laravel.asset + '/logout'
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                console.log('onClickUserSubLogout end');
+                // this.debug_sleep(2000);
+                // ここまで来てからページ遷移するようなので
+                // document.body.removeChild(link);
+                // まで完了していると思われる。
+            },
+            
+            onClickUserSubClose: function (e) {
+                this.activeMainMenu = '';
+                this.activeSubMenu = '';
+            },
+            
             //
             // 各種関数
             //
@@ -588,6 +652,14 @@
 
                 return mimeType;
             },
+            
+            // ビジーwaitを使いsleepするデバッグ用途のメソッド
+            debug_sleep: function (waitMilliSecond) {
+              var startTime = new Date();
+             
+              // 指定ミリ秒間だけループさせる（CPUは常にビジー状態）
+              while (new Date() - startTime < waitMilliSecond);
+            },
         },
     };
 </script>
@@ -641,6 +713,18 @@
         background-color: #aaaaaa;
         margin: 0;
     }
+    
+    .menu-bar-main-user-window-class {
+        position: absolute;
+        left:   130px;
+        top:    30px;
+        width:  120px;
+        height: 90px;
+        z-index: 2001;
+        border: 1px solid #000;
+        background-color: #aaaaaa;
+        margin: 0;
+    }    
     
     .menu-bar-file-sub-import-window-class {
         position: absolute;

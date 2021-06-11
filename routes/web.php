@@ -17,14 +17,22 @@ Route::post('login', 'Auth\LoginController@login')->name('login.post');
 Route::get('logout', 'Auth\LoginController@logout')->name('logout.get');
 
 
+//　認証なし
+Route::get('/', function () {
+    return view('read.index');
+});
+
+
 // 認証付きのルーティング
 Route::group(['middleware' => ['auth']], function () {
 
+    /*
     Route::get('/', function () {
         // return view('welcome');
         // return view('TaskReciever');
         return view('index');
     });
+    */
     
     Route::get('/tasks', function () {
         print 'tasks';

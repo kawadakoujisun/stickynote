@@ -376,7 +376,7 @@
                 .listen('StickerContentItemTextDestroy', response => {
                     console.log('window.Echo.private sticker-content-item-text-destroy-channel listen');
                     
-                    this.removeSticherContentItem(response.eventParam);
+                    this.removeStickerContentItem(response.eventParam);
                 });
 
             window.Echo.private('sticker-content-item-image-create-channel.' + window.laravel.user['id'])
@@ -430,7 +430,7 @@
                 .listen('StickerContentItemImageDestroy', response => {
                     console.log('window.Echo.private sticker-content-item-image-destroy-channel listen');
                     
-                    this.removeSticherContentItem(response.eventParam);
+                    this.removeStickerContentItem(response.eventParam);
                 });
                 
             window.Echo.private('sticker-content-item-video-create-channel.' + window.laravel.user['id'])
@@ -484,7 +484,7 @@
                 .listen('StickerContentItemVideoDestroy', response => {
                     console.log('window.Echo.private sticker-content-item-video-destroy-channel listen');
                     
-                    this.removeSticherContentItem(response.eventParam);
+                    this.removeStickerContentItem(response.eventParam);
                 });
         },
         
@@ -933,7 +933,7 @@
                 return modifiedMountPos;
             },
             
-            removeSticherContentItem: function (eventParam) {
+            removeStickerContentItem: function (eventParam) {
                 const idNo = eventParam.id;
                 
                 const idBaseName = this.getStickerIdBaseName();
