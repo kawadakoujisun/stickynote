@@ -240,7 +240,12 @@
                                                 if (itemFileName) {
                                                     console.log(itemFileName);
                                                     
-                                                    const extName = itemFileName.match(/[^.]+$/);  // 拡張子
+                                                    const extNameArray = itemFileName.match(/[^.]+$/);  // 拡張子
+                                                    let extName = '';
+                                                    if (extNameArray) {
+                                                        extName = extNameArray[0];
+                                                    }
+                                                    console.log(extNameArray, extNameArray.length, extName);
                                                     
                                                     // 画像や動画ファイルがzipに含まれているので、取得する
                                                     const uncompressInfo = {
@@ -262,6 +267,7 @@
                                         .then((uncompressData) => {  // this.を使いたかったので、.then(function(uncompressData) {からアロー関数に変えた。
                                             // 読み込んだ画像や動画をDataURLにする
                                             for (let dataIndex=0; dataIndex<uncompressData.length; ++dataIndex) {
+                                                /*
                                                 // TODO(kawadakoujisun): このbase64から16進数へ変換する処理は間違っているかもしれない。要確認！
                                                 // ファイルの先頭数バイトからMIMEタイプを取得する
                                                 const header64 = uncompressData[dataIndex].slice(0, 16);
@@ -273,6 +279,12 @@
 
                                                 const mimeType = this.getMimeTypeFromHeader(header16);
                                                 console.log(header64, headerRaw, header16, mimeType);
+                                                */
+                                                
+                                                // 拡張子からMIMEタイプを取得する
+                                                const uncompressInfo = uncompressInfos[dataIndex];
+                                                const mimeType = this.getMimeTypeFromExtension(uncompressInfo.extName);
+                                                console.log(uncompressInfo.extName, mimeType);
 
                                                 if (mimeType) {
                                                     // DataURL
@@ -280,13 +292,12 @@
                                                 
                                                     // 新しいプロパティitem_infoを追加し、DataURLを設定する。
                                                     // ファイルがあるかどうかは、この特別なプロパティitem_infoがあるかどうかで判定する。
-                                                    const info = uncompressInfos[dataIndex];
-                                                    if (info.contentItemType == 2) {  // app/Sticker.phpで値を定義している
-                                                        stickerParams[info.stickerIndex].contents[info.contentIndex].item_info = {
+                                                    if (uncompressInfo.contentItemType == 2) {  // app/Sticker.phpで値を定義している
+                                                        stickerParams[uncompressInfo.stickerIndex].contents[uncompressInfo.contentIndex].item_info = {
                                                             selectImageFileInfo: dataURL,
                                                         };
-                                                    } else if (info.contentItemType == 3) {  // app/Sticker.phpで値を定義している
-                                                        stickerParams[info.stickerIndex].contents[info.contentIndex].item_info = {
+                                                    } else if (uncompressInfo.contentItemType == 3) {  // app/Sticker.phpで値を定義している
+                                                        stickerParams[uncompressInfo.stickerIndex].contents[uncompressInfo.contentIndex].item_info = {
                                                             selectVideoFileInfo: dataURL,
                                                         };
                                                     }
@@ -524,6 +535,10 @@
                 });
             },
             
+            /*
+            // TODO(kawadakoujisun): base64から16進数へ変換したヘッダーでMIMEタイプを判定しているが、
+            //     base64から16進数への変換が間違っているかもしれない、その間違ったものに合わせた判定をこの関数内で行っている
+            //     ので、ヘッダーから判定するのはやめた。コメントアウトしておく。
             getMimeTypeFromHeader: function (header) {
                 let mimeType = null;
                 
@@ -533,6 +548,9 @@
                     mimeType = 'image/gif';
                 } else if (header.startsWith('89504e47')) {
                     mimeType = 'image/png';
+                //{
+                //    mimeType = 'image/webp';
+                //}
                 } else if (header.startsWith('00020')) {
                     mimeType = 'video/mp4';
                 }
@@ -544,7 +562,32 @@
                 //}
 
                 return mimeType;
-            }
+            },
+            */
+            
+            getMimeTypeFromExtension: function (extensionString) {
+                let mimeType = null;
+                
+                const ext = extensionString.toLowerCase();  // 小文字にしておく
+                
+                if (ext == 'jpg' || ext == 'jpeg') {  // 他にjfif, pjpeg, pjpもあるらしいが見たことがないのでそれは今回は含まないことにした
+                    mimeType = 'image/jpeg';
+                } else if (ext == 'gif') {
+                    mimeType = 'image/gif';
+                } else if (ext == 'png') {
+                    mimeType = 'image/png';
+                } else if (ext == 'webp') {
+                    mimeType = 'image/webp';
+                } else if (ext == 'mp4') {
+                    mimeType = 'video/mp4';
+                } else if (ext == 'ogv') {
+                    mimeType = 'video/ogg';
+                } else if (ext == 'webm') {
+                    mimeType = 'video/webm';
+                }
+
+                return mimeType;
+            },
         },
     };
 </script>

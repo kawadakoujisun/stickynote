@@ -24,7 +24,7 @@
                 <div>
                     <input
                         type="file"
-                        accept="image/jpeg, image/gif, image/png"
+                        accept="image/jpeg, image/gif, image/png, image/webp"
                         name="selectImageFile"
                         id="sticker-select-image-file-input-id"
                         @change="onSelectImageFile"
@@ -114,7 +114,8 @@
                     
                     if ( targetFileType == 'image/jpeg'
                         || targetFileType == 'image/gif'
-                        || targetFileType == 'image/png' ) {
+                        || targetFileType == 'image/png'
+                        || targetFileType == 'image/webp' ) {
                         const fileReader = new FileReader();
         
                         fileReader.onload = this.onLoadSelectImageFile;

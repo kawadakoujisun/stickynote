@@ -2850,10 +2850,15 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
                       if (itemFileName) {
                         console.log(itemFileName);
+                        var extNameArray = itemFileName.match(/[^.]+$/); // 拡張子
 
-                        var _extName = itemFileName.match(/[^.]+$/); // 拡張子
-                        // 画像や動画ファイルがzipに含まれているので、取得する
+                        var _extName = '';
 
+                        if (extNameArray) {
+                          _extName = extNameArray[0];
+                        }
+
+                        console.log(extNameArray, extNameArray.length, _extName); // 画像や動画ファイルがzipに含まれているので、取得する
 
                         var uncompressInfo = {
                           stickerIndex: stickerIndex,
@@ -2873,35 +2878,38 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                     // this.を使いたかったので、.then(function(uncompressData) {からアロー関数に変えた。
                     // 読み込んだ画像や動画をDataURLにする
                     for (var dataIndex = 0; dataIndex < uncompressData.length; ++dataIndex) {
+                      /*
                       // TODO(kawadakoujisun): このbase64から16進数へ変換する処理は間違っているかもしれない。要確認！
                       // ファイルの先頭数バイトからMIMEタイプを取得する
-                      var header64 = uncompressData[dataIndex].slice(0, 16);
-                      var headerRaw = atob(header64);
-                      var header16 = '';
-
-                      for (var charIndex = 0; charIndex < headerRaw.length; ++charIndex) {
-                        header16 += headerRaw.charCodeAt(charIndex).toString(16);
+                      const header64 = uncompressData[dataIndex].slice(0, 16);
+                      const headerRaw = atob(header64);
+                      const header16 = '';
+                      for (let charIndex=0; charIndex<headerRaw.length; ++charIndex) {
+                          header16 += headerRaw.charCodeAt(charIndex).toString(16);
                       }
-
-                      var mimeType = _this.getMimeTypeFromHeader(header16);
-
+                       const mimeType = this.getMimeTypeFromHeader(header16);
                       console.log(header64, headerRaw, header16, mimeType);
+                      */
+                      // 拡張子からMIMEタイプを取得する
+                      var _uncompressInfo = uncompressInfos[dataIndex];
+
+                      var mimeType = _this.getMimeTypeFromExtension(_uncompressInfo.extName);
+
+                      console.log(_uncompressInfo.extName, mimeType);
 
                       if (mimeType) {
                         // DataURL
                         var dataURL = 'data:' + mimeType + ';base64,' + uncompressData[dataIndex]; // 新しいプロパティitem_infoを追加し、DataURLを設定する。
                         // ファイルがあるかどうかは、この特別なプロパティitem_infoがあるかどうかで判定する。
 
-                        var info = uncompressInfos[dataIndex];
-
-                        if (info.contentItemType == 2) {
+                        if (_uncompressInfo.contentItemType == 2) {
                           // app/Sticker.phpで値を定義している
-                          stickerParams[info.stickerIndex].contents[info.contentIndex].item_info = {
+                          stickerParams[_uncompressInfo.stickerIndex].contents[_uncompressInfo.contentIndex].item_info = {
                             selectImageFileInfo: dataURL
                           };
-                        } else if (info.contentItemType == 3) {
+                        } else if (_uncompressInfo.contentItemType == 3) {
                           // app/Sticker.phpで値を定義している
-                          stickerParams[info.stickerIndex].contents[info.contentIndex].item_info = {
+                          stickerParams[_uncompressInfo.stickerIndex].contents[_uncompressInfo.contentIndex].item_info = {
                             selectVideoFileInfo: dataURL
                           };
                         }
@@ -3144,24 +3152,55 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
       return downloadAll;
     }(),
-    getMimeTypeFromHeader: function getMimeTypeFromHeader(header) {
+
+    /*
+    // TODO(kawadakoujisun): base64から16進数へ変換したヘッダーでMIMEタイプを判定しているが、
+    //     base64から16進数への変換が間違っているかもしれない、その間違ったものに合わせた判定をこの関数内で行っている
+    //     ので、ヘッダーから判定するのはやめた。コメントアウトしておく。
+    getMimeTypeFromHeader: function (header) {
+        let mimeType = null;
+        
+        if (header.startsWith('ffd8ff')) {
+            mimeType = 'image/jpeg';
+        } else if (header.startsWith('47494638')) {
+            mimeType = 'image/gif';
+        } else if (header.startsWith('89504e47')) {
+            mimeType = 'image/png';
+        //{
+        //    mimeType = 'image/webp';
+        //}
+        } else if (header.startsWith('00020')) {
+            mimeType = 'video/mp4';
+        }
+        //{
+        //    mimeType = 'video/ogg';
+        //}
+        //{
+        //    mimeType = 'video/webm';
+        //}
+         return mimeType;
+    },
+    */
+    getMimeTypeFromExtension: function getMimeTypeFromExtension(extensionString) {
       var mimeType = null;
+      var ext = extensionString.toLowerCase(); // 小文字にしておく
 
-      if (header.startsWith('ffd8ff')) {
+      if (ext == 'jpg' || ext == 'jpeg') {
+        // 他にjfif, pjpeg, pjpもあるらしいが見たことがないのでそれは今回は含まないことにした
         mimeType = 'image/jpeg';
-      } else if (header.startsWith('47494638')) {
+      } else if (ext == 'gif') {
         mimeType = 'image/gif';
-      } else if (header.startsWith('89504e47')) {
+      } else if (ext == 'png') {
         mimeType = 'image/png';
-      } else if (header.startsWith('00020')) {
+      } else if (ext == 'webp') {
+        mimeType = 'image/webp';
+      } else if (ext == 'mp4') {
         mimeType = 'video/mp4';
-      } //{
-      //    mimeType = 'video/ogg';
-      //}
-      //{
-      //    mimeType = 'video/webm';
-      //}
-
+      } else if (ext == 'ogv') {
+        mimeType = 'video/ogg';
+      } else if (ext == 'webm') {
+        mimeType = 'video/webm';
+      }
 
       return mimeType;
     }
@@ -4757,7 +4796,7 @@ __webpack_require__.r(__webpack_exports__);
         console.log(targetFile);
         var targetFileType = targetFile.type;
 
-        if (targetFileType == 'image/jpeg' || targetFileType == 'image/gif' || targetFileType == 'image/png') {
+        if (targetFileType == 'image/jpeg' || targetFileType == 'image/gif' || targetFileType == 'image/png' || targetFileType == 'image/webp') {
           var fileReader = new FileReader();
           fileReader.onload = this.onLoadSelectImageFile;
           fileReader.readAsDataURL(targetFile);
@@ -50082,7 +50121,7 @@ var render = function() {
                 _c("input", {
                   attrs: {
                     type: "file",
-                    accept: "image/jpeg, image/gif, image/png",
+                    accept: "image/jpeg, image/gif, image/png, image/webp",
                     name: "selectImageFile",
                     id: "sticker-select-image-file-input-id"
                   },
