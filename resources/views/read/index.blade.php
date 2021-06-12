@@ -7,30 +7,40 @@
 
         <title>StickyNote Mount ReadOnly</title>
         
+        <link rel="preconnect" href="https://fonts.gstatic.com">
+        <link href="https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap" rel="stylesheet">
+        
         <style type="text/css">
             .menu-bar-class {
                 position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */
                 width:  1800px;
                 height: 30px;
-                border: 1px solid #000;
+                /*border: 1px solid #000;*/
                 background-color: #ffffff;
-                margin: 40px 40px 2px;
+                margin: 20px 20px 0px;
                 padding: 0;
             }
             
             .menu-bar-content-class {
                 display: inline-block;
+                padding: 0px 10px;
+                line-height: 30px;
             }
             
             .menu-bar-content-space-class {
                 display: inline-block;
                 width: 20px;
             }
+
+            .menu-bar-content-title-class {
+                font-family: 'Kosugi Maru', sans-serif;
+            }
         </style>        
     </head>
     <body>
         <div class="menu-bar-class">
-            <div class="menu-bar-content-class">StickyNote</div>
+            <div class="menu-bar-content-class menu-bar-content-title-class">StickyNote</div>
+            
             @if (Auth::check())
                 {{-- ユーザがログインしているとき --}}
 

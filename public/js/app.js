@@ -9731,7 +9731,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.mount-class[data-v-453180c5] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 2px 40px 40px;\n    padding: 0;\n}\n.sticker-class[data-v-453180c5] {\n    position: absolute;\n    width:  400px;\n    height: 400px;\n    border: 1px solid #000;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n", ""]);
+exports.push([module.i, "\n.mount-class[data-v-453180c5] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px 20px 20px;\n    padding: 0;\n}\n.sticker-class[data-v-453180c5] {\n    position: absolute;\n    width:  400px;\n    height: 400px;\n    border: 1px solid #000;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n", ""]);
 
 // exports
 
@@ -9769,7 +9769,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 40px 40px 2px;\n    padding: 0;\n}\n.menu-bar-button-outer-class[data-v-76707645] {\n    display: inline-block;\n}\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    left:   0;\n    top:    30px;  /* メニューバーの下の位置 */\n    width:  100%;  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    height: 920px;  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.menu-bar-main-file-window-class[data-v-76707645] {\n    position: absolute;\n    left:   0;\n    top:    30px;\n    width:  120px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-main-insert-window-class[data-v-76707645] {\n    position: absolute;\n    left:   80px;\n    top:    30px;\n    width:  120px;\n    height: 60px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-main-user-window-class[data-v-76707645] {\n    position: absolute;\n    left:   130px;\n    top:    30px;\n    width:  120px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-file-sub-import-window-class[data-v-76707645] {\n    position: absolute;\n    left:   120px;\n    top:    30px;\n    width:  300px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-file-sub-download-window-class[data-v-76707645] {\n    position: absolute;\n    left:   120px;\n    top:    60px;\n    width:  300px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n", ""]);
+exports.push([module.i, "\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    /*border: 1px solid #000;*/\n    background-color: #ffffff;\n    margin: 20px 20px 0px;\n    padding: 0;\n}\n.menu-bar-button-outer-class[data-v-76707645] {\n    margin: 0;\n    display: inline-block;\n}\n.menu-bar-button-inner-class[data-v-76707645] {\n    display: inline-block;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    padding: 0px 10px;\n    line-height: 30px;\n}\n.menu-bar-button-inner-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    left:   0;\n    top:    30px;  /* メニューバーの下の位置 */\n    width:  100%;  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    height: 920px;  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.menu-bar-main-file-window-class[data-v-76707645] {\n    position: absolute;\n    left:   0;\n    top:    30px;\n    width:  120px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-main-insert-window-class[data-v-76707645] {\n    position: absolute;\n    left:   80px;\n    top:    30px;\n    width:  120px;\n    height: 60px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-main-user-window-class[data-v-76707645] {\n    position: absolute;\n    left:   130px;\n    top:    30px;\n    width:  120px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-file-sub-import-window-class[data-v-76707645] {\n    position: absolute;\n    left:   120px;\n    top:    30px;\n    width:  300px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-file-sub-download-window-class[data-v-76707645] {\n    position: absolute;\n    left:   120px;\n    top:    60px;\n    width:  300px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n", ""]);
 
 // exports
 
@@ -9788,7 +9788,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 2px 40px 40px;\n    padding: 0;\n}\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:  400px;\n    height: 400px;\n    border: 1px solid #000;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n", ""]);
+exports.push([module.i, "\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px 20px 20px;\n    padding: 0;\n}\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:  400px;\n    height: 400px;\n    border: 1px solid #000;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n", ""]);
 
 // exports
 
@@ -49384,48 +49384,54 @@ var render = function() {
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "menu-bar-class" }, [
     _c("div", { staticClass: "menu-bar-button-outer-class" }, [
-      _c(
-        "button",
-        {
-          on: {
-            click: function($event) {
-              $event.preventDefault()
-              return _vm.onClickMainFile($event)
+      _c("span", { staticClass: "menu-bar-button-inner-class" }, [
+        _c(
+          "a",
+          {
+            on: {
+              click: function($event) {
+                $event.preventDefault()
+                return _vm.onClickMainFile($event)
+              }
             }
-          }
-        },
-        [_vm._v("ファイル")]
-      )
+          },
+          [_vm._v("ファイル")]
+        )
+      ])
     ]),
     _vm._v(" "),
     _c("div", { staticClass: "menu-bar-button-outer-class" }, [
-      _c(
-        "button",
-        {
-          on: {
-            click: function($event) {
-              $event.preventDefault()
-              return _vm.onClickMainInsert($event)
+      _c("span", { staticClass: "menu-bar-button-inner-class" }, [
+        _c(
+          "a",
+          {
+            on: {
+              click: function($event) {
+                $event.preventDefault()
+                return _vm.onClickMainInsert($event)
+              }
             }
-          }
-        },
-        [_vm._v("挿入")]
-      )
+          },
+          [_vm._v("挿入")]
+        )
+      ])
     ]),
     _vm._v(" "),
     _c("div", { staticClass: "menu-bar-button-outer-class" }, [
-      _c(
-        "button",
-        {
-          on: {
-            click: function($event) {
-              $event.preventDefault()
-              return _vm.onClickMainUser($event)
+      _c("span", { staticClass: "menu-bar-button-inner-class" }, [
+        _c(
+          "a",
+          {
+            on: {
+              click: function($event) {
+                $event.preventDefault()
+                return _vm.onClickMainUser($event)
+              }
             }
-          }
-        },
-        [_vm._v("ユーザー")]
-      )
+          },
+          [_vm._v("ユーザー")]
+        )
+      ])
     ]),
     _vm._v(" "),
     _vm.activeMainMenu !== ""

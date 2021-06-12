@@ -1,13 +1,13 @@
 <template>
     <div class="menu-bar-class">
         <div class="menu-bar-button-outer-class">
-            <button @click.prevent="onClickMainFile">ファイル</button>
+            <span class="menu-bar-button-inner-class"><a @click.prevent="onClickMainFile">ファイル</a></span>
         </div>
         <div class="menu-bar-button-outer-class">
-            <button @click.prevent="onClickMainInsert">挿入</button>
+            <span class="menu-bar-button-inner-class"><a @click.prevent="onClickMainInsert">挿入</a></span>
         </div>
         <div class="menu-bar-button-outer-class">
-            <button @click.prevent="onClickMainUser">ユーザー</button>
+            <span class="menu-bar-button-inner-class"><a @click.prevent="onClickMainUser">ユーザー</a></span>
         </div>
 
         <!-- 背景 -->
@@ -669,15 +669,30 @@
         position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */
         width:  1800px;
         height: 30px;
-        border: 1px solid #000;
+        /*border: 1px solid #000;*/
         background-color: #ffffff;
-        margin: 40px 40px 2px;
+        margin: 20px 20px 0px;
         padding: 0;
     }
     
     .menu-bar-button-outer-class {
+        margin: 0;
         display: inline-block;
     }
+    
+    .menu-bar-button-inner-class {
+        display: inline-block;
+        height: 30px;
+        background-color: #ffffff;
+        margin: 0;
+        padding: 0px 10px;
+        line-height: 30px;
+    }
+
+    .menu-bar-button-inner-class:hover {
+        background-color: #eeeeee;
+        cursor: pointer;
+    }    
     
     .menu-bar-window-overlay-class {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */
         position: absolute;

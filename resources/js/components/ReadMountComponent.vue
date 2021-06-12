@@ -88,7 +88,7 @@
         height: 900px;
         border: 1px solid #000;
         background-color: #ffffff;
-        margin: 2px 40px 40px;
+        margin: 0px 20px 20px;
         padding: 0;
     }
     
