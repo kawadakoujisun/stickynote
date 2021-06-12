@@ -4562,6 +4562,33 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     showStickerContextMenuProps: Object
@@ -4595,13 +4622,6 @@ __webpack_require__.r(__webpack_exports__);
     onClickStickerContextMenu: function onClickStickerContextMenu(e) {
       console.log('onClickStickerContextMenu'); // 何もしないでもいいのだが、コンテキストメニューを閉じることにする。
 
-      var emitParam = {
-        event: e,
-        result: 'none'
-      };
-      this.$emit('hide-sticker-context-menu-custom-event', emitParam);
-    },
-    onClickClose: function onClickClose(e) {
       var emitParam = {
         event: e,
         result: 'none'
@@ -9920,7 +9940,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.sticker-context-menu-overlay-class[data-v-5800ee40] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 1000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.sticker-context-menu-class[data-v-5800ee40] {\n    position: absolute;\n    width:  150px;\n    height: 300px;\n    z-index: 1001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  300;\n    left: 300;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-context-menu-overlay-class[data-v-5800ee40] {\n    position: absolute;\n    \n    /*\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    */\n    \n    left:   -20px;\n    top:    -60px;\n    width:  1850px;\n    height: 990px;\n    \n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * コンテキストメニュー内のボタン\n */\n.sticker-context-menu-button-outer-class[data-v-5800ee40] {\n    width: 100%;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    line-height: 30px;\n}\n.sticker-context-menu-button-outer-class[data-v-5800ee40]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}\n.sticker-context-menu-button-inner-space-class[data-v-5800ee40] {\n    display: inline-block;\n    width: 10px;\n}\n\n/*\n * コンテキストメニューのウィンドウ\n */\n.sticker-context-menu-class[data-v-5800ee40] {\n    position: absolute;\n    min-width: 150px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    top:  300;\n    left: 300;\n}\n", ""]);
 
 // exports
 
@@ -50248,19 +50268,29 @@ var render = function() {
           value: _vm.isShow,
           expression: "isShow"
         }
-      ],
-      staticClass: "sticker-context-menu-overlay-class",
-      on: {
-        click: function($event) {
-          if ($event.target !== $event.currentTarget) {
-            return null
-          }
-          $event.preventDefault()
-          return _vm.onClickStickerContextMenuOverlay($event)
-        }
-      }
+      ]
     },
     [
+      _c("div", {
+        staticClass: "sticker-context-menu-overlay-class",
+        on: {
+          click: function($event) {
+            if ($event.target !== $event.currentTarget) {
+              return null
+            }
+            $event.preventDefault()
+            return _vm.onClickStickerContextMenuOverlay($event)
+          },
+          contextmenu: function($event) {
+            if ($event.target !== $event.currentTarget) {
+              return null
+            }
+            $event.preventDefault()
+            return _vm.onClickStickerContextMenuOverlay($event)
+          }
+        }
+      }),
+      _vm._v(" "),
       _c(
         "div",
         {
@@ -50277,80 +50307,93 @@ var render = function() {
           }
         },
         [
-          _c("div", [
-            _c(
-              "button",
-              {
-                on: {
-                  click: function($event) {
-                    $event.preventDefault()
-                    return _vm.onClickEdit($event)
-                  }
+          _c(
+            "div",
+            {
+              staticClass: "sticker-context-menu-button-outer-class",
+              on: {
+                click: function($event) {
+                  $event.preventDefault()
+                  return _vm.onClickEdit($event)
                 }
-              },
-              [_vm._v("編集")]
-            )
-          ]),
+              }
+            },
+            [
+              _c("span", {
+                staticClass: "sticker-context-menu-button-inner-space-class"
+              }),
+              _vm._v("\n            編集\n            "),
+              _c("span", {
+                staticClass: "sticker-context-menu-button-inner-space-class"
+              })
+            ]
+          ),
           _vm._v(" "),
-          _c("div", [
-            _c(
-              "button",
-              {
-                on: {
-                  click: function($event) {
-                    $event.preventDefault()
-                    return _vm.onClickIncreaseDepth($event)
-                  }
+          _c(
+            "div",
+            {
+              staticClass: "sticker-context-menu-button-outer-class",
+              on: {
+                click: function($event) {
+                  $event.preventDefault()
+                  return _vm.onClickIncreaseDepth($event)
                 }
-              },
-              [_vm._v("前面へ移動")]
-            )
-          ]),
+              }
+            },
+            [
+              _c("span", {
+                staticClass: "sticker-context-menu-button-inner-space-class"
+              }),
+              _vm._v("\n            前面へ移動\n            "),
+              _c("span", {
+                staticClass: "sticker-context-menu-button-inner-space-class"
+              })
+            ]
+          ),
           _vm._v(" "),
-          _c("div", [
-            _c(
-              "button",
-              {
-                on: {
-                  click: function($event) {
-                    $event.preventDefault()
-                    return _vm.onClickDecreaseDepth($event)
-                  }
+          _c(
+            "div",
+            {
+              staticClass: "sticker-context-menu-button-outer-class",
+              on: {
+                click: function($event) {
+                  $event.preventDefault()
+                  return _vm.onClickDecreaseDepth($event)
                 }
-              },
-              [_vm._v("背面へ移動")]
-            )
-          ]),
+              }
+            },
+            [
+              _c("span", {
+                staticClass: "sticker-context-menu-button-inner-space-class"
+              }),
+              _vm._v("\n            背面へ移動\n            "),
+              _c("span", {
+                staticClass: "sticker-context-menu-button-inner-space-class"
+              })
+            ]
+          ),
           _vm._v(" "),
-          _c("div", [
-            _c(
-              "button",
-              {
-                on: {
-                  click: function($event) {
-                    $event.preventDefault()
-                    return _vm.onClickDestroy($event)
-                  }
+          _c(
+            "div",
+            {
+              staticClass: "sticker-context-menu-button-outer-class",
+              on: {
+                click: function($event) {
+                  $event.preventDefault()
+                  return _vm.onClickDestroy($event)
                 }
-              },
-              [_vm._v("削除")]
-            )
-          ]),
-          _vm._v(" "),
-          _c("div", [
-            _c(
-              "button",
-              {
-                on: {
-                  click: function($event) {
-                    $event.preventDefault()
-                    return _vm.onClickClose($event)
-                  }
-                }
-              },
-              [_vm._v("戻る")]
-            )
-          ])
+              }
+            },
+            [
+              _c("span", {
+                staticClass: "sticker-context-menu-button-inner-space-class"
+              }),
+              _vm._v("\n            削除\n            "),
+              _c("span", {
+                staticClass: "sticker-context-menu-button-inner-space-class"
+              })
+            ]
+          )
         ]
       )
     ]

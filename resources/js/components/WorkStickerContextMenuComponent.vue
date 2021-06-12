@@ -1,19 +1,46 @@
 <template>
     <div
         v-show="isShow"
-        class="sticker-context-menu-overlay-class"
-        @click.self.prevent="onClickStickerContextMenuOverlay"
     >
+        <!--
+            背景はtopやleftの位置をずらしているので、
+            コンテキストメニューを背景の子にするとずれてしまう。
+            だから、背景とコンテキストメニューは並列にした。
+        -->
+        <!-- 背景 -->
+        <div
+            class="sticker-context-menu-overlay-class"
+            @click.self.prevent="onClickStickerContextMenuOverlay"
+            @click.right.self.prevent="onClickStickerContextMenuOverlay"
+        >
+        </div>
+
+        <!-- コンテキストメニュー -->
         <div
             class="sticker-context-menu-class"
             id="sticker-content-menu-id"
             @click.self.prevent="onClickStickerContextMenu"
         >
-            <div><button @click.prevent="onClickEdit">編集</button></div>
-            <div><button @click.prevent="onClickIncreaseDepth">前面へ移動</button></div>
-            <div><button @click.prevent="onClickDecreaseDepth">背面へ移動</button></div>
-            <div><button @click.prevent="onClickDestroy">削除</button></div>
-            <div><button @click.prevent="onClickClose">戻る</button></div>
+            <div class="sticker-context-menu-button-outer-class" @click.prevent="onClickEdit">
+                <span class="sticker-context-menu-button-inner-space-class"></span>
+                編集
+                <span class="sticker-context-menu-button-inner-space-class"></span>
+            </div>
+            <div class="sticker-context-menu-button-outer-class" @click.prevent="onClickIncreaseDepth">
+                <span class="sticker-context-menu-button-inner-space-class"></span>
+                前面へ移動
+                <span class="sticker-context-menu-button-inner-space-class"></span>
+            </div>
+            <div class="sticker-context-menu-button-outer-class" @click.prevent="onClickDecreaseDepth">
+                <span class="sticker-context-menu-button-inner-space-class"></span>
+                背面へ移動
+                <span class="sticker-context-menu-button-inner-space-class"></span>
+            </div>
+            <div class="sticker-context-menu-button-outer-class" @click.prevent="onClickDestroy">
+                <span class="sticker-context-menu-button-inner-space-class"></span>
+                削除
+                <span class="sticker-context-menu-button-inner-space-class"></span>
+            </div> 
         </div>
     </div>
 </template>
@@ -61,14 +88,6 @@
                 };
                 this.$emit('hide-sticker-context-menu-custom-event', emitParam); 
             },
-            
-            onClickClose: function (e) {
-                const emitParam = {
-                    event: e,
-                    result: 'none',
-                };
-                this.$emit('hide-sticker-context-menu-custom-event', emitParam);
-            },            
             
             onClickEdit: function (e) {
                 console.log('onClickEdit');
@@ -167,25 +186,62 @@
 </script>
 
 <style scoped>
+    /*
+     * オーバーレイ
+     */
     .sticker-context-menu-overlay-class {
         position: absolute;
+        
+        /*
         left:   0;
         top:    0;
         width:  100%;
         height: 100%;
-        z-index: 1000;
+        */
+        
+        left:   -20px;
+        top:    -60px;
+        width:  1850px;
+        height: 990px;
+        
+        z-index: 3000;
         background: rgba(0, 0, 0, 0.0);
         margin: 0;
     }
     
+    /*
+     * コンテキストメニュー内のボタン
+     */
+    .sticker-context-menu-button-outer-class {
+        width: 100%;
+        height: 30px;
+        background-color: #ffffff;
+        margin: 0;
+        line-height: 30px;
+    }
+
+    .sticker-context-menu-button-outer-class:hover {
+        background-color: #eeeeee;
+        cursor: pointer;
+    }
+    
+    .sticker-context-menu-button-inner-space-class {
+        display: inline-block;
+        width: 10px;
+    }
+    
+    /*
+     * コンテキストメニューのウィンドウ
+     */
     .sticker-context-menu-class {
         position: absolute;
-        width:  150px;
-        height: 300px;
-        z-index: 1001;
+        min-width: 150px;
+        z-index: 3001;
         border: 1px solid #000;
         background-color: #aaaaaa;
         margin: 0;
+        padding: 0;
+        box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.4);
         
         /* 外部から変更するもの */
         top:  300;
