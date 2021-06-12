@@ -367,7 +367,7 @@
                         const contentLinkIdBaseName = this.getContentLinkIdBaseName();
                         divItemElem.id = `${contentLinkIdBaseName}${contentLinkIdNo}`;
                         
-                        divItemElem.innerHTML = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
+                        divItemElem.innerText = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
                         updateElem.appendChild(divItemElem);
                     }
                 });
@@ -520,7 +520,7 @@
                         
                         if (content['link'].item_type == 1) {  // app/Sticker.phpで値を定義している
                             const text = content['item']['text'];
-                            divItemElem.innerHTML = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
+                            divItemElem.innerText = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
                         } else if (content['link'].item_type == 2) {  // app/Sticker.phpで値を定義している
                             const imageURL = content['item']['image_url'];
                             divItemElem.innerHTML = `<img src="${imageURL}" width="200px">`;

@@ -3819,7 +3819,7 @@ __webpack_require__.r(__webpack_exports__);
         var contentLinkIdBaseName = _this.getContentLinkIdBaseName();
 
         divItemElem.id = "".concat(contentLinkIdBaseName).concat(contentLinkIdNo);
-        divItemElem.innerHTML = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
+        divItemElem.innerText = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
 
         updateElem.appendChild(divItemElem);
       }
@@ -3957,7 +3957,7 @@ __webpack_require__.r(__webpack_exports__);
           if (content['link'].item_type == 1) {
             // app/Sticker.phpで値を定義している
             var text = content['item']['text'];
-            divItemElem.innerHTML = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
+            divItemElem.innerText = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
           } else if (content['link'].item_type == 2) {
             // app/Sticker.phpで値を定義している
             var imageURL = content['item']['image_url'];
@@ -4837,7 +4837,7 @@ __webpack_require__.r(__webpack_exports__);
         if (content['link'].item_type == 1) {
           // app/Sticker.phpで値を定義している
           var text = content['item']['text'];
-          spanItemElem.innerHTML = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
+          spanItemElem.innerText = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
         } else if (content['link'].item_type == 2) {
           // app/Sticker.phpで値を定義している
           var imageURL = content['item']['image_url'];
@@ -5177,6 +5177,16 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     showStickerTextAddWindowProps: Object
@@ -5184,17 +5194,39 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       isShow: this.showStickerTextAddWindowProps.isShow,
-      addText: ''
+      addText: '',
+      stickerTextAddWindowTimeoutId: null
     };
   },
   watch: {
     'showStickerTextAddWindowProps.isShow': function showStickerTextAddWindowPropsIsShow(newValue, oldValue) {
       this.isShow = this.showStickerTextAddWindowProps.isShow;
+
+      if (this.isShow) {
+        this.addText = '';
+        var windowElem = document.getElementById("sticker-text-add-window-id"); // いったん表示しないとサイズを取得できないので、最初は見えないところにおいておく。
+
+        windowElem.style.left = '-10000px';
+        windowElem.style.top = 0;
+        this.stickerTextAddWindowTimeoutId = setTimeout(function () {
+          var windowElemRect = windowElem.getBoundingClientRect();
+          windowElem.style.left = '50%';
+          windowElem.style.top = '50%';
+          windowElem.style.marginLeft = "".concat(-windowElemRect.width / 2, "px"); // margin-left
+
+          windowElem.style.marginTop = "".concat(-windowElemRect.height / 2, "px"); // margin-top
+        }, 10);
+      }
     }
   },
   methods: {
     onClickStickerTextAddWindowOverlay: function onClickStickerTextAddWindowOverlay(e) {
-      console.log('onClickStickerTextAddWindowOverlay'); // 何もしない
+      console.log('onClickStickerTextAddWindowOverlay');
+      var emitParam = {
+        event: e,
+        result: 'none'
+      };
+      this.backToMount(emitParam);
     },
     onClickStickerTextAddWindow: function onClickStickerTextAddWindow(e) {
       console.log('onClickStickerTextAddWindow'); // 何もしない
@@ -5204,7 +5236,7 @@ __webpack_require__.r(__webpack_exports__);
         event: e,
         result: 'none'
       };
-      this.$emit('hide-sticker-text-add-window-custom-event', emitParam);
+      this.backToMount(emitParam);
     },
     onClickAddText: function onClickAddText(e) {
       // テキストを追加する
@@ -5229,8 +5261,16 @@ __webpack_require__.r(__webpack_exports__);
           event: e,
           result: 'addText'
         };
-        this.$emit('hide-sticker-text-add-window-custom-event', emitParam);
+        this.backToMount(emitParam);
       }
+    },
+    backToMount: function backToMount(emitParam) {
+      if (this.stickerTextAddWindowTimeoutId !== null) {
+        clearTimeout(this.stickerTextAddWindowTimeoutId);
+        this.stickerTextAddWindowTimeoutId = null;
+      }
+
+      this.$emit('hide-sticker-text-add-window-custom-event', emitParam);
     }
   }
 });
@@ -10034,7 +10074,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.sticker-text-add-window-overlay-class[data-v-d8ba2e6c] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 1000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.sticker-text-add-window-class[data-v-d8ba2e6c] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  400px;\n    height: 200px;\n    z-index: 1001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-text-add-window-overlay-class[data-v-d8ba2e6c] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-text-add-window-class[data-v-d8ba2e6c] {\n    position: fixed;\n    left:   50%;\n    top:    50%;\n    min-width: 400px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n.sticker-text-add-window-space-class[data-v-d8ba2e6c] {\n    height: 10px;\n}\n", ""]);
 
 // exports
 
@@ -50840,19 +50880,29 @@ var render = function() {
           value: _vm.isShow,
           expression: "isShow"
         }
-      ],
-      staticClass: "sticker-text-add-window-overlay-class",
-      on: {
-        click: function($event) {
-          if ($event.target !== $event.currentTarget) {
-            return null
-          }
-          $event.preventDefault()
-          return _vm.onClickStickerTextAddWindowOverlay($event)
-        }
-      }
+      ]
     },
     [
+      _c("div", {
+        staticClass: "sticker-text-add-window-overlay-class",
+        on: {
+          click: function($event) {
+            if ($event.target !== $event.currentTarget) {
+              return null
+            }
+            $event.preventDefault()
+            return _vm.onClickStickerTextAddWindowOverlay($event)
+          },
+          contextmenu: function($event) {
+            if ($event.target !== $event.currentTarget) {
+              return null
+            }
+            $event.preventDefault()
+            return _vm.onClickStickerTextAddWindowOverlay($event)
+          }
+        }
+      }),
+      _vm._v(" "),
       _c(
         "div",
         {
@@ -50880,7 +50930,7 @@ var render = function() {
               }
             },
             [
-              _c("input", {
+              _c("textarea", {
                 directives: [
                   {
                     name: "model",
@@ -50889,7 +50939,8 @@ var render = function() {
                     expression: "addText"
                   }
                 ],
-                attrs: { type: "textarea" },
+                staticClass: "form-control",
+                attrs: { cols: "40", rows: "2" },
                 domProps: { value: _vm.addText },
                 on: {
                   input: function($event) {
@@ -50901,16 +50952,19 @@ var render = function() {
                 }
               }),
               _vm._v(" "),
-              _c("button", { attrs: { type: "submit" } }, [
-                _vm._v("\n                追加\n            ")
-              ])
+              _c("div", { staticClass: "sticker-text-add-window-space-class" }),
+              _vm._v(" "),
+              _vm._m(0)
             ]
           ),
           _vm._v(" "),
-          _c("div", [
+          _c("div", { staticClass: "sticker-text-add-window-space-class" }),
+          _vm._v(" "),
+          _c("div", { staticClass: "text-center" }, [
             _c(
               "button",
               {
+                staticClass: "btn btn-secondary",
                 on: {
                   click: function($event) {
                     $event.preventDefault()
@@ -50926,7 +50980,25 @@ var render = function() {
     ]
   )
 }
-var staticRenderFns = []
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", [
+      _c("p", [
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-secondary btn-block",
+            attrs: { type: "submit" }
+          },
+          [_vm._v("追加")]
+        )
+      ])
+    ])
+  }
+]
 render._withStripped = true
 
 

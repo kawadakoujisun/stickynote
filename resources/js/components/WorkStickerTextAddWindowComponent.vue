@@ -1,9 +1,16 @@
 <template>
     <div
         v-show="isShow"
-        class="sticker-text-add-window-overlay-class"
-        @click.self.prevent="onClickStickerTextAddWindowOverlay"
     >
+        <!-- 背景 -->
+        <div
+            class="sticker-text-add-window-overlay-class"
+            @click.self.prevent="onClickStickerTextAddWindowOverlay"
+            @click.right.self.prevent="onClickStickerTextAddWindowOverlay"
+        >
+        </div>        
+        
+        <!-- ウィンドウ -->
         <div
             class="sticker-text-add-window-class"
             id="sticker-text-add-window-id"
@@ -12,16 +19,19 @@
             <form
                 @submit.prevent="onClickAddText"
             >
-                <input
+                <textarea
                     v-model="addText"
-                    type="textarea"
+                    cols="40"
+                    rows="2"
+                    class="form-control"
                 >
-                <button type="submit">
-                    追加
-                </button>
+                </textarea>
+                <div class="sticker-text-add-window-space-class"></div>
+                <div><p><button type="submit" class="btn btn-secondary btn-block">追加</button></p></div>
             </form>
 
-            <div><button @click.prevent="onClickClose">戻る</button></div>
+            <div class="sticker-text-add-window-space-class"></div>
+            <div class="text-center"><button class="btn btn-secondary" @click.prevent="onClickClose">戻る</button></div>
         </div>
     </div>
 </template>
@@ -36,19 +46,42 @@
             return {
                 isShow: this.showStickerTextAddWindowProps.isShow,
                 addText: '',
+                stickerTextAddWindowTimeoutId: null,
             };
         },
         
         watch: {
             'showStickerTextAddWindowProps.isShow': function(newValue, oldValue) {
                 this.isShow = this.showStickerTextAddWindowProps.isShow;
+                
+                if (this.isShow) {
+                    this.addText = '';
+                    
+                    const windowElem = document.getElementById("sticker-text-add-window-id");
+                    // いったん表示しないとサイズを取得できないので、最初は見えないところにおいておく。
+                    windowElem.style.left = '-10000px';
+                    windowElem.style.top  = 0;
+                    
+                    this.stickerTextAddWindowTimeoutId = setTimeout(() => {
+                        const windowElemRect = windowElem.getBoundingClientRect();
+                        windowElem.style.left = '50%';
+                        windowElem.style.top  = '50%';
+
+                        windowElem.style.marginLeft = `${-windowElemRect.width/2}px`;   // margin-left
+                        windowElem.style.marginTop  = `${-windowElemRect.height/2}px`;  // margin-top
+                    }, 10);
+                }
             },
         },
         
         methods: {
             onClickStickerTextAddWindowOverlay: function (e) {
                 console.log('onClickStickerTextAddWindowOverlay');
-                // 何もしない
+                const emitParam = {
+                    event: e,
+                    result: 'none',
+                };
+                this.backToMount(emitParam);
             },
             
             onClickStickerTextAddWindow: function (e) {
@@ -61,7 +94,7 @@
                     event: e,
                     result: 'none',
                 };
-                this.$emit('hide-sticker-text-add-window-custom-event', emitParam);
+                this.backToMount(emitParam);
             },
             
             onClickAddText: function (e) {
@@ -91,34 +124,57 @@
                         event: e,
                         result: 'addText',
                     };
-                    this.$emit('hide-sticker-text-add-window-custom-event', emitParam);
+                    this.backToMount(emitParam);
                 }
+            },
+            
+            backToMount: function (emitParam) {
+                if (this.stickerTextAddWindowTimeoutId !== null) {
+                    clearTimeout(this.stickerTextAddWindowTimeoutId);
+                    this.stickerTextAddWindowTimeoutId = null;
+                }
+                
+                this.$emit('hide-sticker-text-add-window-custom-event', emitParam);
             },
         },
     };
 </script>
 
 <style scoped>
+    /*
+     * オーバーレイ
+     */
     .sticker-text-add-window-overlay-class {
-        position: absolute;
+        position: fixed;
         left:   0;
         top:    0;
         width:  100%;
         height: 100%;
-        z-index: 1000;
+        z-index: 3000;
         background: rgba(0, 0, 0, 0.0);
         margin: 0;
     }
     
+    /*
+     * ウィンドウ
+     */
     .sticker-text-add-window-class {
-        position: absolute;
-        left:   0;
-        top:    0;
-        width:  400px;
-        height: 200px;
-        z-index: 1001;
+        position: fixed;
+        left:   50%;
+        top:    50%;
+        min-width: 400px;
+        z-index: 3001;
         border: 1px solid #000;
-        background-color: #aaaaaa;
-        margin: 0;
+        background-color: #ffffff;
+        padding: 10px;
+        box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);
+        
+        /* 外部から変更するもの */
+        margin-left: 0;
+        margin-top:  0;
+    }
+    
+    .sticker-text-add-window-space-class {
+        height: 10px;
     }
 </style>
