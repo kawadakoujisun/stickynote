@@ -863,7 +863,7 @@
         background-color: #aaaaaa;
         margin: 0;
         padding: 0;
-        box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.4);
+        box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);
         
         /* 外部から変更するもの */
         left:   0;
@@ -879,7 +879,7 @@
         background-color: #aaaaaa;
         margin: 0;
         padding: 0;
-        box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.4);
+        box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);
         
         /* 外部から変更するもの */
         top:    0;

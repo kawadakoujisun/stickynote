@@ -4466,23 +4466,52 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     showStickerColorChangeWindowProps: Object
   },
   data: function data() {
     return {
-      isShow: this.showStickerColorChangeWindowProps.isShow
+      isShow: this.showStickerColorChangeWindowProps.isShow,
+      stickerColorChangeWindowTimeoutId: null
     };
   },
   watch: {
     'showStickerColorChangeWindowProps.isShow': function showStickerColorChangeWindowPropsIsShow(newValue, oldValue) {
       this.isShow = this.showStickerColorChangeWindowProps.isShow;
+
+      if (this.isShow) {
+        var windowElem = document.getElementById("sticker-color-change-window-id"); // いったん表示しないとサイズを取得できないので、最初は見えないところにおいておく。
+
+        windowElem.style.left = '-10000px';
+        windowElem.style.top = 0;
+        this.stickerColorChangeWindowTimeoutId = setTimeout(function () {
+          var windowElemRect = windowElem.getBoundingClientRect();
+          windowElem.style.left = '50%';
+          windowElem.style.top = '50%';
+          windowElem.style.marginLeft = "".concat(-windowElemRect.width / 2, "px"); // margin-left
+
+          windowElem.style.marginTop = "".concat(-windowElemRect.height / 2, "px"); // margin-top
+        }, 10);
+      }
     }
   },
   methods: {
     onClickStickerColorChangeWindowOverlay: function onClickStickerColorChangeWindowOverlay(e) {
-      console.log('onClickStickerColorChangeWindowOverlay'); // 何もしない
+      console.log('onClickStickerColorChangeWindowOverlay');
+      var emitParam = {
+        event: e,
+        result: 'none'
+      };
+      this.backToMount(emitParam);
     },
     onClickStickerColorChangeWindow: function onClickStickerColorChangeWindow(e) {
       console.log('onClickStickerColorChangeWindow'); // 何もしない
@@ -4492,7 +4521,7 @@ __webpack_require__.r(__webpack_exports__);
         event: e,
         result: 'none'
       };
-      this.$emit('hide-sticker-color-change-window-custom-event', emitParam);
+      this.backToMount(emitParam);
     },
     onClickColorRed: function onClickColorRed(e) {
       this.changeColor(e, 0xffaaaa);
@@ -4526,6 +4555,14 @@ __webpack_require__.r(__webpack_exports__);
         event: e,
         result: 'changeColor'
       };
+      this.backToMount(emitParam);
+    },
+    backToMount: function backToMount(emitParam) {
+      if (this.stickerColorChangeWindowTimeoutId !== null) {
+        clearTimeout(this.stickerColorChangeWindowTimeoutId);
+        this.stickerColorChangeWindowTimeoutId = null;
+      }
+
       this.$emit('hide-sticker-color-change-window-custom-event', emitParam);
     }
   }
@@ -9883,7 +9920,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * メニューバーのバーそのもの\n */\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    /*border: 1px solid #000;*/\n    background-color: #ffffff;\n    margin: 20px 20px 0px;\n    padding: 0;\n}\n\n/*\n * メニューバー上にあるボタン\n */\n.menu-bar-button-outer-class[data-v-76707645] {\n    position: relative;  /* z-indexを指定したいので、positionをデフォルトのstaticからrelativeに変えておく。 */\n    z-index: 2001;\n    margin: 0;\n    display: inline-block;\n}\n.menu-bar-button-inner-class[data-v-76707645] {\n    display: inline-block;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    padding: 0px 10px;\n    line-height: 30px;\n}\n.menu-bar-button-inner-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}    \n\n/*\n * メニューバーに属するウィンドウを表示しているときのオーバーレイ\n */\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    \n    /*left:   0;*/\n    /*top:    30px;*/  /* メニューバーの下の位置 */\n    /*width:  100%;*/  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    /*height: 920px;*/  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    \n    left:   -20px;  /* メニューバーの位置からマージン分左へ */\n    top:    -20px;  /* メニューバーの位置からマージン分上へ */\n    width:  1850px;  /* だいたい『「メニューバーの横幅(=台紙の横幅)」+「ボーダーの太さ」+「左右マージン分」』くらい */\n    height: 980px;  /* だいたい『「メニューバーの高さ」+「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」+「上下マージン分」』くらい */\n    \n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ内のボタン\n */\n.menu-bar-window-button-outer-class[data-v-76707645] {\n    width: 100%;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    line-height: 30px;\n}\n.menu-bar-window-button-outer-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}\n.menu-bar-window-button-inner-space-class[data-v-76707645] {\n    display: inline-block;\n    width: 10px;\n}    \n\n/*\n * メニューバーの上にあるボタンから表示するウィンドウ\n */\n.menu-bar-main-window-class[data-v-76707645] {\n    position: absolute;\n    top:    30px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    left:   0;\n}\n\n/*\n * 「メニューバーの上にあるボタンから表示したウィンドウ」から表示するウィンドウ\n */\n.menu-bar-sub-window-class[data-v-76707645] {\n    position: absolute;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    top:    0;\n    left:   0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * メニューバーのバーそのもの\n */\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    /*border: 1px solid #000;*/\n    background-color: #ffffff;\n    margin: 20px 20px 0px;\n    padding: 0;\n}\n\n/*\n * メニューバー上にあるボタン\n */\n.menu-bar-button-outer-class[data-v-76707645] {\n    position: relative;  /* z-indexを指定したいので、positionをデフォルトのstaticからrelativeに変えておく。 */\n    z-index: 2001;\n    margin: 0;\n    display: inline-block;\n}\n.menu-bar-button-inner-class[data-v-76707645] {\n    display: inline-block;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    padding: 0px 10px;\n    line-height: 30px;\n}\n.menu-bar-button-inner-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}    \n\n/*\n * メニューバーに属するウィンドウを表示しているときのオーバーレイ\n */\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    \n    /*left:   0;*/\n    /*top:    30px;*/  /* メニューバーの下の位置 */\n    /*width:  100%;*/  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    /*height: 920px;*/  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    \n    left:   -20px;  /* メニューバーの位置からマージン分左へ */\n    top:    -20px;  /* メニューバーの位置からマージン分上へ */\n    width:  1850px;  /* だいたい『「メニューバーの横幅(=台紙の横幅)」+「ボーダーの太さ」+「左右マージン分」』くらい */\n    height: 980px;  /* だいたい『「メニューバーの高さ」+「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」+「上下マージン分」』くらい */\n    \n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ内のボタン\n */\n.menu-bar-window-button-outer-class[data-v-76707645] {\n    width: 100%;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    line-height: 30px;\n}\n.menu-bar-window-button-outer-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}\n.menu-bar-window-button-inner-space-class[data-v-76707645] {\n    display: inline-block;\n    width: 10px;\n}    \n\n/*\n * メニューバーの上にあるボタンから表示するウィンドウ\n */\n.menu-bar-main-window-class[data-v-76707645] {\n    position: absolute;\n    top:    30px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    left:   0;\n}\n\n/*\n * 「メニューバーの上にあるボタンから表示したウィンドウ」から表示するウィンドウ\n */\n.menu-bar-sub-window-class[data-v-76707645] {\n    position: absolute;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    top:    0;\n    left:   0;\n}\n", ""]);
 
 // exports
 
@@ -9921,7 +9958,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.sticker-color-change-window-overlay-class[data-v-14581d2b] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 1000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.sticker-color-change-window-class[data-v-14581d2b] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  150px;\n    height: 300px;\n    z-index: 1001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-color-change-window-overlay-class[data-v-14581d2b] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-color-change-window-class[data-v-14581d2b] {\n    position: fixed;\n    left:   50%;\n    top:    50%;\n    min-width: 150px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n.sticker-color-change-window-space-class[data-v-14581d2b] {\n    height: 20px;\n}\n", ""]);
 
 // exports
 
@@ -9940,7 +9977,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-context-menu-overlay-class[data-v-5800ee40] {\n    position: absolute;\n    \n    /*\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    */\n    \n    left:   -20px;\n    top:    -60px;\n    width:  1850px;\n    height: 990px;\n    \n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * コンテキストメニュー内のボタン\n */\n.sticker-context-menu-button-outer-class[data-v-5800ee40] {\n    width: 100%;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    line-height: 30px;\n}\n.sticker-context-menu-button-outer-class[data-v-5800ee40]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}\n.sticker-context-menu-button-inner-space-class[data-v-5800ee40] {\n    display: inline-block;\n    width: 10px;\n}\n\n/*\n * コンテキストメニューのウィンドウ\n */\n.sticker-context-menu-class[data-v-5800ee40] {\n    position: absolute;\n    min-width: 150px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    top:  300;\n    left: 300;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-context-menu-overlay-class[data-v-5800ee40] {\n    position: absolute;\n    \n    /*\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    */\n    \n    left:   -20px;\n    top:    -60px;\n    width:  1850px;\n    height: 990px;\n    \n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * コンテキストメニュー内のボタン\n */\n.sticker-context-menu-button-outer-class[data-v-5800ee40] {\n    width: 100%;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    line-height: 30px;\n}\n.sticker-context-menu-button-outer-class[data-v-5800ee40]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}\n.sticker-context-menu-button-inner-space-class[data-v-5800ee40] {\n    display: inline-block;\n    width: 10px;\n}\n\n/*\n * コンテキストメニューのウィンドウ\n */\n.sticker-context-menu-class[data-v-5800ee40] {\n    position: absolute;\n    min-width: 150px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    top:  300;\n    left: 300;\n}\n", ""]);
 
 // exports
 
@@ -50113,19 +50150,29 @@ var render = function() {
           value: _vm.isShow,
           expression: "isShow"
         }
-      ],
-      staticClass: "sticker-color-change-window-overlay-class",
-      on: {
-        click: function($event) {
-          if ($event.target !== $event.currentTarget) {
-            return null
-          }
-          $event.preventDefault()
-          return _vm.onClickStickerColorChangeWindowOverlay($event)
-        }
-      }
+      ]
     },
     [
+      _c("div", {
+        staticClass: "sticker-color-change-window-overlay-class",
+        on: {
+          click: function($event) {
+            if ($event.target !== $event.currentTarget) {
+              return null
+            }
+            $event.preventDefault()
+            return _vm.onClickStickerColorChangeWindowOverlay($event)
+          },
+          contextmenu: function($event) {
+            if ($event.target !== $event.currentTarget) {
+              return null
+            }
+            $event.preventDefault()
+            return _vm.onClickStickerColorChangeWindowOverlay($event)
+          }
+        }
+      }),
+      _vm._v(" "),
       _c(
         "div",
         {
@@ -50143,84 +50190,102 @@ var render = function() {
         },
         [
           _c("div", [
-            _c(
-              "button",
-              {
-                on: {
-                  click: function($event) {
-                    $event.preventDefault()
-                    return _vm.onClickColorRed($event)
+            _c("p", [
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-secondary btn-block",
+                  on: {
+                    click: function($event) {
+                      $event.preventDefault()
+                      return _vm.onClickColorRed($event)
+                    }
                   }
-                }
-              },
-              [_vm._v("赤")]
-            )
+                },
+                [_vm._v("赤")]
+              )
+            ])
           ]),
           _vm._v(" "),
           _c("div", [
-            _c(
-              "button",
-              {
-                on: {
-                  click: function($event) {
-                    $event.preventDefault()
-                    return _vm.onClickColorBlue($event)
+            _c("p", [
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-secondary btn-block",
+                  on: {
+                    click: function($event) {
+                      $event.preventDefault()
+                      return _vm.onClickColorBlue($event)
+                    }
                   }
-                }
-              },
-              [_vm._v("青")]
-            )
+                },
+                [_vm._v("青")]
+              )
+            ])
           ]),
           _vm._v(" "),
           _c("div", [
-            _c(
-              "button",
-              {
-                on: {
-                  click: function($event) {
-                    $event.preventDefault()
-                    return _vm.onClickColorYellow($event)
+            _c("p", [
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-secondary btn-block",
+                  on: {
+                    click: function($event) {
+                      $event.preventDefault()
+                      return _vm.onClickColorYellow($event)
+                    }
                   }
-                }
-              },
-              [_vm._v("黄色")]
-            )
+                },
+                [_vm._v("黄色")]
+              )
+            ])
           ]),
           _vm._v(" "),
           _c("div", [
-            _c(
-              "button",
-              {
-                on: {
-                  click: function($event) {
-                    $event.preventDefault()
-                    return _vm.onClickColorGreen($event)
+            _c("p", [
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-secondary btn-block",
+                  on: {
+                    click: function($event) {
+                      $event.preventDefault()
+                      return _vm.onClickColorGreen($event)
+                    }
                   }
-                }
-              },
-              [_vm._v("緑")]
-            )
+                },
+                [_vm._v("緑")]
+              )
+            ])
           ]),
           _vm._v(" "),
           _c("div", [
-            _c(
-              "button",
-              {
-                on: {
-                  click: function($event) {
-                    $event.preventDefault()
-                    return _vm.onClickColorPink($event)
+            _c("p", [
+              _c(
+                "button",
+                {
+                  staticClass: "btn btn-secondary btn-block",
+                  on: {
+                    click: function($event) {
+                      $event.preventDefault()
+                      return _vm.onClickColorPink($event)
+                    }
                   }
-                }
-              },
-              [_vm._v("ピンク")]
-            )
+                },
+                [_vm._v("ピンク")]
+              )
+            ])
           ]),
           _vm._v(" "),
-          _c("div", [
+          _c("div", { staticClass: "sticker-color-change-window-space-class" }),
+          _vm._v(" "),
+          _c("div", { staticClass: "text-center" }, [
             _c(
               "button",
               {
+                staticClass: "btn btn-secondary",
                 on: {
                   click: function($event) {
                     $event.preventDefault()

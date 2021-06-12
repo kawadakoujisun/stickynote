@@ -241,7 +241,7 @@
         background-color: #aaaaaa;
         margin: 0;
         padding: 0;
-        box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.4);
+        box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);
         
         /* 外部から変更するもの */
         top:  300;
