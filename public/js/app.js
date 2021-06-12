@@ -2772,6 +2772,41 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -2781,38 +2816,65 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
   },
   methods: {
     //
+    // 背景
+    //
+    onClickOverlay: function onClickOverlay(e) {
+      if (this.activeMainMenu !== '') {
+        e.preventDefault();
+        this.activeMainMenu = '';
+        this.activeSubMenu = '';
+      }
+    },
+    //
     // メイン
     //
     onClickMainFile: function onClickMainFile(e) {
       if (this.activeMainMenu !== 'mainFile') {
         this.activeMainMenu = 'mainFile';
         this.activeSubMenu = '';
+        this.setWindowPos('menu-bar-button-file-id', 'menu-bar-main-file-window-id', false);
       }
     },
     onClickMainInsert: function onClickMainInsert(e) {
       if (this.activeMainMenu !== 'mainInsert') {
         this.activeMainMenu = 'mainInsert';
         this.activeSubMenu = '';
+        this.setWindowPos('menu-bar-button-insert-id', 'menu-bar-main-insert-window-id', false);
       }
     },
     onClickMainUser: function onClickMainUser(e) {
       if (this.activeSubMenu !== 'mainUser') {
         this.activeMainMenu = 'mainUser';
         this.activeSubMenu = '';
+        this.setWindowPos('menu-bar-button-user-id', 'menu-bar-main-user-window-id', false);
       }
     },
     //
     // ファイルサブ
     //
     onClickFileSubImport: function onClickFileSubImport(e) {
-      this.activeSubMenu = 'fileSubImport';
+      if (this.activeSubMenu !== 'fileSubImport') {
+        this.activeSubMenu = 'fileSubImport';
+        this.setWindowPos('menu-bar-main-file-import-button-id', 'menu-bar-file-sub-import-window-id', true);
+      }
+    },
+    onMouseEnterFileSubImport: function onMouseEnterFileSubImport(e) {
+      if (this.activeSubMenu !== 'fileSubImport') {
+        this.activeSubMenu = 'fileSubImport';
+        this.setWindowPos('menu-bar-main-file-import-button-id', 'menu-bar-file-sub-import-window-id', true);
+      }
     },
     onClickFileSubDonwload: function onClickFileSubDonwload(e) {
-      this.activeSubMenu = 'fileSubDownload';
+      if (this.activeSubMenu !== 'fileSubDownload') {
+        this.activeSubMenu = 'fileSubDownload';
+        this.setWindowPos('menu-bar-main-file-download-button-id', 'menu-bar-file-sub-download-window-id', true);
+      }
     },
-    onClickFileSubClose: function onClickFileSubClose(e) {
-      this.activeMainMenu = '';
-      this.activeSubMenu = '';
+    onMouseEnterFileSubDownload: function onMouseEnterFileSubDownload(e) {
+      if (this.activeSubMenu !== 'fileSubDownload') {
+        this.activeSubMenu = 'fileSubDownload';
+        this.setWindowPos('menu-bar-main-file-download-button-id', 'menu-bar-file-sub-download-window-id', true);
+      }
     },
     //
     // ファイルサブのインポート
@@ -3064,9 +3126,6 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       input.click();
       document.body.removeChild(input);
     },
-    onClickFileSubImportClose: function onClickFileSubImportClose(e) {
-      this.activeSubMenu = '';
-    },
     //
     // ファイルサブのダウンロード
     //
@@ -3108,9 +3167,6 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         _this3.downloadAll(stickerParams);
       });
     },
-    onClickFileSubDownloadClose: function onClickFileSubDownloadClose(e) {
-      this.activeSubMenu = '';
-    },
     //
     // 挿入サブ
     //
@@ -3125,10 +3181,6 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         user_id: window.laravel.user['id']
       }).then(function (response) {// 特にすることなし
       });
-    },
-    onClickInsertSubClose: function onClickInsertSubClose(e) {
-      this.activeMainMenu = '';
-      this.activeSubMenu = '';
     },
     //
     // ユーザーサブ
@@ -3160,10 +3212,6 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       // ここまで来てからページ遷移するようなので
       // document.body.removeChild(link);
       // まで完了していると思われる。
-    },
-    onClickUserSubClose: function onClickUserSubClose(e) {
-      this.activeMainMenu = '';
-      this.activeSubMenu = '';
     },
     //
     // 各種関数
@@ -3346,6 +3394,52 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       }
 
       return mimeType;
+    },
+    // ウィンドウの表示位置を設定する
+    setWindowPos: function setWindowPos(buttonId, windowId, isSubWindow) {
+      var buttonElem = document.getElementById(buttonId);
+      var windowElem = document.getElementById(windowId);
+      var buttonElemRect = buttonElem.getBoundingClientRect();
+      var buttonElemPagePos = {};
+      buttonElemPagePos.x = buttonElemRect.left + window.pageXOffset;
+      buttonElemPagePos.y = buttonElemRect.top + window.pageYOffset;
+      var windowElemMountPos = this.convertPosFromPageToMount(buttonElemPagePos);
+
+      if (isSubWindow) {
+        windowElem.style.left = "".concat(windowElemMountPos.x + buttonElemRect.width, "px");
+        windowElem.style.top = "".concat(windowElemMountPos.y, "px");
+      } else {
+        windowElem.style.left = "".concat(windowElemMountPos.x, "px"); // TODO(kawadakoujisun): 小数のこともある。
+        //     ここは大丈夫なので、他の.vueで使っているところを見直して！
+      }
+    },
+    // pagePos = {
+    //     x: 0,  // px（数値だけで単位の文字列は付けていない）
+    //     y: 0,
+    // };
+    // pagePosはページ内における座標。
+    // mountPosは台紙内における座標。
+    convertPosFromPageToMount: function convertPosFromPageToMount(pagePos) {
+      var mountPos = {
+        x: 0,
+        // px（数値だけで単位の文字列は付けていない）
+        y: 0
+      }; // 台紙の枠の太さ
+
+      var mountBorderWidth = this.getMountBorderWidth();
+      var mountElem = this.$el; // 台紙の現在の画面内における座標
+
+      var mountElemRect = mountElem.getBoundingClientRect(); // 台紙のページ内における座標
+
+      var mountElemPagePos = {};
+      mountElemPagePos.x = mountElemRect.left + window.pageXOffset;
+      mountElemPagePos.y = mountElemRect.top + window.pageYOffset;
+      mountPos.x = pagePos.x - mountElemPagePos.x - mountBorderWidth;
+      mountPos.y = pagePos.y - mountElemPagePos.y - mountBorderWidth;
+      return mountPos;
+    },
+    getMountBorderWidth: function getMountBorderWidth() {
+      return 0;
     },
     // ビジーwaitを使いsleepするデバッグ用途のメソッド
     debug_sleep: function debug_sleep(waitMilliSecond) {
@@ -9769,7 +9863,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    /*border: 1px solid #000;*/\n    background-color: #ffffff;\n    margin: 20px 20px 0px;\n    padding: 0;\n}\n.menu-bar-button-outer-class[data-v-76707645] {\n    margin: 0;\n    display: inline-block;\n}\n.menu-bar-button-inner-class[data-v-76707645] {\n    display: inline-block;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    padding: 0px 10px;\n    line-height: 30px;\n}\n.menu-bar-button-inner-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    left:   0;\n    top:    30px;  /* メニューバーの下の位置 */\n    width:  100%;  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    height: 920px;  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.menu-bar-main-file-window-class[data-v-76707645] {\n    position: absolute;\n    left:   0;\n    top:    30px;\n    width:  120px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-main-insert-window-class[data-v-76707645] {\n    position: absolute;\n    left:   80px;\n    top:    30px;\n    width:  120px;\n    height: 60px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-main-user-window-class[data-v-76707645] {\n    position: absolute;\n    left:   130px;\n    top:    30px;\n    width:  120px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-file-sub-import-window-class[data-v-76707645] {\n    position: absolute;\n    left:   120px;\n    top:    30px;\n    width:  300px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.menu-bar-file-sub-download-window-class[data-v-76707645] {\n    position: absolute;\n    left:   120px;\n    top:    60px;\n    width:  300px;\n    height: 90px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * メニューバーのバーそのもの\n */\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    /*border: 1px solid #000;*/\n    background-color: #ffffff;\n    margin: 20px 20px 0px;\n    padding: 0;\n}\n\n/*\n * メニューバー上にあるボタン\n */\n.menu-bar-button-outer-class[data-v-76707645] {\n    position: relative;  /* z-indexを指定したいので、positionをデフォルトのstaticからrelativeに変えておく。 */\n    z-index: 2001;\n    margin: 0;\n    display: inline-block;\n}\n.menu-bar-button-inner-class[data-v-76707645] {\n    display: inline-block;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    padding: 0px 10px;\n    line-height: 30px;\n}\n.menu-bar-button-inner-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}    \n\n/*\n * メニューバーに属するウィンドウを表示しているときのオーバーレイ\n */\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    \n    /*left:   0;*/\n    /*top:    30px;*/  /* メニューバーの下の位置 */\n    /*width:  100%;*/  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    /*height: 920px;*/  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    \n    left:   -20px;  /* メニューバーの位置からマージン分左へ */\n    top:    -20px;  /* メニューバーの位置からマージン分上へ */\n    width:  1850px;  /* だいたい『「メニューバーの横幅(=台紙の横幅)」+「ボーダーの太さ」+「左右マージン分」』くらい */\n    height: 980px;  /* だいたい『「メニューバーの高さ」+「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」+「上下マージン分」』くらい */\n    \n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ内のボタン\n */\n.menu-bar-window-button-outer-class[data-v-76707645] {\n    width: 100%;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    line-height: 30px;\n}\n.menu-bar-window-button-outer-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}\n.menu-bar-window-button-inner-space-class[data-v-76707645] {\n    display: inline-block;\n    width: 10px;\n}    \n\n/*\n * メニューバーの上にあるボタンから表示するウィンドウ\n */\n.menu-bar-main-window-class[data-v-76707645] {\n    position: absolute;\n    top:    30px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    left:   0;\n}\n\n/*\n * 「メニューバーの上にあるボタンから表示したウィンドウ」から表示するウィンドウ\n */\n.menu-bar-sub-window-class[data-v-76707645] {\n    position: absolute;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    top:    0;\n    left:   0;\n}\n", ""]);
 
 // exports
 
@@ -49383,8 +49477,13 @@ var render = function() {
   var _h = _vm.$createElement
   var _c = _vm._self._c || _h
   return _c("div", { staticClass: "menu-bar-class" }, [
-    _c("div", { staticClass: "menu-bar-button-outer-class" }, [
-      _c("span", { staticClass: "menu-bar-button-inner-class" }, [
+    _c(
+      "div",
+      {
+        staticClass: "menu-bar-button-outer-class",
+        attrs: { id: "menu-bar-button-file-id" }
+      },
+      [
         _c(
           "a",
           {
@@ -49395,13 +49494,22 @@ var render = function() {
               }
             }
           },
-          [_vm._v("ファイル")]
+          [
+            _c("span", { staticClass: "menu-bar-button-inner-class" }, [
+              _vm._v("ファイル")
+            ])
+          ]
         )
-      ])
-    ]),
+      ]
+    ),
     _vm._v(" "),
-    _c("div", { staticClass: "menu-bar-button-outer-class" }, [
-      _c("span", { staticClass: "menu-bar-button-inner-class" }, [
+    _c(
+      "div",
+      {
+        staticClass: "menu-bar-button-outer-class",
+        attrs: { id: "menu-bar-button-insert-id" }
+      },
+      [
         _c(
           "a",
           {
@@ -49412,13 +49520,22 @@ var render = function() {
               }
             }
           },
-          [_vm._v("挿入")]
+          [
+            _c("span", { staticClass: "menu-bar-button-inner-class" }, [
+              _vm._v("挿入")
+            ])
+          ]
         )
-      ])
-    ]),
+      ]
+    ),
     _vm._v(" "),
-    _c("div", { staticClass: "menu-bar-button-outer-class" }, [
-      _c("span", { staticClass: "menu-bar-button-inner-class" }, [
+    _c(
+      "div",
+      {
+        staticClass: "menu-bar-button-outer-class",
+        attrs: { id: "menu-bar-button-user-id" }
+      },
+      [
         _c(
           "a",
           {
@@ -49429,262 +49546,368 @@ var render = function() {
               }
             }
           },
-          [_vm._v("ユーザー")]
+          [
+            _c("span", { staticClass: "menu-bar-button-inner-class" }, [
+              _vm._v("ユーザー")
+            ])
+          ]
         )
-      ])
-    ]),
+      ]
+    ),
     _vm._v(" "),
     _vm.activeMainMenu !== ""
-      ? _c("div", [_c("div", { staticClass: "menu-bar-window-overlay-class" })])
+      ? _c("div", [
+          _c("div", {
+            staticClass: "menu-bar-window-overlay-class",
+            on: {
+              click: function($event) {
+                if ($event.target !== $event.currentTarget) {
+                  return null
+                }
+                return _vm.onClickOverlay($event)
+              },
+              contextmenu: function($event) {
+                if ($event.target !== $event.currentTarget) {
+                  return null
+                }
+                return _vm.onClickOverlay($event)
+              }
+            }
+          })
+        ])
       : _vm._e(),
     _vm._v(" "),
-    _vm.activeMainMenu === "mainFile"
-      ? _c("div", [
-          _c("div", { staticClass: "menu-bar-main-file-window-class" }, [
-            _c("div", [
-              _c(
-                "button",
-                {
-                  on: {
-                    click: function($event) {
-                      $event.preventDefault()
-                      return _vm.onClickFileSubImport($event)
-                    }
-                  }
-                },
-                [_vm._v("インポート >")]
-              )
-            ]),
+    _c(
+      "div",
+      {
+        directives: [
+          {
+            name: "show",
+            rawName: "v-show",
+            value: _vm.activeMainMenu === "mainFile",
+            expression: "activeMainMenu === 'mainFile'"
+          }
+        ]
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "menu-bar-main-window-class",
+            attrs: { id: "menu-bar-main-file-window-id" }
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "menu-bar-window-button-outer-class",
+                attrs: { id: "menu-bar-main-file-import-button-id" },
+                on: {
+                  click: function($event) {
+                    $event.preventDefault()
+                    return _vm.onClickFileSubImport($event)
+                  },
+                  mouseenter: _vm.onMouseEnterFileSubImport
+                }
+              },
+              [
+                _c("span", {
+                  staticClass: "menu-bar-window-button-inner-space-class"
+                }),
+                _vm._v("\n                インポート >\n                "),
+                _c("span", {
+                  staticClass: "menu-bar-window-button-inner-space-class"
+                })
+              ]
+            ),
             _vm._v(" "),
-            _c("div", [
-              _c(
-                "button",
-                {
-                  on: {
-                    click: function($event) {
-                      $event.preventDefault()
-                      return _vm.onClickFileSubDonwload($event)
-                    }
-                  }
-                },
-                [_vm._v("ダウンロード >")]
-              )
-            ]),
-            _vm._v(" "),
-            _c("div", [
-              _c(
-                "button",
-                {
-                  on: {
-                    click: function($event) {
-                      $event.preventDefault()
-                      return _vm.onClickFileSubClose($event)
-                    }
-                  }
-                },
-                [_vm._v("戻る")]
-              )
-            ])
-          ]),
-          _vm._v(" "),
-          _vm.activeSubMenu === "fileSubImport"
-            ? _c("div", [
+            _c(
+              "div",
+              {
+                staticClass: "menu-bar-window-button-outer-class",
+                attrs: { id: "menu-bar-main-file-download-button-id" },
+                on: {
+                  click: function($event) {
+                    $event.preventDefault()
+                    return _vm.onClickFileSubDonwload($event)
+                  },
+                  mouseenter: _vm.onMouseEnterFileSubDownload
+                }
+              },
+              [
+                _c("span", {
+                  staticClass: "menu-bar-window-button-inner-space-class"
+                }),
+                _vm._v("\n                ダウンロード >\n                "),
+                _c("span", {
+                  staticClass: "menu-bar-window-button-inner-space-class"
+                })
+              ]
+            )
+          ]
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          {
+            directives: [
+              {
+                name: "show",
+                rawName: "v-show",
+                value: _vm.activeSubMenu === "fileSubImport",
+                expression: "activeSubMenu === 'fileSubImport'"
+              }
+            ]
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "menu-bar-sub-window-class",
+                attrs: { id: "menu-bar-file-sub-import-window-id" }
+              },
+              [
                 _c(
                   "div",
-                  { staticClass: "menu-bar-file-sub-import-window-class" },
+                  {
+                    staticClass: "menu-bar-window-button-outer-class",
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        return _vm.onClickFileSubImportText($event)
+                      }
+                    }
+                  },
                   [
-                    _c("div", [
-                      _c(
-                        "button",
-                        {
-                          on: {
-                            click: function($event) {
-                              $event.preventDefault()
-                              return _vm.onClickFileSubImportText($event)
-                            }
-                          }
-                        },
-                        [_vm._v("テキストのみ(.json)")]
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("div", [
-                      _c(
-                        "button",
-                        {
-                          on: {
-                            click: function($event) {
-                              $event.preventDefault()
-                              return _vm.onClickFileSubImportAll($event)
-                            }
-                          }
-                        },
-                        [_vm._v("全部(.zip)")]
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("div", [
-                      _c(
-                        "button",
-                        {
-                          on: {
-                            click: function($event) {
-                              $event.preventDefault()
-                              return _vm.onClickFileSubImportClose($event)
-                            }
-                          }
-                        },
-                        [_vm._v("戻る")]
-                      )
-                    ])
+                    _c("span", {
+                      staticClass: "menu-bar-window-button-inner-space-class"
+                    }),
+                    _vm._v(
+                      "\n                    テキストのみ(.json)\n                    "
+                    ),
+                    _c("span", {
+                      staticClass: "menu-bar-window-button-inner-space-class"
+                    })
                   ]
-                )
-              ])
-            : _vm._e(),
-          _vm._v(" "),
-          _vm.activeSubMenu === "fileSubDownload"
-            ? _c("div", [
+                ),
+                _vm._v(" "),
                 _c(
                   "div",
-                  { staticClass: "menu-bar-file-sub-download-window-class" },
+                  {
+                    staticClass: "menu-bar-window-button-outer-class",
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        return _vm.onClickFileSubImportAll($event)
+                      }
+                    }
+                  },
                   [
-                    _c("div", [
-                      _c(
-                        "button",
-                        {
-                          on: {
-                            click: function($event) {
-                              $event.preventDefault()
-                              return _vm.onClickFileSubDownloadText($event)
-                            }
-                          }
-                        },
-                        [_vm._v("テキストのみ(.json)")]
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("div", [
-                      _c(
-                        "button",
-                        {
-                          on: {
-                            click: function($event) {
-                              $event.preventDefault()
-                              return _vm.onClickFileSubDownloadAll($event)
-                            }
-                          }
-                        },
-                        [_vm._v("全部(.zip)")]
-                      )
-                    ]),
-                    _vm._v(" "),
-                    _c("div", [
-                      _c(
-                        "button",
-                        {
-                          on: {
-                            click: function($event) {
-                              $event.preventDefault()
-                              return _vm.onClickFileSubDownloadClose($event)
-                            }
-                          }
-                        },
-                        [_vm._v("戻る")]
-                      )
-                    ])
+                    _c("span", {
+                      staticClass: "menu-bar-window-button-inner-space-class"
+                    }),
+                    _vm._v(
+                      "\n                    全部(.zip)\n                    "
+                    ),
+                    _c("span", {
+                      staticClass: "menu-bar-window-button-inner-space-class"
+                    })
                   ]
                 )
-              ])
-            : _vm._e()
-        ])
-      : _vm._e(),
+              ]
+            )
+          ]
+        ),
+        _vm._v(" "),
+        _c(
+          "div",
+          {
+            directives: [
+              {
+                name: "show",
+                rawName: "v-show",
+                value: _vm.activeSubMenu === "fileSubDownload",
+                expression: "activeSubMenu === 'fileSubDownload'"
+              }
+            ]
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "menu-bar-sub-window-class",
+                attrs: { id: "menu-bar-file-sub-download-window-id" }
+              },
+              [
+                _c(
+                  "div",
+                  {
+                    staticClass: "menu-bar-window-button-outer-class",
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        return _vm.onClickFileSubDownloadText($event)
+                      }
+                    }
+                  },
+                  [
+                    _c("span", {
+                      staticClass: "menu-bar-window-button-inner-space-class"
+                    }),
+                    _vm._v(
+                      "\n                    テキストのみ(.json)\n                    "
+                    ),
+                    _c("span", {
+                      staticClass: "menu-bar-window-button-inner-space-class"
+                    })
+                  ]
+                ),
+                _vm._v(" "),
+                _c(
+                  "div",
+                  {
+                    staticClass: "menu-bar-window-button-outer-class",
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        return _vm.onClickFileSubDownloadAll($event)
+                      }
+                    }
+                  },
+                  [
+                    _c("span", {
+                      staticClass: "menu-bar-window-button-inner-space-class"
+                    }),
+                    _vm._v(
+                      "\n                    全部(.zip)\n                    "
+                    ),
+                    _c("span", {
+                      staticClass: "menu-bar-window-button-inner-space-class"
+                    })
+                  ]
+                )
+              ]
+            )
+          ]
+        )
+      ]
+    ),
     _vm._v(" "),
-    _vm.activeMainMenu === "mainInsert"
-      ? _c("div", [
-          _c("div", { staticClass: "menu-bar-main-insert-window-class" }, [
-            _c("div", [
-              _c(
-                "button",
-                {
-                  on: {
-                    click: function($event) {
-                      $event.preventDefault()
-                      return _vm.onClickInsertSubSticker($event)
-                    }
+    _c(
+      "div",
+      {
+        directives: [
+          {
+            name: "show",
+            rawName: "v-show",
+            value: _vm.activeMainMenu === "mainInsert",
+            expression: "activeMainMenu === 'mainInsert'"
+          }
+        ]
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "menu-bar-main-window-class",
+            attrs: { id: "menu-bar-main-insert-window-id" }
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "menu-bar-window-button-outer-class",
+                on: {
+                  click: function($event) {
+                    $event.preventDefault()
+                    return _vm.onClickInsertSubSticker($event)
                   }
-                },
-                [_vm._v("ふせん")]
-              )
-            ]),
-            _vm._v(" "),
-            _c("div", [
-              _c(
-                "button",
-                {
-                  on: {
-                    click: function($event) {
-                      $event.preventDefault()
-                      return _vm.onClickInsertSubClose($event)
-                    }
-                  }
-                },
-                [_vm._v("戻る")]
-              )
-            ])
-          ])
-        ])
-      : _vm._e(),
+                }
+              },
+              [
+                _c("span", {
+                  staticClass: "menu-bar-window-button-inner-space-class"
+                }),
+                _vm._v("\n                ふせん\n                "),
+                _c("span", {
+                  staticClass: "menu-bar-window-button-inner-space-class"
+                })
+              ]
+            )
+          ]
+        )
+      ]
+    ),
     _vm._v(" "),
-    _vm.activeMainMenu === "mainUser"
-      ? _c("div", [
-          _c("div", { staticClass: "menu-bar-main-user-window-class" }, [
-            _c("div", [
-              _c(
-                "button",
-                {
-                  on: {
-                    click: function($event) {
-                      $event.preventDefault()
-                      return _vm.onClickUserSubRead($event)
-                    }
+    _c(
+      "div",
+      {
+        directives: [
+          {
+            name: "show",
+            rawName: "v-show",
+            value: _vm.activeMainMenu === "mainUser",
+            expression: "activeMainMenu === 'mainUser'"
+          }
+        ]
+      },
+      [
+        _c(
+          "div",
+          {
+            staticClass: "menu-bar-main-window-class",
+            attrs: { id: "menu-bar-main-user-window-id" }
+          },
+          [
+            _c(
+              "div",
+              {
+                staticClass: "menu-bar-window-button-outer-class",
+                on: {
+                  click: function($event) {
+                    $event.preventDefault()
+                    return _vm.onClickUserSubRead($event)
                   }
-                },
-                [_vm._v("閲覧のみ")]
-              )
-            ]),
+                }
+              },
+              [
+                _c("span", {
+                  staticClass: "menu-bar-window-button-inner-space-class"
+                }),
+                _vm._v("\n                閲覧のみ\n                "),
+                _c("span", {
+                  staticClass: "menu-bar-window-button-inner-space-class"
+                })
+              ]
+            ),
             _vm._v(" "),
-            _c("div", [
-              _c(
-                "button",
-                {
-                  on: {
-                    click: function($event) {
-                      $event.preventDefault()
-                      return _vm.onClickUserSubLogout($event)
-                    }
+            _c(
+              "div",
+              {
+                staticClass: "menu-bar-window-button-outer-class",
+                on: {
+                  click: function($event) {
+                    $event.preventDefault()
+                    return _vm.onClickUserSubLogout($event)
                   }
-                },
-                [_vm._v("Logout")]
-              )
-            ]),
-            _vm._v(" "),
-            _c("div", [
-              _c(
-                "button",
-                {
-                  on: {
-                    click: function($event) {
-                      $event.preventDefault()
-                      return _vm.onClickUserSubClose($event)
-                    }
-                  }
-                },
-                [_vm._v("戻る")]
-              )
-            ])
-          ])
-        ])
-      : _vm._e()
+                }
+              },
+              [
+                _c("span", {
+                  staticClass: "menu-bar-window-button-inner-space-class"
+                }),
+                _vm._v(
+                  "                  \n                Logout\n                "
+                ),
+                _c("span", {
+                  staticClass: "menu-bar-window-button-inner-space-class"
+                })
+              ]
+            )
+          ]
+        )
+      ]
+    )
   ])
 }
 var staticRenderFns = []

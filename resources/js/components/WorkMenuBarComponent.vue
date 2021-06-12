@@ -1,62 +1,97 @@
 <template>
     <div class="menu-bar-class">
-        <div class="menu-bar-button-outer-class">
-            <span class="menu-bar-button-inner-class"><a @click.prevent="onClickMainFile">ファイル</a></span>
+        <div class="menu-bar-button-outer-class" id="menu-bar-button-file-id">
+            <a @click.prevent="onClickMainFile"><span class="menu-bar-button-inner-class">ファイル</span></a>
         </div>
-        <div class="menu-bar-button-outer-class">
-            <span class="menu-bar-button-inner-class"><a @click.prevent="onClickMainInsert">挿入</a></span>
+        <div class="menu-bar-button-outer-class" id="menu-bar-button-insert-id">
+            <a @click.prevent="onClickMainInsert"><span class="menu-bar-button-inner-class">挿入</span></a>
         </div>
-        <div class="menu-bar-button-outer-class">
-            <span class="menu-bar-button-inner-class"><a @click.prevent="onClickMainUser">ユーザー</a></span>
+        <div class="menu-bar-button-outer-class" id="menu-bar-button-user-id">
+            <a @click.prevent="onClickMainUser"><span class="menu-bar-button-inner-class">ユーザー</span></a>
         </div>
 
         <!-- 背景 -->
         <div v-if="activeMainMenu !== ''">
-            <div class="menu-bar-window-overlay-class">
+            <div
+                class="menu-bar-window-overlay-class"
+                @click.self="onClickOverlay"
+                @click.right.self="onClickOverlay"
+            >
             </div>
         </div>
         
         <!-- ファイル -->
-        <div v-if="activeMainMenu === 'mainFile'">
-            <div class="menu-bar-main-file-window-class">
-                <div><button @click.prevent="onClickFileSubImport">インポート &gt;</button></div>
-                <div><button @click.prevent="onClickFileSubDonwload">ダウンロード &gt;</button></div>
-                <div><button @click.prevent="onClickFileSubClose">戻る</button></div>
+        <div v-show="activeMainMenu === 'mainFile'">  <!-- v-ifだとこの子要素にアクセスできない -->
+            <div class="menu-bar-main-window-class" id="menu-bar-main-file-window-id">
+                <div class="menu-bar-window-button-outer-class" id="menu-bar-main-file-import-button-id" @click.prevent="onClickFileSubImport" @mouseenter="onMouseEnterFileSubImport">
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                    インポート &gt;
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                </div>
+                <div class="menu-bar-window-button-outer-class" id="menu-bar-main-file-download-button-id" @click.prevent="onClickFileSubDonwload" @mouseenter="onMouseEnterFileSubDownload">
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                    ダウンロード &gt;
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                </div>
             </div>
 
             <!-- ファイル > インポート -->
-            <div v-if="activeSubMenu === 'fileSubImport'">
-                <div class="menu-bar-file-sub-import-window-class">
-                    <div><button @click.prevent="onClickFileSubImportText">テキストのみ(.json)</button></div>
-                    <div><button @click.prevent="onClickFileSubImportAll">全部(.zip)</button></div>
-                    <div><button @click.prevent="onClickFileSubImportClose">戻る</button></div>
+            <div v-show="activeSubMenu === 'fileSubImport'">
+                <div class="menu-bar-sub-window-class" id="menu-bar-file-sub-import-window-id">
+                    <div class="menu-bar-window-button-outer-class" @click.prevent="onClickFileSubImportText">
+                        <span class="menu-bar-window-button-inner-space-class"></span>
+                        テキストのみ(.json)
+                        <span class="menu-bar-window-button-inner-space-class"></span>
+                    </div>
+                    <div class="menu-bar-window-button-outer-class" @click.prevent="onClickFileSubImportAll">
+                        <span class="menu-bar-window-button-inner-space-class"></span>
+                        全部(.zip)
+                        <span class="menu-bar-window-button-inner-space-class"></span>
+                    </div>                    
                 </div>
             </div>
 
             <!-- ファイル > ダウンロード -->
-            <div v-if="activeSubMenu === 'fileSubDownload'">
-                <div class="menu-bar-file-sub-download-window-class">
-                    <div><button @click.prevent="onClickFileSubDownloadText">テキストのみ(.json)</button></div>
-                    <div><button @click.prevent="onClickFileSubDownloadAll">全部(.zip)</button></div>
-                    <div><button @click.prevent="onClickFileSubDownloadClose">戻る</button></div>
+            <div v-show="activeSubMenu === 'fileSubDownload'">
+                <div class="menu-bar-sub-window-class" id="menu-bar-file-sub-download-window-id">
+                    <div class="menu-bar-window-button-outer-class" @click.prevent="onClickFileSubDownloadText">
+                        <span class="menu-bar-window-button-inner-space-class"></span>
+                        テキストのみ(.json)
+                        <span class="menu-bar-window-button-inner-space-class"></span>
+                    </div>
+                    <div class="menu-bar-window-button-outer-class" @click.prevent="onClickFileSubDownloadAll">
+                        <span class="menu-bar-window-button-inner-space-class"></span>
+                        全部(.zip)
+                        <span class="menu-bar-window-button-inner-space-class"></span>
+                    </div>                       
                 </div>
             </div>
         </div>
         
         <!-- 挿入 -->
-        <div v-if="activeMainMenu === 'mainInsert'">
-            <div class="menu-bar-main-insert-window-class">
-                <div><button @click.prevent="onClickInsertSubSticker">ふせん</button></div>
-                <div><button @click.prevent="onClickInsertSubClose">戻る</button></div>
-            </div>
-        </div>
-        
+        <div v-show="activeMainMenu === 'mainInsert'">
+            <div class="menu-bar-main-window-class" id="menu-bar-main-insert-window-id">
+                <div class="menu-bar-window-button-outer-class" @click.prevent="onClickInsertSubSticker">
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                    ふせん
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                </div>
+            </div>        
+        </div>        
+
         <!-- ユーザー -->
-        <div v-if="activeMainMenu === 'mainUser'">
-            <div class="menu-bar-main-user-window-class">
-                <div><button @click.prevent="onClickUserSubRead">閲覧のみ</button></div>
-                <div><button @click.prevent="onClickUserSubLogout">Logout</button></div>
-                <div><button @click.prevent="onClickUserSubClose">戻る</button></div>
+        <div v-show="activeMainMenu === 'mainUser'">
+            <div class="menu-bar-main-window-class" id="menu-bar-main-user-window-id">
+                <div class="menu-bar-window-button-outer-class" @click.prevent="onClickUserSubRead">
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                    閲覧のみ
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                </div>                
+                <div class="menu-bar-window-button-outer-class" @click.prevent="onClickUserSubLogout">
+                    <span class="menu-bar-window-button-inner-space-class"></span>                  
+                    Logout
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                </div>
             </div>
         </div>
     </div>
@@ -73,12 +108,26 @@
         
         methods: {
             //
+            // 背景
+            //
+            onClickOverlay: function (e) {
+                if (this.activeMainMenu !== '') {
+                    e.preventDefault();
+                    
+                    this.activeMainMenu = '';
+                    this.activeSubMenu = '';
+                }  
+            },
+            
+            //
             // メイン
             //
             onClickMainFile: function (e) {
                 if (this.activeMainMenu !== 'mainFile') {
                     this.activeMainMenu = 'mainFile';
                     this.activeSubMenu = '';
+                    
+                    this.setWindowPos('menu-bar-button-file-id', 'menu-bar-main-file-window-id', false);
                 }
             },
             
@@ -86,6 +135,8 @@
                 if (this.activeMainMenu !== 'mainInsert') {
                     this.activeMainMenu = 'mainInsert';
                     this.activeSubMenu = '';
+                    
+                    this.setWindowPos('menu-bar-button-insert-id', 'menu-bar-main-insert-window-id', false);
                 }
             },
             
@@ -93,6 +144,8 @@
                 if (this.activeSubMenu !== 'mainUser') {
                     this.activeMainMenu = 'mainUser';
                     this.activeSubMenu = '';
+                    
+                    this.setWindowPos('menu-bar-button-user-id', 'menu-bar-main-user-window-id', false);
                 }
             },
             
@@ -100,18 +153,37 @@
             // ファイルサブ
             //
             onClickFileSubImport: function (e) {
-                this.activeSubMenu = 'fileSubImport';
+                if (this.activeSubMenu !== 'fileSubImport') {
+                    this.activeSubMenu = 'fileSubImport';
+                
+                    this.setWindowPos('menu-bar-main-file-import-button-id', 'menu-bar-file-sub-import-window-id', true);
+                }
+            },
+            
+            onMouseEnterFileSubImport: function (e) {
+                if (this.activeSubMenu !== 'fileSubImport') {
+                    this.activeSubMenu = 'fileSubImport';
+                    
+                    this.setWindowPos('menu-bar-main-file-import-button-id', 'menu-bar-file-sub-import-window-id', true);
+                }
             },
             
             onClickFileSubDonwload: function (e) {
-                this.activeSubMenu = 'fileSubDownload';
+                if (this.activeSubMenu !== 'fileSubDownload') {
+                    this.activeSubMenu = 'fileSubDownload';
+                
+                    this.setWindowPos('menu-bar-main-file-download-button-id', 'menu-bar-file-sub-download-window-id', true);
+                }
             },
             
-            onClickFileSubClose: function (e) {
-                this.activeMainMenu = '';
-                this.activeSubMenu = '';
+            onMouseEnterFileSubDownload: function (e) {
+                if (this.activeSubMenu !== 'fileSubDownload') {
+                    this.activeSubMenu = 'fileSubDownload';
+                    
+                    this.setWindowPos('menu-bar-main-file-download-button-id', 'menu-bar-file-sub-download-window-id', true);
+                }
             },
-
+            
             //
             // ファイルサブのインポート
             //
@@ -374,10 +446,6 @@
                 document.body.removeChild(input);
             },
             
-            onClickFileSubImportClose: function (e) {
-                this.activeSubMenu = '';
-            },            
-            
             //
             // ファイルサブのダウンロード
             //
@@ -423,10 +491,6 @@
                     });
             },
             
-            onClickFileSubDownloadClose: function (e) {
-                this.activeSubMenu = '';
-            },
-            
             //
             // 挿入サブ
             //
@@ -448,12 +512,6 @@
                         // 特にすることなし
                     });
             },
-            
-            onClickInsertSubClose: function (e) {
-                this.activeMainMenu = '';
-                this.activeSubMenu = '';
-            },
-            
             
             //
             // ユーザーサブ
@@ -492,11 +550,6 @@
                 // ここまで来てからページ遷移するようなので
                 // document.body.removeChild(link);
                 // まで完了していると思われる。
-            },
-            
-            onClickUserSubClose: function (e) {
-                this.activeMainMenu = '';
-                this.activeSubMenu = '';
             },
             
             //
@@ -653,6 +706,61 @@
                 return mimeType;
             },
             
+            // ウィンドウの表示位置を設定する
+            setWindowPos: function (buttonId, windowId, isSubWindow) {
+                const buttonElem = document.getElementById(buttonId);
+                const windowElem = document.getElementById(windowId);
+                
+                const buttonElemRect = buttonElem.getBoundingClientRect();
+                const buttonElemPagePos = {};
+                buttonElemPagePos.x = buttonElemRect.left + window.pageXOffset;
+                buttonElemPagePos.y = buttonElemRect.top + window.pageYOffset;
+                const windowElemMountPos = this.convertPosFromPageToMount(buttonElemPagePos);
+                
+                if (isSubWindow) {
+                    windowElem.style.left = `${windowElemMountPos.x + buttonElemRect.width}px`;
+                    windowElem.style.top  = `${windowElemMountPos.y}px`;
+                } else {
+                    windowElem.style.left = `${windowElemMountPos.x}px`;
+                        // TODO(kawadakoujisun): 小数のこともある。
+                        //     ここは大丈夫なので、他の.vueで使っているところを見直して！
+                }
+            },
+            
+            // pagePos = {
+            //     x: 0,  // px（数値だけで単位の文字列は付けていない）
+            //     y: 0,
+            // };
+            // pagePosはページ内における座標。
+            // mountPosは台紙内における座標。
+            convertPosFromPageToMount: function (pagePos) {
+                const mountPos = {
+                    x: 0,  // px（数値だけで単位の文字列は付けていない）
+                    y: 0,
+                };
+                
+                // 台紙の枠の太さ
+                const mountBorderWidth = this.getMountBorderWidth();
+                
+                const mountElem = this.$el;
+                // 台紙の現在の画面内における座標
+                const mountElemRect = mountElem.getBoundingClientRect();
+                
+                // 台紙のページ内における座標
+                const mountElemPagePos = {};
+                mountElemPagePos.x = mountElemRect.left + window.pageXOffset;
+                mountElemPagePos.y = mountElemRect.top + window.pageYOffset;
+                
+                mountPos.x = pagePos.x - mountElemPagePos.x - mountBorderWidth;
+                mountPos.y = pagePos.y - mountElemPagePos.y - mountBorderWidth;
+                    
+                return mountPos;
+            },            
+            
+            getMountBorderWidth: function () {
+                return 0;  
+            },            
+            
             // ビジーwaitを使いsleepするデバッグ用途のメソッド
             debug_sleep: function (waitMilliSecond) {
               var startTime = new Date();
@@ -665,6 +773,9 @@
 </script>
 
 <style scoped>
+    /*
+     * メニューバーのバーそのもの
+     */
     .menu-bar-class {
         position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */
         width:  1800px;
@@ -675,7 +786,12 @@
         padding: 0;
     }
     
+    /*
+     * メニューバー上にあるボタン
+     */
     .menu-bar-button-outer-class {
+        position: relative;  /* z-indexを指定したいので、positionをデフォルトのstaticからrelativeに変えておく。 */
+        z-index: 2001;
         margin: 0;
         display: inline-block;
     }
@@ -694,74 +810,79 @@
         cursor: pointer;
     }    
     
+    /*
+     * メニューバーに属するウィンドウを表示しているときのオーバーレイ
+     */
     .menu-bar-window-overlay-class {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */
         position: absolute;
-        left:   0;
-        top:    30px;  /* メニューバーの下の位置 */
-        width:  100%;  /* メニューバーの横幅は台紙の横幅と合わせてある */
-        height: 920px;  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */
+        
+        /*left:   0;*/
+        /*top:    30px;*/  /* メニューバーの下の位置 */
+        /*width:  100%;*/  /* メニューバーの横幅は台紙の横幅と合わせてある */
+        /*height: 920px;*/  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */
+        
+        left:   -20px;  /* メニューバーの位置からマージン分左へ */
+        top:    -20px;  /* メニューバーの位置からマージン分上へ */
+        width:  1850px;  /* だいたい『「メニューバーの横幅(=台紙の横幅)」+「ボーダーの太さ」+「左右マージン分」』くらい */
+        height: 980px;  /* だいたい『「メニューバーの高さ」+「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」+「上下マージン分」』くらい */
+        
         z-index: 2000;  /* 台紙より上に表示される */
         background: rgba(0, 0, 0, 0.0);
         margin: 0;
     }
     
-    .menu-bar-main-file-window-class {
+    /*
+     * ウィンドウ内のボタン
+     */
+    .menu-bar-window-button-outer-class {
+        width: 100%;
+        height: 30px;
+        background-color: #ffffff;
+        margin: 0;
+        line-height: 30px;
+    }
+
+    .menu-bar-window-button-outer-class:hover {
+        background-color: #eeeeee;
+        cursor: pointer;
+    }
+    
+    .menu-bar-window-button-inner-space-class {
+        display: inline-block;
+        width: 10px;
+    }    
+    
+    /*
+     * メニューバーの上にあるボタンから表示するウィンドウ
+     */
+    .menu-bar-main-window-class {
         position: absolute;
+        top:    30px;
+        z-index: 2001;
+        border: 1px solid #000;
+        background-color: #aaaaaa;
+        margin: 0;
+        padding: 0;
+        box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.4);
+        
+        /* 外部から変更するもの */
         left:   0;
-        top:    30px;
-        width:  120px;
-        height: 90px;
-        z-index: 2001;
-        border: 1px solid #000;
-        background-color: #aaaaaa;
-        margin: 0;
     }
     
-    .menu-bar-main-insert-window-class {
+    /*
+     * 「メニューバーの上にあるボタンから表示したウィンドウ」から表示するウィンドウ
+     */
+    .menu-bar-sub-window-class {
         position: absolute;
-        left:   80px;
-        top:    30px;
-        width:  120px;
-        height: 60px;
         z-index: 2001;
         border: 1px solid #000;
         background-color: #aaaaaa;
         margin: 0;
-    }
-    
-    .menu-bar-main-user-window-class {
-        position: absolute;
-        left:   130px;
-        top:    30px;
-        width:  120px;
-        height: 90px;
-        z-index: 2001;
-        border: 1px solid #000;
-        background-color: #aaaaaa;
-        margin: 0;
-    }    
-    
-    .menu-bar-file-sub-import-window-class {
-        position: absolute;
-        left:   120px;
-        top:    30px;
-        width:  300px;
-        height: 90px;
-        z-index: 2001;
-        border: 1px solid #000;
-        background-color: #aaaaaa;
-        margin: 0;        
-    }    
-    
-    .menu-bar-file-sub-download-window-class {
-        position: absolute;
-        left:   120px;
-        top:    60px;
-        width:  300px;
-        height: 90px;
-        z-index: 2001;
-        border: 1px solid #000;
-        background-color: #aaaaaa;
-        margin: 0;        
+        padding: 0;
+        box-shadow: 2px 2px 3px 0 rgba(0, 0, 0, 0.4);
+        
+        /* 外部から変更するもの */
+        top:    0;
+        left:   0;
     }
 </style>
