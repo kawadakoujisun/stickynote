@@ -1,21 +1,31 @@
 <template>
     <div
         v-show="isShow"
-        class="sticker-image-add-window-overlay-class"
-        @click.self.prevent="onClickStickerImageAddWindowOverlay"
     >
+        <!-- 背景 -->
+        <div
+            class="sticker-image-add-window-overlay-class"
+            @click.self.prevent="onClickStickerImageAddWindowOverlay"
+            @click.right.self.prevent="onClickStickerImageAddWindowOverlay"
+        >
+        </div>         
+        
+        <!-- ウィンドウ -->
         <div
             class="sticker-image-add-window-class"
             id="sticker-image-add-window-id"
             @click.self.prevent="onClickStickerImageAddWindow"
         >
-            <img
-                v-show="isImageFileEnabled"
-                id="sticker-image-preview-id"
-                src=""
-                width="200px"
-                height="200px"
-            >
+            <div class="sticker-image-add-window-image-outer-class">
+                <img
+                    v-show="isImageFileEnabled"
+                    class="sticker-image-add-window-image-inner-class"
+                    id="sticker-image-preview-id"
+                    src=""
+                >
+            </div>
+            
+            <div class="sticker-image-add-window-space-class"></div>
 
             <form
                 enctype="multipart/form-data"
@@ -26,21 +36,30 @@
                         type="file"
                         accept="image/jpeg, image/gif, image/png, image/webp"
                         name="selectImageFile"
+                        class="form-control"
                         id="sticker-select-image-file-input-id"
                         @change="onSelectImageFile"
                     >
                 </div>
+                
+                <div class="sticker-image-add-window-space-class"></div>
+                
                 <div>
+                    <p>
                     <button
                         v-bind:disabled="isImageFileEnabled == false"
                         type="submit"
+                        class="btn btn-secondary btn-block"
                     >
                         追加
                     </button>
+                    </p>
                 </div>
             </form>
 
-            <div><button @click.prevent="onClickClose">戻る</button></div>
+            <div class="sticker-image-add-window-space-class"></div>
+            
+            <div class="text-center"><button class="btn btn-secondary" @click.prevent="onClickClose">戻る</button></div>
         </div>
     </div>
 </template>
@@ -80,7 +99,11 @@
         methods: {
             onClickStickerImageAddWindowOverlay: function (e) {
                 console.log('onClickStickerImageAddWindowOverlay');
-                // 何もしない
+                const emitParam = {
+                    event: e,
+                    result: 'none',
+                };
+                this.$emit('hide-sticker-image-add-window-custom-event', emitParam);
             },
             
             onClickStickerImageAddWindow: function (e) {
@@ -172,26 +195,62 @@
 </script>
 
 <style scoped>
+    /*
+     * オーバーレイ
+     */
     .sticker-image-add-window-overlay-class {
-        position: absolute;
+        position: fixed;
         left:   0;
         top:    0;
         width:  100%;
         height: 100%;
-        z-index: 1000;
+        z-index: 3000;
         background: rgba(0, 0, 0, 0.0);
         margin: 0;
     }
     
+    /*
+     * ウィンドウ
+     */
     .sticker-image-add-window-class {
-        position: absolute;
-        left:   0;
-        top:    0;
+        position: fixed;
+        left:         50%;
+        top:          50%;
+        margin-right: -50%;
+        transform:    translate(-50%, -50%);
         width:  400px;
-        height: 400px;
-        z-index: 1001;
+        z-index: 3001;
         border: 1px solid #000;
-        background-color: #aaaaaa;
-        margin: 0;
+        background-color: #ffffff;
+        padding: 10px;
+        box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);
+    }
+    
+    .sticker-image-add-window-image-outer-class {
+        position: relative;
+        width:  200px;
+        height: 200px;
+        border: 1px solid #000;
+        background-color: #cccccc;
+        margin-left:  auto;
+        margin-right: auto;
+        padding: 0;
+    }
+    
+    .sticker-image-add-window-image-inner-class {
+        position: absolute;
+        left:         50%;
+        top:          50%;
+        margin-right: -50%;
+        transform:    translate(-50%, -50%);
+        width:      auto;
+        height:     auto;
+        max-width:  100%;
+        max-height: 100%;
+
+    }
+    
+    .sticker-image-add-window-space-class {
+        height: 10px;
     }
 </style>

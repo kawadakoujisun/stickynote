@@ -55,6 +55,7 @@
                 this.isShow = this.showStickerTextAddWindowProps.isShow;
                 
                 if (this.isShow) {
+                    // 前の入力が残っているので、消しておく。
                     this.addText = '';
                     
                     const windowElem = document.getElementById("sticker-text-add-window-id");

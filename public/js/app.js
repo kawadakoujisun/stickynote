@@ -5047,6 +5047,25 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     showStickerImageAddWindowProps: Object
@@ -5073,7 +5092,12 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     onClickStickerImageAddWindowOverlay: function onClickStickerImageAddWindowOverlay(e) {
-      console.log('onClickStickerImageAddWindowOverlay'); // 何もしない
+      console.log('onClickStickerImageAddWindowOverlay');
+      var emitParam = {
+        event: e,
+        result: 'none'
+      };
+      this.$emit('hide-sticker-image-add-window-custom-event', emitParam);
     },
     onClickStickerImageAddWindow: function onClickStickerImageAddWindow(e) {
       console.log('onClickStickerImageAddWindow'); // 何もしない
@@ -5203,6 +5227,7 @@ __webpack_require__.r(__webpack_exports__);
       this.isShow = this.showStickerTextAddWindowProps.isShow;
 
       if (this.isShow) {
+        // 前の入力が残っているので、消しておく。
         this.addText = '';
         var windowElem = document.getElementById("sticker-text-add-window-id"); // いったん表示しないとサイズを取得できないので、最初は見えないところにおいておく。
 
@@ -10055,7 +10080,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.sticker-image-add-window-overlay-class[data-v-744f6466] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 1000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.sticker-image-add-window-class[data-v-744f6466] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  400px;\n    height: 400px;\n    z-index: 1001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-image-add-window-overlay-class[data-v-744f6466] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-image-add-window-class[data-v-744f6466] {\n    position: fixed;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:  400px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n}\n.sticker-image-add-window-image-outer-class[data-v-744f6466] {\n    position: relative;\n    width:  200px;\n    height: 200px;\n    border: 1px solid #000;\n    background-color: #cccccc;\n    margin-left:  auto;\n    margin-right: auto;\n    padding: 0;\n}\n.sticker-image-add-window-image-inner-class[data-v-744f6466] {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n.sticker-image-add-window-space-class[data-v-744f6466] {\n    height: 10px;\n}\n", ""]);
 
 // exports
 
@@ -10074,7 +10099,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-text-add-window-overlay-class[data-v-d8ba2e6c] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-text-add-window-class[data-v-d8ba2e6c] {\n    position: fixed;\n    left:   50%;\n    top:    50%;\n    min-width: 400px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n.sticker-text-add-window-space-class[data-v-d8ba2e6c] {\n    height: 10px;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-text-add-window-overlay-class[data-v-d8ba2e6c] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-text-add-window-class[data-v-d8ba2e6c] {\n    position: fixed;\n    left:   50%;\n    top:    50%;\n    min-width: 400px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n.sticker-text-add-window-space-class[data-v-d8ba2e6c] {\n    height: 10px;\n}\n", ""]);
 
 // exports
 
@@ -50744,19 +50769,29 @@ var render = function() {
           value: _vm.isShow,
           expression: "isShow"
         }
-      ],
-      staticClass: "sticker-image-add-window-overlay-class",
-      on: {
-        click: function($event) {
-          if ($event.target !== $event.currentTarget) {
-            return null
-          }
-          $event.preventDefault()
-          return _vm.onClickStickerImageAddWindowOverlay($event)
-        }
-      }
+      ]
     },
     [
+      _c("div", {
+        staticClass: "sticker-image-add-window-overlay-class",
+        on: {
+          click: function($event) {
+            if ($event.target !== $event.currentTarget) {
+              return null
+            }
+            $event.preventDefault()
+            return _vm.onClickStickerImageAddWindowOverlay($event)
+          },
+          contextmenu: function($event) {
+            if ($event.target !== $event.currentTarget) {
+              return null
+            }
+            $event.preventDefault()
+            return _vm.onClickStickerImageAddWindowOverlay($event)
+          }
+        }
+      }),
+      _vm._v(" "),
       _c(
         "div",
         {
@@ -50773,22 +50808,26 @@ var render = function() {
           }
         },
         [
-          _c("img", {
-            directives: [
-              {
-                name: "show",
-                rawName: "v-show",
-                value: _vm.isImageFileEnabled,
-                expression: "isImageFileEnabled"
-              }
-            ],
-            attrs: {
-              id: "sticker-image-preview-id",
-              src: "",
-              width: "200px",
-              height: "200px"
-            }
-          }),
+          _c(
+            "div",
+            { staticClass: "sticker-image-add-window-image-outer-class" },
+            [
+              _c("img", {
+                directives: [
+                  {
+                    name: "show",
+                    rawName: "v-show",
+                    value: _vm.isImageFileEnabled,
+                    expression: "isImageFileEnabled"
+                  }
+                ],
+                staticClass: "sticker-image-add-window-image-inner-class",
+                attrs: { id: "sticker-image-preview-id", src: "" }
+              })
+            ]
+          ),
+          _vm._v(" "),
+          _c("div", { staticClass: "sticker-image-add-window-space-class" }),
           _vm._v(" "),
           _c(
             "form",
@@ -50804,6 +50843,7 @@ var render = function() {
             [
               _c("div", [
                 _c("input", {
+                  staticClass: "form-control",
                   attrs: {
                     type: "file",
                     accept: "image/jpeg, image/gif, image/png, image/webp",
@@ -50814,25 +50854,35 @@ var render = function() {
                 })
               ]),
               _vm._v(" "),
+              _c("div", {
+                staticClass: "sticker-image-add-window-space-class"
+              }),
+              _vm._v(" "),
               _c("div", [
-                _c(
-                  "button",
-                  {
-                    attrs: {
-                      disabled: _vm.isImageFileEnabled == false,
-                      type: "submit"
-                    }
-                  },
-                  [_vm._v("\n                    追加\n                ")]
-                )
+                _c("p", [
+                  _c(
+                    "button",
+                    {
+                      staticClass: "btn btn-primary btn-block",
+                      attrs: {
+                        disabled: _vm.isImageFileEnabled == false,
+                        type: "submit"
+                      }
+                    },
+                    [_vm._v("\n                    追加\n                ")]
+                  )
+                ])
               ])
             ]
           ),
           _vm._v(" "),
-          _c("div", [
+          _c("div", { staticClass: "sticker-image-add-window-space-class" }),
+          _vm._v(" "),
+          _c("div", { staticClass: "text-center" }, [
             _c(
               "button",
               {
+                staticClass: "btn btn-primary",
                 on: {
                   click: function($event) {
                     $event.preventDefault()
