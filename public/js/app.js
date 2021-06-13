@@ -4797,6 +4797,22 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     showStickerEditWindowProps: Object
@@ -4804,13 +4820,29 @@ __webpack_require__.r(__webpack_exports__);
   data: function data() {
     return {
       isShow: this.showStickerEditWindowProps.isShow,
-      stickerParam: this.showStickerEditWindowProps.stickerParam
+      stickerParam: this.showStickerEditWindowProps.stickerParam,
+      stickerEditWindowTimeoutId: null
     };
   },
   watch: {
     'showStickerEditWindowProps.isShow': function showStickerEditWindowPropsIsShow(newValue, oldValue) {
       this.isShow = this.showStickerEditWindowProps.isShow;
       this.stickerParam = this.showStickerEditWindowProps.stickerParam;
+
+      if (this.isShow) {
+        var windowElem = document.getElementById("sticker-edit-window-id"); // いったん表示しないとサイズを取得できないので、最初は見えないところにおいておく。
+
+        windowElem.style.left = '-10000px';
+        windowElem.style.top = 0;
+        this.stickerEditWindowTimeoutId = setTimeout(function () {
+          var windowElemRect = windowElem.getBoundingClientRect();
+          windowElem.style.left = '50%';
+          windowElem.style.top = '50%';
+          windowElem.style.marginLeft = "".concat(-windowElemRect.width / 2, "px"); // margin-left
+
+          windowElem.style.marginTop = "".concat(-windowElemRect.height / 2, "px"); // margin-top
+        }, 10);
+      }
     }
   },
   directives: {
@@ -4819,8 +4851,6 @@ __webpack_require__.r(__webpack_exports__);
         var stickerParam = binding.value.stickerParam;
         var colorHex = '000000' + stickerParam['color'].toString(16);
         colorHex = colorHex.substr(colorHex.length - 6);
-        el.style.top = '20px';
-        el.style.left = '20px';
         el.style.backgroundColor = '#' + colorHex; // background-color
       }
     },
@@ -4830,22 +4860,25 @@ __webpack_require__.r(__webpack_exports__);
         var content = binding.value.content;
         var idBaseName = 'content-link-id-';
         el.id = "".concat(idBaseName).concat(content['link'].id);
-        var divItemOuterElems = el.getElementsByClassName('sticker-content-item-outer-class');
-        var spanItemElem = document.createElement('span');
-        divItemOuterElems[0].appendChild(spanItemElem);
+        var divItemOuterElems = el.getElementsByClassName('sticker-edit-sticker-content-item-outer-class');
+        var divItemElem = document.createElement('div');
+        divItemOuterElems[0].appendChild(divItemElem);
 
         if (content['link'].item_type == 1) {
           // app/Sticker.phpで値を定義している
+          divItemElem.classList.add('sticker-edit-sticker-content-item-text-outer-class');
           var text = content['item']['text'];
-          spanItemElem.innerText = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
+          divItemElem.innerText = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
         } else if (content['link'].item_type == 2) {
           // app/Sticker.phpで値を定義している
+          divItemElem.classList.add('sticker-edit-sticker-content-item-image-outer-class');
           var imageURL = content['item']['image_url'];
-          spanItemElem.innerHTML = "<img src=\"".concat(imageURL, "\" width=\"200px\">");
+          divItemElem.innerHTML = "<img class=\"sticker-edit-sticker-content-item-image-inner-class\" src=\"".concat(imageURL, "\">");
         } else if (content['link'].item_type == 3) {
           // app/Sticker.phpで値を定義している
+          divItemElem.classList.add('sticker-edit-sticker-content-item-image-outer-class');
           var videoURL = content['item']['video_url'];
-          spanItemElem.innerHTML = "<video src=\"".concat(videoURL, "\" width=\"200px\" controls autoplay loop></video>");
+          divItemElem.innerHTML = "<video class=\"sticker-edit-sticker-content-item-image-inner-class\" src=\"".concat(videoURL, "\" controls autoplay loop></video>");
         }
       },
       inserted: function inserted(el, binding) {
@@ -4861,7 +4894,12 @@ __webpack_require__.r(__webpack_exports__);
   },
   methods: {
     onClickStickerEditWindowOverlay: function onClickStickerEditWindowOverlay(e) {
-      console.log('onClickStickerEditWindowOverlay'); // 何もしない
+      console.log('onClickStickerEditWindowOverlay');
+      var emitParam = {
+        event: e,
+        result: 'none'
+      };
+      this.backToMount(emitParam);
     },
     onClickStickerEditWindow: function onClickStickerEditWindow(e) {
       console.log('onClickStickerEditWindow'); // 何もしない
@@ -4943,7 +4981,7 @@ __webpack_require__.r(__webpack_exports__);
             event: e,
             result: result
           };
-          this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+          this.backToMount(emitParam);
         }
       }
     },
@@ -4952,7 +4990,7 @@ __webpack_require__.r(__webpack_exports__);
         event: e,
         result: 'none'
       };
-      this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+      this.backToMount(emitParam);
     },
     onClickChangeColor: function onClickChangeColor(e) {
       console.log('onClickChangeColor');
@@ -4960,7 +4998,7 @@ __webpack_require__.r(__webpack_exports__);
         event: e,
         result: 'openStickerColorChangeWindow'
       };
-      this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+      this.backToMount(emitParam);
     },
     onClickAddText: function onClickAddText(e) {
       console.log('onClickAddText');
@@ -4968,7 +5006,7 @@ __webpack_require__.r(__webpack_exports__);
         event: e,
         result: 'openStickerTextAddWindow'
       };
-      this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+      this.backToMount(emitParam);
     },
     onClickAddImage: function onClickAddImage(e) {
       console.log('onClickAddImage');
@@ -4976,7 +5014,7 @@ __webpack_require__.r(__webpack_exports__);
         event: e,
         result: 'openStickerImageAddWindow'
       };
-      this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+      this.backToMount(emitParam);
     },
     onClickAddVideo: function onClickAddVideo(e) {
       console.log('onClickAddVideo');
@@ -4984,6 +5022,14 @@ __webpack_require__.r(__webpack_exports__);
         event: e,
         result: 'openStickerVideoAddWindow'
       };
+      this.backToMount(emitParam);
+    },
+    backToMount: function backToMount(emitParam) {
+      if (this.stickerEditWindowTimeoutId !== null) {
+        clearTimeout(this.stickerEditWindowTimeoutId);
+        this.stickerEditWindowTimeoutId = null;
+      }
+
       this.$emit('hide-sticker-edit-window-custom-event', emitParam);
     }
   }
@@ -10085,7 +10131,26 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.sticker-edit-window-overlay-class[data-v-1ec0eebc] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 1000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n.sticker-edit-window-class[data-v-1ec0eebc] {\n    position: absolute;\n    left:   0;\n    top:    0;\n    width:  440px;\n    height: 600px;\n    z-index: 1001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n}\n.sticker-class[data-v-1ec0eebc] {\n    position: absolute;\n    width:  400px;\n    height: 400px;\n    border: 1px solid #000;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n.sticker-content-item-outer-class[data-v-1ec0eebc] {\n    display: inline-block;  /* 2つのdivを横に並べるには、2つともinline-blockにしておかなければならないようだ。 */\n}\n.sticker-content-remove-button-outer-class[data-v-1ec0eebc] {\n    display: inline-block;  /* 2つのdivを横に並べるには、2つともinline-blockにしておかなければならないようだ。 */\n}\n.sticker-edit-buttons-outer-class[data-v-1ec0eebc] {\n    position: absolute;\n    top: 440px;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-edit-window-overlay-class[data-v-1ec0eebc] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-edit-window-class[data-v-1ec0eebc] {\n    position: fixed;\n    /*left:   50%;\n    top:    50%;*/\n    left: 10px;\n    top: 10px;\n    min-width: 480px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n\n/*\n * ふせん(+削除ボタン)\n */\n.sticker-edit-sticker-class[data-v-1ec0eebc] {\n    position: relative;\n    width:      440px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin-left:  auto;\n    margin-right: auto;\n    padding: 0;\n    overflow-y: scroll;\n    \n    /* 外部から変更するもの */\n    background-color: #000000;\n}\n.sticker-edit-sticker-inner-class[data-v-1ec0eebc] {\n    width:      380px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n.sticker-edit-sticker-content-item-outer-class[data-v-1ec0eebc] {\n    display: inline-block;\n    width: 280px;\n    padding: 0;\n    vertical-align: middle;\n}\n.sticker-edit-sticker-content-remove-button-outer-class[data-v-1ec0eebc] {\n    display: inline-block;\n    width:  80px;\n    padding: 0;\n    vertical-align: middle;\n    text-align: right;\n}\n\n/*\n * ボタン\n */\n.sticker-edit-buttons-outer-class[data-v-1ec0eebc] {\n    position: relative;\n    width:      440px;\n}\n.sticker-edit-button-space-class[data-v-1ec0eebc] {\n    height: 10px;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerEditWindowComponent.vue?vue&type=style&index=1&lang=css&":
+/*!************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerEditWindowComponent.vue?vue&type=style&index=1&lang=css& ***!
+  \************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* TODO(kawadakoujisun): ::v-deepを試してみたい */\n\n/*\n * 画像(動画も)\n */\n.sticker-edit-sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-edit-sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト\n */\n.sticker-edit-sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
 
 // exports
 
@@ -48511,6 +48576,36 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerEditWindowComponent.vue?vue&type=style&index=1&lang=css&":
+/*!****************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerEditWindowComponent.vue?vue&type=style&index=1&lang=css& ***!
+  \****************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerEditWindowComponent.vue?vue&type=style&index=1&lang=css& */ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerEditWindowComponent.vue?vue&type=style&index=1&lang=css&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerImageAddWindowComponent.vue?vue&type=style&index=0&id=744f6466&scoped=true&lang=css&":
 /*!********************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerImageAddWindowComponent.vue?vue&type=style&index=0&id=744f6466&scoped=true&lang=css& ***!
@@ -50585,19 +50680,29 @@ var render = function() {
           value: _vm.isShow,
           expression: "isShow"
         }
-      ],
-      staticClass: "sticker-edit-window-overlay-class",
-      on: {
-        click: function($event) {
-          if ($event.target !== $event.currentTarget) {
-            return null
-          }
-          $event.preventDefault()
-          return _vm.onClickStickerEditWindowOverlay($event)
-        }
-      }
+      ]
     },
     [
+      _c("div", {
+        staticClass: "sticker-edit-window-overlay-class",
+        on: {
+          click: function($event) {
+            if ($event.target !== $event.currentTarget) {
+              return null
+            }
+            $event.preventDefault()
+            return _vm.onClickStickerEditWindowOverlay($event)
+          },
+          contextmenu: function($event) {
+            if ($event.target !== $event.currentTarget) {
+              return null
+            }
+            $event.preventDefault()
+            return _vm.onClickStickerEditWindowOverlay($event)
+          }
+        }
+      }),
+      _vm._v(" "),
       _c(
         "div",
         {
@@ -50627,124 +50732,152 @@ var render = function() {
                         expression: "{ stickerParam: stickerParam }"
                       }
                     ],
-                    staticClass: "sticker-class",
+                    staticClass: "sticker-edit-sticker-class",
                     attrs: { id: "sticker-id" }
                   },
-                  _vm._l(_vm.stickerParam.contents, function(content, index) {
-                    return _c(
+                  [
+                    _c(
                       "div",
-                      {
-                        directives: [
-                          {
-                            name: "sticker-content-custom-directive",
-                            rawName: "v-sticker-content-custom-directive",
-                            value: { content: content, index: index },
-                            expression: "{ content: content, index: index }"
-                          }
-                        ],
-                        key: index
-                      },
-                      [
-                        _c("div", {
-                          staticClass: "sticker-content-item-outer-class"
-                        }),
-                        _vm._v(" "),
-                        _c(
+                      { staticClass: "sticker-edit-sticker-inner-class" },
+                      _vm._l(_vm.stickerParam.contents, function(
+                        content,
+                        index
+                      ) {
+                        return _c(
                           "div",
                           {
-                            staticClass:
-                              "sticker-content-remove-button-outer-class"
+                            directives: [
+                              {
+                                name: "sticker-content-custom-directive",
+                                rawName: "v-sticker-content-custom-directive",
+                                value: { content: content, index: index },
+                                expression: "{ content: content, index: index }"
+                              }
+                            ],
+                            key: index
                           },
                           [
+                            _c("div", {
+                              staticClass:
+                                "sticker-edit-sticker-content-item-outer-class"
+                            }),
+                            _vm._v(" "),
                             _c(
-                              "button",
+                              "div",
                               {
-                                on: {
-                                  click: function($event) {
-                                    $event.preventDefault()
-                                    return _vm.onClickStickerContentRemove(
-                                      $event
-                                    )
-                                  }
-                                }
+                                staticClass:
+                                  "sticker-edit-sticker-content-remove-button-outer-class"
                               },
-                              [_vm._v("削除")]
+                              [
+                                _c(
+                                  "button",
+                                  {
+                                    staticClass: "btn btn-secondary",
+                                    on: {
+                                      click: function($event) {
+                                        $event.preventDefault()
+                                        return _vm.onClickStickerContentRemove(
+                                          $event
+                                        )
+                                      }
+                                    }
+                                  },
+                                  [_vm._v("削除")]
+                                )
+                              ]
                             )
                           ]
                         )
-                      ]
+                      }),
+                      0
                     )
-                  }),
-                  0
+                  ]
                 )
               ])
             : _vm._e(),
           _vm._v(" "),
+          _c("div", { staticClass: "sticker-edit-button-space-class" }),
+          _vm._v(" "),
           _c("div", { staticClass: "sticker-edit-buttons-outer-class" }, [
             _c("div", [
-              _c(
-                "button",
-                {
-                  on: {
-                    click: function($event) {
-                      $event.preventDefault()
-                      return _vm.onClickChangeColor($event)
+              _c("p", [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary btn-block",
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        return _vm.onClickChangeColor($event)
+                      }
                     }
-                  }
-                },
-                [_vm._v("色を変更")]
-              )
+                  },
+                  [_vm._v("色を変更")]
+                )
+              ])
             ]),
             _vm._v(" "),
             _c("div", [
-              _c(
-                "button",
-                {
-                  on: {
-                    click: function($event) {
-                      $event.preventDefault()
-                      return _vm.onClickAddText($event)
+              _c("p", [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary btn-block",
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        return _vm.onClickAddText($event)
+                      }
                     }
-                  }
-                },
-                [_vm._v("テキストを追加")]
-              )
+                  },
+                  [_vm._v("テキストを追加")]
+                )
+              ])
             ]),
             _vm._v(" "),
             _c("div", [
-              _c(
-                "button",
-                {
-                  on: {
-                    click: function($event) {
-                      $event.preventDefault()
-                      return _vm.onClickAddImage($event)
+              _c("p", [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary btn-block",
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        return _vm.onClickAddImage($event)
+                      }
                     }
-                  }
-                },
-                [_vm._v("画像を追加")]
-              )
+                  },
+                  [_vm._v("画像を追加")]
+                )
+              ])
             ]),
             _vm._v(" "),
             _c("div", [
-              _c(
-                "button",
-                {
-                  on: {
-                    click: function($event) {
-                      $event.preventDefault()
-                      return _vm.onClickAddVideo($event)
+              _c("p", [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary btn-block",
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        return _vm.onClickAddVideo($event)
+                      }
                     }
-                  }
-                },
-                [_vm._v("動画を追加")]
-              )
+                  },
+                  [_vm._v("動画を追加")]
+                )
+              ])
             ]),
             _vm._v(" "),
-            _c("div", [
+            _c("div", { staticClass: "sticker-edit-button-space-class" }),
+            _vm._v(" "),
+            _c("div", { staticClass: "text-center" }, [
               _c(
                 "button",
                 {
+                  staticClass: "btn btn-secondary",
                   on: {
                     click: function($event) {
                       $event.preventDefault()
@@ -64364,7 +64497,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _WorkStickerEditWindowComponent_vue_vue_type_template_id_1ec0eebc_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./WorkStickerEditWindowComponent.vue?vue&type=template&id=1ec0eebc&scoped=true& */ "./resources/js/components/WorkStickerEditWindowComponent.vue?vue&type=template&id=1ec0eebc&scoped=true&");
 /* harmony import */ var _WorkStickerEditWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./WorkStickerEditWindowComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/WorkStickerEditWindowComponent.vue?vue&type=script&lang=js&");
 /* empty/unused harmony star reexport *//* harmony import */ var _WorkStickerEditWindowComponent_vue_vue_type_style_index_0_id_1ec0eebc_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./WorkStickerEditWindowComponent.vue?vue&type=style&index=0&id=1ec0eebc&scoped=true&lang=css& */ "./resources/js/components/WorkStickerEditWindowComponent.vue?vue&type=style&index=0&id=1ec0eebc&scoped=true&lang=css&");
-/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* harmony import */ var _WorkStickerEditWindowComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./WorkStickerEditWindowComponent.vue?vue&type=style&index=1&lang=css& */ "./resources/js/components/WorkStickerEditWindowComponent.vue?vue&type=style&index=1&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
 
 
 
@@ -64373,7 +64508,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 
-var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_4__["default"])(
   _WorkStickerEditWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _WorkStickerEditWindowComponent_vue_vue_type_template_id_1ec0eebc_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
   _WorkStickerEditWindowComponent_vue_vue_type_template_id_1ec0eebc_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
@@ -64417,6 +64552,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerEditWindowComponent_vue_vue_type_style_index_0_id_1ec0eebc_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerEditWindowComponent.vue?vue&type=style&index=0&id=1ec0eebc&scoped=true&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerEditWindowComponent.vue?vue&type=style&index=0&id=1ec0eebc&scoped=true&lang=css&");
 /* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerEditWindowComponent_vue_vue_type_style_index_0_id_1ec0eebc_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerEditWindowComponent_vue_vue_type_style_index_0_id_1ec0eebc_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerEditWindowComponent_vue_vue_type_style_index_0_id_1ec0eebc_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerEditWindowComponent_vue_vue_type_style_index_0_id_1ec0eebc_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerEditWindowComponent.vue?vue&type=style&index=1&lang=css&":
+/*!*****************************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerEditWindowComponent.vue?vue&type=style&index=1&lang=css& ***!
+  \*****************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerEditWindowComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerEditWindowComponent.vue?vue&type=style&index=1&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerEditWindowComponent.vue?vue&type=style&index=1&lang=css&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerEditWindowComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerEditWindowComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerEditWindowComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerEditWindowComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
 
 
 /***/ }),

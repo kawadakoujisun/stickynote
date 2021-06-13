@@ -248,7 +248,6 @@
         height:     auto;
         max-width:  100%;
         max-height: 100%;
-
     }
     
     .sticker-video-add-window-space-class {

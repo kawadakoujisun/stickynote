@@ -1,9 +1,16 @@
 <template>
     <div
         v-show="isShow"
-        class="sticker-edit-window-overlay-class"
-        @click.self.prevent="onClickStickerEditWindowOverlay"
     >
+        <!-- 背景 -->
+        <div
+            class="sticker-edit-window-overlay-class"
+            @click.self.prevent="onClickStickerEditWindowOverlay"
+            @click.right.self.prevent="onClickStickerEditWindowOverlay"
+        >
+        </div> 
+        
+        <!-- ウィンドウ -->
         <div
             class="sticker-edit-window-class"
             id="sticker-edit-window-id"
@@ -12,34 +19,43 @@
             <div v-if="(stickerParam != null)">
                 <div
                     v-sticker-custom-directive="{ stickerParam: stickerParam }"
-                    class="sticker-class"
+                    class="sticker-edit-sticker-class"
                     id="sticker-id"
                 >
                     <div
-                        v-for="(content, index) in stickerParam.contents"
-                        v-bind:key="index"
-                        v-sticker-content-custom-directive="{ content: content, index: index }"
+                        class="sticker-edit-sticker-inner-class"
                     >
                         <div
-                            class="sticker-content-item-outer-class"
+                            v-for="(content, index) in stickerParam.contents"
+                            v-bind:key="index"
+                            v-sticker-content-custom-directive="{ content: content, index: index }"
                         >
-                        </div>
-                        <div
-                            class="sticker-content-remove-button-outer-class"
-                        >
-                            <button @click.prevent="onClickStickerContentRemove">削除</button>
+                            <div
+                                class="sticker-edit-sticker-content-item-outer-class"
+                            >
+                            </div>
+                            <div
+                                class="sticker-edit-sticker-content-remove-button-outer-class"
+                            >
+                                <button class="btn btn-secondary" @click.prevent="onClickStickerContentRemove">削除</button>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
+            
+            <div class="sticker-edit-button-space-class"></div>
+            
             <div
                 class="sticker-edit-buttons-outer-class"
             >
-                <div><button @click.prevent="onClickChangeColor">色を変更</button></div>
-                <div><button @click.prevent="onClickAddText">テキストを追加</button></div>
-                <div><button @click.prevent="onClickAddImage">画像を追加</button></div>
-                <div><button @click.prevent="onClickAddVideo">動画を追加</button></div>
-                <div><button @click.prevent="onClickClose">戻る</button></div>
+                <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickChangeColor">色を変更</button></p></div>
+                <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickAddText">テキストを追加</button></p></div>
+                <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickAddImage">画像を追加</button></p></div>
+                <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickAddVideo">動画を追加</button></p></div>
+                
+                <div class="sticker-edit-button-space-class"></div>
+                <div class="text-center"><button class="btn btn-secondary" @click.prevent="onClickClose">戻る</button></div>
             </div>
         </div>
     </div>
@@ -55,6 +71,7 @@
             return {
                 isShow: this.showStickerEditWindowProps.isShow,
                 stickerParam: this.showStickerEditWindowProps.stickerParam,
+                stickerEditWindowTimeoutId: null,
             };
         },
         
@@ -62,6 +79,22 @@
             'showStickerEditWindowProps.isShow': function(newValue, oldValue) {
                 this.isShow = this.showStickerEditWindowProps.isShow;
                 this.stickerParam = this.showStickerEditWindowProps.stickerParam;
+                
+                if (this.isShow) {
+                    const windowElem = document.getElementById("sticker-edit-window-id");
+                    // いったん表示しないとサイズを取得できないので、最初は見えないところにおいておく。
+                    windowElem.style.left = '-10000px';
+                    windowElem.style.top  = 0;
+                    
+                    this.stickerEditWindowTimeoutId = setTimeout(() => {
+                        const windowElemRect = windowElem.getBoundingClientRect();
+                        windowElem.style.left = '50%';
+                        windowElem.style.top  = '50%';
+
+                        windowElem.style.marginLeft = `${-windowElemRect.width/2}px`;   // margin-left
+                        windowElem.style.marginTop  = `${-windowElemRect.height/2}px`;  // margin-top
+                    }, 10);
+                }
             },
         },
         
@@ -73,8 +106,6 @@
                     let colorHex = '000000' + stickerParam['color'].toString(16);
                     colorHex = colorHex.substr(colorHex.length - 6);
                     
-                    el.style.top  = '20px';
-                    el.style.left = '20px';
                     el.style.backgroundColor = '#'+colorHex;  // background-color
                 },
             },
@@ -87,20 +118,23 @@
                     const idBaseName = 'content-link-id-';
                     el.id = `${idBaseName}${content['link'].id}`;
                   
-                    const divItemOuterElems = el.getElementsByClassName('sticker-content-item-outer-class');
+                    const divItemOuterElems = el.getElementsByClassName('sticker-edit-sticker-content-item-outer-class');
                     
-                    const spanItemElem = document.createElement('span');
-                    divItemOuterElems[0].appendChild(spanItemElem);
+                    const divItemElem = document.createElement('div');
+                    divItemOuterElems[0].appendChild(divItemElem);
                         
                     if (content['link'].item_type == 1) {  // app/Sticker.phpで値を定義している
+                        divItemElem.classList.add('sticker-edit-sticker-content-item-text-outer-class');
                         const text = content['item']['text'];
-                        spanItemElem.innerText = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
+                        divItemElem.innerText = text;  // TODO(kawadakoujisun): html構文をそのまま出力して！
                     } else if (content['link'].item_type == 2) {  // app/Sticker.phpで値を定義している
+                        divItemElem.classList.add('sticker-edit-sticker-content-item-image-outer-class');
                         const imageURL = content['item']['image_url'];
-                        spanItemElem.innerHTML = `<img src="${imageURL}" width="200px">`;
+                        divItemElem.innerHTML = `<img class="sticker-edit-sticker-content-item-image-inner-class" src="${imageURL}">`;
                     } else if (content['link'].item_type == 3) {  // app/Sticker.phpで値を定義している
+                        divItemElem.classList.add('sticker-edit-sticker-content-item-image-outer-class');
                         const videoURL = content['item']['video_url'];
-                        spanItemElem.innerHTML = `<video src="${videoURL}" width="200px" controls autoplay loop></video>`;
+                        divItemElem.innerHTML = `<video class="sticker-edit-sticker-content-item-image-inner-class" src="${videoURL}" controls autoplay loop></video>`;
                     }
                 },
                 
@@ -121,7 +155,11 @@
         methods: {
             onClickStickerEditWindowOverlay: function (e) {
                 console.log('onClickStickerEditWindowOverlay');
-                // 何もしない
+                const emitParam = {
+                    event: e,
+                    result: 'none',
+                };
+                this.backToMount(emitParam);
             },
             
             onClickStickerEditWindow: function (e) {
@@ -214,7 +252,7 @@
                             event: e,
                             result: result,
                         };
-                        this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+                        this.backToMount(emitParam);
                     }
                 }
             },
@@ -224,7 +262,7 @@
                     event: e,
                     result: 'none',
                 };
-                this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+                this.backToMount(emitParam);
             },
             
             onClickChangeColor: function (e) {
@@ -233,7 +271,7 @@
                     event: e,
                     result: 'openStickerColorChangeWindow',
                 };
-                this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+                this.backToMount(emitParam);
             },
             
             onClickAddText: function (e) {
@@ -242,7 +280,7 @@
                     event: e,
                     result: 'openStickerTextAddWindow',
                 };
-                this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+                this.backToMount(emitParam);
             },
             
             onClickAddImage: function (e) {
@@ -251,7 +289,7 @@
                     event: e,
                     result: 'openStickerImageAddWindow',
                 };
-                this.$emit('hide-sticker-edit-window-custom-event', emitParam);
+                this.backToMount(emitParam);
             },
 
             onClickAddVideo: function (e) {
@@ -260,6 +298,15 @@
                     event: e,
                     result: 'openStickerVideoAddWindow',
                 };
+                this.backToMount(emitParam);
+            },
+            
+            backToMount: function (emitParam) {
+                if (this.stickerEditWindowTimeoutId !== null) {
+                    clearTimeout(this.stickerEditWindowTimeoutId);
+                    this.stickerEditWindowTimeoutId = null;
+                }
+                
                 this.$emit('hide-sticker-edit-window-custom-event', emitParam);
             },
         },
@@ -267,52 +314,127 @@
 </script>
 
 <style scoped>
+    /*
+     * オーバーレイ
+     */
     .sticker-edit-window-overlay-class {
-        position: absolute;
+        position: fixed;
         left:   0;
         top:    0;
         width:  100%;
         height: 100%;
-        z-index: 1000;
+        z-index: 3000;
         background: rgba(0, 0, 0, 0.0);
         margin: 0;
     }
     
+    /*
+     * ウィンドウ
+     */
     .sticker-edit-window-class {
-        position: absolute;
-        left:   0;
-        top:    0;
-        width:  440px;
-        height: 600px;
-        z-index: 1001;
+        position: fixed;
+        /*left:   50%;
+        top:    50%;*/
+        left: 10px;
+        top: 10px;
+        min-width: 480px;
+        z-index: 3001;
         border: 1px solid #000;
-        background-color: #aaaaaa;
-        margin: 0;
-    }
-    
-    .sticker-class {
-        position: absolute;
-        width:  400px;
-        height: 400px;
-        border: 1px solid #000;
-        margin: 0;
+        background-color: #ffffff;
+        padding: 10px;
+        box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);
         
         /* 外部から変更するもの */
-        top:  0;
-        left: 0;
+        margin-left: 0;
+        margin-top:  0;
+    }
+    
+    /*
+     * ふせん(+削除ボタン)
+     */
+    .sticker-edit-sticker-class {
+        position: relative;
+        width:      440px;
+        min-height: 200px;
+        max-height: 430px;
+        border: 1px solid #000;
+        margin-left:  auto;
+        margin-right: auto;
+        padding: 0;
+        overflow-y: scroll;
+        
+        /* 外部から変更するもの */
         background-color: #000000;
     }
     
-    .sticker-content-item-outer-class {
-        display: inline-block;  /* 2つのdivを横に並べるには、2つともinline-blockにしておかなければならないようだ。 */
+    .sticker-edit-sticker-inner-class {
+        width:      380px;
+        min-height: 180px;
+        max-height: 400px;
+        margin: 10px auto 10px;
     }
     
-    .sticker-content-remove-button-outer-class {
-        display: inline-block;  /* 2つのdivを横に並べるには、2つともinline-blockにしておかなければならないようだ。 */
+    .sticker-edit-sticker-content-item-outer-class {
+        display: inline-block;
+        width: 280px;
+        padding: 0;
+        vertical-align: middle;
     }
     
+    .sticker-edit-sticker-content-remove-button-outer-class {
+        display: inline-block;
+        width:  80px;
+        padding: 0;
+        vertical-align: middle;
+        text-align: right;
+    }
+    
+    /*
+     * ボタン
+     */
     .sticker-edit-buttons-outer-class {
+        position: relative;
+        width:      440px;
+    }
+    
+    .sticker-edit-button-space-class {
+        height: 10px;
+    }
+</style>
+
+<style>
+    /* TODO(kawadakoujisun): ::v-deepを試してみたい */
+
+    /*
+     * 画像(動画も)
+     */
+    .sticker-edit-sticker-content-item-image-outer-class {
+        position: relative;
+        width:  280px;
+        height: 200px;
+        margin: 0;
+        padding: 0;
+    }
+    
+    .sticker-edit-sticker-content-item-image-inner-class {
         position: absolute;
-        top: 440px;
+        left:         50%;
+        top:          50%;
+        margin-right: -50%;
+        transform:    translate(-50%, -50%);
+        width:      auto;
+        height:     auto;
+        max-width:  100%;
+        max-height: 100%;
+    }
+    
+    /*
+     * テキスト
+     */
+    .sticker-edit-sticker-content-item-text-outer-class {
+        position: relative;
+        width:  280px;
+        margin: 0;
+        padding: 0;
     }
 </style>
