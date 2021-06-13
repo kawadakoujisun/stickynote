@@ -1,5 +1,7 @@
 <template>
     <div class="menu-bar-class">
+        <div class="menu-bar-mark-class"><img v-bind:src="markSrc"></div>
+        
         <div class="menu-bar-button-outer-class" id="menu-bar-button-file-id">
             <a @click.prevent="onClickMainFile"><span class="menu-bar-button-inner-class">ファイル</span></a>
         </div>
@@ -103,6 +105,7 @@
             return {
                 activeMainMenu: '',
                 activeSubMenu:  '',
+                markSrc: window.laravel.asset + '/images/stickynote_mark.jpg',
             };
         },
         
@@ -785,6 +788,12 @@
         margin: 20px 20px 0px;
         padding: 0;
     }
+    
+    .menu-bar-mark-class {
+        display: inline-block;
+        vertical-align: middle;
+        padding: 0;
+    }    
     
     /*
      * メニューバー上にあるボタン

@@ -21,6 +21,12 @@
                 padding: 0;
             }
             
+            .menu-bar-mark-class {
+                display: inline-block;
+                vertical-align: middle;
+                padding: 0;
+            }
+            
             .menu-bar-content-class {
                 display: inline-block;
                 padding: 0px 10px;
@@ -39,6 +45,8 @@
     </head>
     <body>
         <div class="menu-bar-class">
+            <div class="menu-bar-mark-class"><img src="{{ asset('/images/stickynote_mark.jpg') }}"></div>
+            
             <div class="menu-bar-content-class menu-bar-content-title-class">StickyNote</div>
             
             @if (Auth::check())
