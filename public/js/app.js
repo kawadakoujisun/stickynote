@@ -3512,6 +3512,10 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -3811,17 +3815,20 @@ __webpack_require__.r(__webpack_exports__);
             }
           };
           contents.push(content); // TODO(kawadakoujisun): id順に並び替える必要あるかも。見た目のdivの並びも。
-        } // 見た目更新
+        }
 
+        var divStickerInnerElems = updateElem.getElementsByClassName('sticker-inner-class');
+        var divStickerInnerElem = divStickerInnerElems[0]; // 見た目更新
 
         var divItemElem = document.createElement('div');
 
         var contentLinkIdBaseName = _this.getContentLinkIdBaseName();
 
         divItemElem.id = "".concat(contentLinkIdBaseName).concat(contentLinkIdNo);
+        divItemElem.classList.add('sticker-content-item-text-outer-class');
         divItemElem.innerText = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
 
-        updateElem.appendChild(divItemElem);
+        divStickerInnerElem.appendChild(divItemElem);
       }
     });
     window.Echo["private"]('sticker-content-item-text-destroy-channel.' + window.laravel.user['id']).listen('StickerContentItemTextDestroy', function (response) {
@@ -3860,16 +3867,19 @@ __webpack_require__.r(__webpack_exports__);
             }
           };
           contents.push(content); // TODO(kawadakoujisun): id順に並び替える必要あるかも。見た目のdivの並びも。
-        } // 見た目更新
+        }
 
+        var divStickerInnerElems = updateElem.getElementsByClassName('sticker-inner-class');
+        var divStickerInnerElem = divStickerInnerElems[0]; // 見た目更新
 
         var divItemElem = document.createElement('div');
 
         var contentLinkIdBaseName = _this.getContentLinkIdBaseName();
 
         divItemElem.id = "".concat(contentLinkIdBaseName).concat(contentLinkIdNo);
-        divItemElem.innerHTML = "<img src=\"".concat(imageURL, "\" width=\"200px\">");
-        updateElem.appendChild(divItemElem);
+        divItemElem.classList.add('sticker-content-item-image-outer-class');
+        divItemElem.innerHTML = "<img class=\"sticker-content-item-image-inner-class\" src=\"".concat(imageURL, "\">");
+        divStickerInnerElem.appendChild(divItemElem);
       }
     });
     window.Echo["private"]('sticker-content-item-image-destroy-channel.' + window.laravel.user['id']).listen('StickerContentItemImageDestroy', function (response) {
@@ -3908,16 +3918,19 @@ __webpack_require__.r(__webpack_exports__);
             }
           };
           contents.push(content); // TODO(kawadakoujisun): id順に並び替える必要あるかも。見た目のdivの並びも。
-        } // 見た目更新
+        }
 
+        var divStickerInnerElems = updateElem.getElementsByClassName('sticker-inner-class');
+        var divStickerInnerElem = divStickerInnerElems[0]; // 見た目更新
 
         var divItemElem = document.createElement('div');
 
         var contentLinkIdBaseName = _this.getContentLinkIdBaseName();
 
         divItemElem.id = "".concat(contentLinkIdBaseName).concat(contentLinkIdNo);
-        divItemElem.innerHTML = "<video src=\"".concat(videoURL, "\" width=\"200px\" controls autoplay loop></video>");
-        updateElem.appendChild(divItemElem);
+        divItemElem.classList.add('sticker-content-item-image-outer-class');
+        divItemElem.innerHTML = "<video class=\"sticker-content-item-image-inner-class\" src=\"".concat(videoURL, "\" controls autoplay loop></video>");
+        divStickerInnerElem.appendChild(divItemElem);
       }
     });
     window.Echo["private"]('sticker-content-item-video-destroy-channel.' + window.laravel.user['id']).listen('StickerContentItemVideoDestroy', function (response) {
@@ -3942,7 +3955,9 @@ __webpack_require__.r(__webpack_exports__);
 
         var idBaseName = 'sticker-id-'; // 調べている時間がないので直書きしておく。
 
-        el.id = "".concat(idBaseName).concat(stickerParam['id']); // const contentLinkIdBaseName = this.getContentLinkIdBaseName();
+        el.id = "".concat(idBaseName).concat(stickerParam['id']);
+        var divStickerInnerElems = el.getElementsByClassName('sticker-inner-class');
+        var divStickerInnerElem = divStickerInnerElems[0]; // const contentLinkIdBaseName = this.getContentLinkIdBaseName();
 
         var contentLinkIdBaseName = 'content-link-id-'; // 直書き
 
@@ -3952,21 +3967,24 @@ __webpack_require__.r(__webpack_exports__);
           var content = contents[i];
           var divItemElem = document.createElement('div');
           divItemElem.id = "".concat(contentLinkIdBaseName).concat(content['link'].id);
-          el.appendChild(divItemElem);
+          divStickerInnerElem.appendChild(divItemElem);
 
           if (content['link'].item_type == 1) {
             // app/Sticker.phpで値を定義している
+            divItemElem.classList.add('sticker-content-item-text-outer-class');
             var text = content['item']['text'];
             divItemElem.innerText = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
           } else if (content['link'].item_type == 2) {
             // app/Sticker.phpで値を定義している
+            divItemElem.classList.add('sticker-content-item-image-outer-class');
             var imageURL = content['item']['image_url'];
-            divItemElem.innerHTML = "<img src=\"".concat(imageURL, "\" width=\"200px\">"); // TODO(kawadakoujisun): https://techacademy.jp/my/frontend/frontend2/jquery
+            divItemElem.innerHTML = "<img class=\"sticker-content-item-image-inner-class\" src=\"".concat(imageURL, "\">"); // TODO(kawadakoujisun): https://techacademy.jp/my/frontend/frontend2/jquery
             //     const img = new Image();をお手本にして画像を表示してみるか？
           } else if (content['link'].item_type == 3) {
             // app/Sticker.phpで値を定義している
+            divItemElem.classList.add('sticker-content-item-image-outer-class');
             var videoURL = content['item']['video_url'];
-            divItemElem.innerHTML = "<video src=\"".concat(videoURL, "\" width=\"200px\" controls autoplay loop></video>");
+            divItemElem.innerHTML = "<video class=\"sticker-content-item-image-inner-class\" src=\"".concat(videoURL, "\" controls autoplay loop></video>");
           }
         }
       },
@@ -4321,6 +4339,8 @@ __webpack_require__.r(__webpack_exports__);
       var updateElem = document.getElementById(updateId);
 
       if (updateElem) {
+        var divStickerInnerElems = updateElem.getElementsByClassName('sticker-inner-class');
+        var divStickerInnerElem = divStickerInnerElems[0];
         var contentLinkIdNo = eventParam.content_link_id; // データ更新
 
         var index = this.getStickerParamIndex(idNo);
@@ -4343,7 +4363,7 @@ __webpack_require__.r(__webpack_exports__);
             var contentLinkIdBaseName = this.getContentLinkIdBaseName();
             var divItemElemId = "".concat(contentLinkIdBaseName).concat(contentLinkIdNo); // TODO(kawadakoujisun): refを使えばループを回さなくて済むか？
 
-            var childElems = updateElem.childNodes;
+            var childElems = divStickerInnerElem.childNodes;
             var divItemElem = null;
 
             for (var _i = 0; _i < childElems.length; ++_i) {
@@ -4356,7 +4376,7 @@ __webpack_require__.r(__webpack_exports__);
             }
 
             if (divItemElem !== null) {
-              updateElem.removeChild(divItemElem);
+              divStickerInnerElem.removeChild(divItemElem);
             }
           }
         }
@@ -10074,7 +10094,26 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px 20px 20px;\n    padding: 0;\n}\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:  400px;\n    height: 400px;\n    border: 1px solid #000;\n    margin: 0;\n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px 20px 20px;\n    padding: 0;\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 0;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=1&lang=css&":
+/*!************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=1&lang=css& ***!
+  \************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * ふせん\n */\n.sticker-inner-class {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n\n/*\n * 画像(動画も)\n */\n.sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト\n */\n.sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
 
 // exports
 
@@ -48486,6 +48525,36 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=1&lang=css&":
+/*!****************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=1&lang=css& ***!
+  \****************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkMountComponent.vue?vue&type=style&index=1&lang=css& */ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=1&lang=css&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=style&index=0&id=14581d2b&scoped=true&lang=css&":
 /*!***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerColorChangeWindowComponent.vue?vue&type=style&index=0&id=14581d2b&scoped=true&lang=css& ***!
@@ -50202,39 +50271,43 @@ var render = function() {
     },
     [
       _vm._l(_vm.stickerParams, function(stickerParam, index) {
-        return _c("div", {
-          directives: [
-            {
-              name: "sticker-custom-directive",
-              rawName: "v-sticker-custom-directive",
-              value: { stickerParam: stickerParam, index: index },
-              expression: "{ stickerParam: stickerParam, index: index }"
-            }
-          ],
-          key: stickerParam.id,
-          staticClass: "sticker-class",
-          on: {
-            mousedown: function($event) {
-              if (
-                !$event.type.indexOf("key") &&
-                _vm._k($event.keyCode, "left", 37, $event.key, [
-                  "Left",
-                  "ArrowLeft"
-                ])
-              ) {
-                return null
+        return _c(
+          "div",
+          {
+            directives: [
+              {
+                name: "sticker-custom-directive",
+                rawName: "v-sticker-custom-directive",
+                value: { stickerParam: stickerParam, index: index },
+                expression: "{ stickerParam: stickerParam, index: index }"
               }
-              if ("button" in $event && $event.button !== 0) {
-                return null
+            ],
+            key: stickerParam.id,
+            staticClass: "sticker-class",
+            on: {
+              mousedown: function($event) {
+                if (
+                  !$event.type.indexOf("key") &&
+                  _vm._k($event.keyCode, "left", 37, $event.key, [
+                    "Left",
+                    "ArrowLeft"
+                  ])
+                ) {
+                  return null
+                }
+                if ("button" in $event && $event.button !== 0) {
+                  return null
+                }
+                return _vm.onChildMouseDownLeft($event)
+              },
+              contextmenu: function($event) {
+                $event.preventDefault()
+                return _vm.onChildClickRight($event)
               }
-              return _vm.onChildMouseDownLeft($event)
-            },
-            contextmenu: function($event) {
-              $event.preventDefault()
-              return _vm.onChildClickRight($event)
             }
-          }
-        })
+          },
+          [_c("div", { staticClass: "sticker-inner-class" })]
+        )
       }),
       _vm._v(" "),
       _c("work-sticker-context-menu", {
@@ -64236,7 +64309,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _WorkMountComponent_vue_vue_type_template_id_652fa580_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./WorkMountComponent.vue?vue&type=template&id=652fa580&scoped=true& */ "./resources/js/components/WorkMountComponent.vue?vue&type=template&id=652fa580&scoped=true&");
 /* harmony import */ var _WorkMountComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./WorkMountComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/WorkMountComponent.vue?vue&type=script&lang=js&");
 /* empty/unused harmony star reexport *//* harmony import */ var _WorkMountComponent_vue_vue_type_style_index_0_id_652fa580_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css& */ "./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css&");
-/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* harmony import */ var _WorkMountComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./WorkMountComponent.vue?vue&type=style&index=1&lang=css& */ "./resources/js/components/WorkMountComponent.vue?vue&type=style&index=1&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
 
 
 
@@ -64245,7 +64320,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 
-var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_4__["default"])(
   _WorkMountComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _WorkMountComponent_vue_vue_type_template_id_652fa580_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
   _WorkMountComponent_vue_vue_type_template_id_652fa580_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
@@ -64289,6 +64364,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_style_index_0_id_652fa580_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css&");
 /* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_style_index_0_id_652fa580_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_style_index_0_id_652fa580_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_style_index_0_id_652fa580_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_style_index_0_id_652fa580_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkMountComponent.vue?vue&type=style&index=1&lang=css&":
+/*!*****************************************************************************************!*\
+  !*** ./resources/js/components/WorkMountComponent.vue?vue&type=style&index=1&lang=css& ***!
+  \*****************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkMountComponent.vue?vue&type=style&index=1&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=1&lang=css&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMountComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
 
 
 /***/ }),
