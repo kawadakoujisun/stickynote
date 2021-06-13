@@ -46,13 +46,13 @@
                 
                 <div>
                     <p>
-                    <button
-                        v-bind:disabled="isImageFileEnabled == false"
-                        type="submit"
-                        class="btn btn-secondary btn-block"
-                    >
-                        追加
-                    </button>
+                        <button
+                            v-bind:disabled="isImageFileEnabled == false"
+                            type="submit"
+                            class="btn btn-secondary btn-block"
+                        >
+                            追加
+                        </button>
                     </p>
                 </div>
             </form>
