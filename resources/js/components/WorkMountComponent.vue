@@ -1120,19 +1120,16 @@
         left: 0;
         background-color: #000000;
     }
-</style>
 
-<style>
-    /*
-     * ふせん
-     */
     .sticker-inner-class {
         width:      280px;
         min-height: 180px;
         max-height: 400px;
         margin: 10px auto 10px;
     }
-    
+</style>
+
+<style>
     /*
      * 画像(動画も)
      */
