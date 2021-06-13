@@ -433,7 +433,8 @@
                         divItemElem.id = `${contentLinkIdBaseName}${contentLinkIdNo}`;
                         
                         divItemElem.classList.add('sticker-content-item-image-outer-class');
-                        divItemElem.innerHTML = `<img class="sticker-content-item-image-inner-class" src="${imageURL}">`;
+                        divItemElem.innerHTML = `<img class="sticker-content-item-image-inner-class" src="${imageURL}" >`;
+                        console.log(divItemElem.innerHTML);
                         divStickerInnerElem.appendChild(divItemElem);
                     }
                 });
@@ -492,6 +493,7 @@
                         
                         divItemElem.classList.add('sticker-content-item-image-outer-class');
                         divItemElem.innerHTML = `<video class="sticker-content-item-image-inner-class" src="${videoURL}" controls autoplay loop></video>`;
+                        console.log(divItemElem.innerHTML);
                         divStickerInnerElem.appendChild(divItemElem);
                     }
                 });
