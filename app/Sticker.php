@@ -96,13 +96,16 @@ class Sticker extends Model
      */
     public static function createSticker()
     {
+        $stickerNumBeforeCreate = self::count();
+        
         $sticker = self::create();
         $sticker->infoItemPos()->create([
             'pos_top'  => 0,
             'pos_left' => 0,
         ]);
         $sticker->infoItemDepth()->create([
-            'depth' => self::$infoItemDepthDefault,
+            // 'depth' => self::$infoItemDepthDefault,
+            'depth' => self::$infoItemDepthMin + $stickerNumBeforeCreate,  // TODO(kawadakoujisun): Maxを越えないかチェック
         ]);
         $sticker->infoItemColor()->create([
             'color' => 0xffaaaa,

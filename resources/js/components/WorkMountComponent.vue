@@ -304,6 +304,35 @@
                     }
                 });
                 
+            window.Echo.private('all-sticker-info-item-depth-update-channel.' + window.laravel.user['id'])
+                .listen('AllStickerInfoItemDepthUpdate', response => {
+                    console.log('window.Echo.private all-sticker-info-item-depth-update-channel listen');
+                    
+                    const stickerDepths = response.eventParam.sticker_depths;
+                    
+                    const idBaseName = this.getStickerIdBaseName();
+                    
+                    for (let stickerDepth of stickerDepths) {
+                        const idNo = stickerDepth.id;
+                        const updateId = `${idBaseName}${idNo}`;
+                        
+                        const updateElem = document.getElementById(updateId);
+                        
+                        if (updateElem) {
+                            const depth = stickerDepth.depth;
+                            
+                            // データ更新
+                            const index = this.getStickerParamIndex(idNo);
+                            if (index !== null) {
+                                this.stickerParams[index]['depth'] = depth;
+                            }
+                            
+                            // 見た目更新
+                            updateElem.style.zIndex = depth;  // z-index
+                        }
+                    }
+                });
+                
             window.Echo.private('sticker-info-item-color-update-channel.' + window.laravel.user['id'])
                 .listen('StickerInfoItemColorUpdate', response => {
                     console.log('window.Echo.private sticker-info-item-color-update-channel listen');
@@ -704,6 +733,10 @@
                         // ここに来る前にふせんを前面へ移動しているので、ここでは何もしない
                     } else if(emitParam.result == 'decreaseDepth') {
                         // ここに来る前にふせんを背面へ移動しているので、ここでは何もしない
+                    } else if(emitParam.result == 'changeDepthFrontMost') {
+                        // ここに来る前にふせんを最前面へ移動しているので、ここでは何もしない
+                    } else if(emitParam.result == 'changeDepthBackMost') {
+                        // ここに来る前にふせんを最背面へ移動しているので、ここでは何もしない    
                     } else if(emitParam.result == 'destroySticker') {
                         // ここに来る前にふせんを削除しているので、ここでは何もしない
                     }

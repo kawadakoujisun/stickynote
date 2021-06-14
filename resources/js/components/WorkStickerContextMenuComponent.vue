@@ -26,6 +26,7 @@
                 編集
                 <span class="sticker-context-menu-button-inner-space-class"></span>
             </div>
+            <!--
             <div class="sticker-context-menu-button-outer-class" @click.prevent="onClickIncreaseDepth">
                 <span class="sticker-context-menu-button-inner-space-class"></span>
                 前面へ移動
@@ -34,6 +35,17 @@
             <div class="sticker-context-menu-button-outer-class" @click.prevent="onClickDecreaseDepth">
                 <span class="sticker-context-menu-button-inner-space-class"></span>
                 背面へ移動
+                <span class="sticker-context-menu-button-inner-space-class"></span>
+            </div>
+            -->
+            <div class="sticker-context-menu-button-outer-class" @click.prevent="onClickChangeDepthFrontMost">
+                <span class="sticker-context-menu-button-inner-space-class"></span>
+                最前面へ移動
+                <span class="sticker-context-menu-button-inner-space-class"></span>
+            </div>
+            <div class="sticker-context-menu-button-outer-class" @click.prevent="onClickChangeDepthBackMost">
+                <span class="sticker-context-menu-button-inner-space-class"></span>
+                最背面へ移動
                 <span class="sticker-context-menu-button-inner-space-class"></span>
             </div>
             <div class="sticker-context-menu-button-outer-class" @click.prevent="onClickDestroy">
@@ -152,6 +164,62 @@
                     result: 'decreaseDepth',
                 };
                 this.$emit('hide-sticker-context-menu-custom-event', emitParam);
+            },
+            
+            onClickChangeDepthFrontMost: function (e) {
+                // ふせんを最前面へ移動する
+                console.log('onClickChangeDepthFrontMost');
+                
+                console.log('axios.put');
+                                    
+                const reqParam = {
+                    id: this.showStickerContextMenuProps.idNo,
+                    change_type : 'frontMost',
+                    change_value: null,
+                };
+                
+                axios.put(window.laravel.asset + '/api/work-all-sticker-info-item-depth-update', {
+                    reqParam: reqParam,
+                    user_id: window.laravel.user['id'],
+                })
+                    .then(response => {
+                        // 特にすることなし
+                    });
+
+                // 親に戻る
+                const emitParam = {
+                    event: e,
+                    result: 'changeDepthFrontMost',
+                };
+                this.$emit('hide-sticker-context-menu-custom-event', emitParam);
+            },
+            
+            onClickChangeDepthBackMost: function (e) {
+                // ふせんを最背面へ移動する
+                console.log('onClickChangeDepthBackMost');
+                
+                console.log('axios.put');
+                                    
+                const reqParam = {
+                    id: this.showStickerContextMenuProps.idNo,
+                    change_type : 'backMost',
+                    change_value: null,
+                };
+                
+                axios.put(window.laravel.asset + '/api/work-all-sticker-info-item-depth-update', {
+                    reqParam: reqParam,
+                    user_id: window.laravel.user['id'],
+                })
+                    .then(response => {
+                        // 特にすることなし
+                    });
+
+                // 親に戻る
+                const emitParam = {
+                    event: e,
+                    result: 'changeDepthBackMost',
+                };
+                this.$emit('hide-sticker-context-menu-custom-event', emitParam);                
             },
             
             onClickDestroy: function (e) {

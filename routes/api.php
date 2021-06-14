@@ -535,6 +535,69 @@ Route::put('/work-sticker-info-item-depth-update', function(Request $request) {
 	}
 });
 
+Route::put('/work-all-sticker-info-item-depth-update', function(Request $request) {
+	$depthMin = \App\Sticker::$infoItemDepthMin;
+
+	$dstStickerDepths = array();
+
+	$stickerCount = 0;
+	
+	$stickerId = $request->reqParam['id'];
+	$changeType = $request->reqParam['change_type'];
+	
+	if ($changeType == 'frontMost') {  // 最前面へ
+		// 複数個所から同時更新されるのを防ぐためロックしておく
+		$stickerInfoItemDepths = \App\StickerInfoItemDepth::orderBy('depth', 'asc')->lockForUpdate()->get();
+		$stickerNum = \App\StickerInfoItemDepth::count();
+		foreach ($stickerInfoItemDepths as $index => $stickerInfoItemDepth) {
+			if ($stickerInfoItemDepth->sticker_id == $stickerId) {
+				$stickerInfoItemDepth->depth = $depthMin + $stickerNum - 1;
+			} else {
+				$stickerInfoItemDepth->depth = $depthMin + $stickerCount;
+				++$stickerCount;
+			}
+			// データベースに保存する
+	    	$stickerInfoItemDepth->save();
+	    	
+	    	$dstStickerDepth = [
+	    		'id'    => $stickerInfoItemDepth->sticker_id,
+	    		'depth' => $stickerInfoItemDepth->depth,
+	    	];
+	    	array_push($dstStickerDepths, $dstStickerDepth);
+		}
+	} else if ($changeType == 'backMost') {  // 最背面へ
+		// 複数個所から同時更新されるのを防ぐためロックしておく
+		$stickerInfoItemDepths = \App\StickerInfoItemDepth::orderBy('depth', 'desc')->lockForUpdate()->get();
+		$stickerNum = \App\StickerInfoItemDepth::count();
+		foreach ($stickerInfoItemDepths as $index => $stickerInfoItemDepth) {
+			if ($stickerInfoItemDepth->sticker_id == $stickerId) {
+				$stickerInfoItemDepth->depth = $depthMin;
+			} else {
+				$stickerInfoItemDepth->depth = $depthMin + $stickerNum - 1 - $stickerCount;
+				++$stickerCount;
+			}
+			// データベースに保存する
+	    	$stickerInfoItemDepth->save();
+	    	
+	    	$dstStickerDepth = [
+	    		'id'    => $stickerInfoItemDepth->sticker_id,
+	    		'depth' => $stickerInfoItemDepth->depth,
+	    	];
+	    	array_push($dstStickerDepths, $dstStickerDepth);
+		}
+	}
+	
+	if (count($dstStickerDepths) > 0) {
+		// イベント
+	    $eventParam = [
+	    	'sticker_depths' => $dstStickerDepths,
+	    	'user_id'        => $request->user_id,
+	    ];
+	    
+	    event((new \App\Events\AllStickerInfoItemDepthUpdate($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+	}
+});
+
 Route::put('/work-sticker-info-item-color-update', function(Request $request) {
 	$sticker = \App\Sticker::find($request->reqParam['id']);
 
