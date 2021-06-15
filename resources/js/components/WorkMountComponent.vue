@@ -462,9 +462,30 @@
                         divItemElem.id = `${contentLinkIdBaseName}${contentLinkIdNo}`;
                         
                         divItemElem.classList.add('sticker-content-item-image-outer-class');
-                        divItemElem.innerHTML = `<img class="sticker-content-item-image-inner-class" src="${imageURL}" >`;
-                        console.log(divItemElem.innerHTML);
+                        // divItemElem.innerHTML = `<img class="sticker-content-item-image-inner-class" src="${imageURL}" >`;
+                        // console.log(divItemElem.innerHTML);
                         divStickerInnerElem.appendChild(divItemElem);
+                        
+                        // img要素を作成して画像をロードする
+                        new Promise((resolve, reject) => {
+                            const img = new Image();
+                            img.classList.add('sticker-content-item-image-inner-class');
+                            img.onload = () => resolve(img);
+                            img.onerror = (e) => reject(e);
+                            img.src = imageURL;
+                        })
+                        .then((img) => {
+                            // 画像のロードが終わったので、img要素を表示する
+                            console.log('Image onload END', imageURL);
+                            console.log(img);
+                            divItemElem.appendChild(img);
+                            console.log(divItemElem.innerHTML);
+                        })
+                        .catch((e) => {
+                            // 画像のロードでエラー発生
+                            console.log('Image onerror END', imageURL);
+                            console.log(e);
+                        });
                     }
                 });
                 
