@@ -388,6 +388,34 @@ Route::post('/work-sticky-note-import-end', function(Request $request) {
 });
 
 Route::post('/work-sticker-create', function(Request $request) {
+	// ふせんを作成する前に、既存のふせんのdepthをきれいにしておく
+	// （ふせんを削除したときにdepthが連続値でなくなっているので）
+	
+	$depthMin = \App\Sticker::$infoItemDepthMin;
+
+	$dstStickerDepths = array();
+
+	$stickerCount = 0;
+	
+	{
+		// 複数個所から同時更新されるのを防ぐためロックしておく
+		$stickerInfoItemDepths = \App\StickerInfoItemDepth::orderBy('depth', 'asc')->lockForUpdate()->get();
+		foreach ($stickerInfoItemDepths as $index => $stickerInfoItemDepth) {
+			$stickerInfoItemDepth->depth = $depthMin + $stickerCount;
+			++$stickerCount;
+
+			// データベースに保存する
+	    	$stickerInfoItemDepth->save();
+	    	
+	    	$dstStickerDepth = [
+	    		'id'    => $stickerInfoItemDepth->sticker_id,
+	    		'depth' => $stickerInfoItemDepth->depth,
+	    	];
+	    	array_push($dstStickerDepths, $dstStickerDepth);
+		}
+	}
+	
+	
 	// ふせんを作成し、データベースに保存する
 	$sticker = \App\Sticker::createSticker();
 	
@@ -402,6 +430,7 @@ Route::post('/work-sticker-create', function(Request $request) {
 	    'pos_left' => $stickerInfoItemPos->pos_left,
 	    'depth'    => $stickerInfoItemDepth->depth,
 	    'color'    => $stickerInfoItemColor->color,
+	    'sticker_depths' => $dstStickerDepths,
 	    'user_id'  => $request->user_id,
 	];
 	

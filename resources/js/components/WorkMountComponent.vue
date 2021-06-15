@@ -198,6 +198,38 @@
                 .listen('StickerCreate', response => {
                     console.log('window.Echo.private sticker-create-channel listen');
                     
+                    // ふせんを追加する前に、既存のふせんのdepthを更新しておく
+
+                    {
+                    
+                        const stickerDepths = response.eventParam.sticker_depths;
+                        
+                        const idBaseName = this.getStickerIdBaseName();
+                        
+                        for (let stickerDepth of stickerDepths) {
+                            const idNo = stickerDepth.id;
+                            const updateId = `${idBaseName}${idNo}`;
+                            
+                            const updateElem = document.getElementById(updateId);
+                            
+                            if (updateElem) {
+                                const depth = stickerDepth.depth;
+                                
+                                // データ更新
+                                const index = this.getStickerParamIndex(idNo);
+                                if (index !== null) {
+                                    this.stickerParams[index]['depth'] = depth;
+                                }
+                                
+                                // 見た目更新
+                                updateElem.style.zIndex = depth;  // z-index
+                            }
+                        }
+                    }
+
+
+                    // ふせんを追加する
+                    
                     // データ更新
                     const stickerParam = {
         				'id'       : response.eventParam.id,
