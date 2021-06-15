@@ -500,6 +500,8 @@
                             .catch((e2) => {
                                 console.log('Image onerror END 2', imageURL);
                                 console.log(e2);
+                                
+                                divItemElem.textContent = '画像読み込みエラー';
                             });
                         });
                     }
