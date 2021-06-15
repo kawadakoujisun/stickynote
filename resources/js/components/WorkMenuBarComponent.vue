@@ -302,12 +302,19 @@
                                     const uncompressInfos = [];
                                     const uncompressFuncs = [];
                                     
+                                    let uncompressCount = 0;
+                                    const uncompressIndexes = [];  // uncompressIndexes[stickerIndex][contentIndex] = uncompressInfosのインデックス
+                                    
                                     for (let stickerIndex = 0; stickerIndex < stickerParams.length; ++stickerIndex) {
                                         const stickerParam = stickerParams[stickerIndex];
                                         const contents = stickerParam.contents;
                                         
+                                        const uncompressContentIndexes = [];
+                                        
                                         for (let contentIndex = 0; contentIndex < contents.length; ++contentIndex) {
                                             const content = contents[contentIndex];
+                                            
+                                            uncompressContentIndexes.push(-1);  // uncompressInfosのインデックスがない場合は-1
  
                                             let source = null;
                                             if (content.link.item_type == 2) {  // app/Sticker.phpで値を定義している
@@ -351,29 +358,42 @@
                                                     
                                                     uncompressInfos.push(uncompressInfo);
                                                     uncompressFuncs.push(zipContent.files[itemFileName].async('base64'));
+                                                    
+                                                    uncompressContentIndexes.pop();  // pushしていた-1をpopしておく
+                                                    uncompressContentIndexes.push(uncompressCount);
+                                                    
+                                                    ++uncompressCount;
                                                 }
                                             }
                                         }
+                                        
+                                        uncompressIndexes.push(uncompressContentIndexes);
                                     }
                                     
                                     if (uncompressFuncs.length >= 1) {
                                         Promise.all(uncompressFuncs)
                                         .then((uncompressData) => {  // this.を使いたかったので、.then(function(uncompressData) {からアロー関数に変えた。
+                                            /*
+                                            //
+                                            // 特別なプロパティitem_infoを使う場合
+                                            //     1回のpostで済ませる
+                                            //
+                                            
                                             // 読み込んだ画像や動画をDataURLにする
                                             for (let dataIndex=0; dataIndex<uncompressData.length; ++dataIndex) {
-                                                /*
-                                                // TODO(kawadakoujisun): このbase64から16進数へ変換する処理は間違っているかもしれない。要確認！
-                                                // ファイルの先頭数バイトからMIMEタイプを取得する
-                                                const header64 = uncompressData[dataIndex].slice(0, 16);
-                                                const headerRaw = atob(header64);
-                                                const header16 = '';
-                                                for (let charIndex=0; charIndex<headerRaw.length; ++charIndex) {
-                                                    header16 += headerRaw.charCodeAt(charIndex).toString(16);
-                                                }
-
-                                                const mimeType = this.getMimeTypeFromHeader(header16);
-                                                console.log(header64, headerRaw, header16, mimeType);
-                                                */
+                                                // 
+                                                // // TODO(kawadakoujisun): このbase64から16進数へ変換する処理は間違っているかもしれない。要確認！
+                                                // // ファイルの先頭数バイトからMIMEタイプを取得する
+                                                // const header64 = uncompressData[dataIndex].slice(0, 16);
+                                                // const headerRaw = atob(header64);
+                                                // const header16 = '';
+                                                // for (let charIndex=0; charIndex<headerRaw.length; ++charIndex) {
+                                                //     header16 += headerRaw.charCodeAt(charIndex).toString(16);
+                                                // }
+                                                // 
+                                                // const mimeType = this.getMimeTypeFromHeader(header16);
+                                                // console.log(header64, headerRaw, header16, mimeType);
+                                                // 
                                                 
                                                 // 拡張子からMIMEタイプを取得する
                                                 const uncompressInfo = uncompressInfos[dataIndex];
@@ -415,6 +435,118 @@
                                                 .then(response => {
                                                     // 特にすることなし
                                                 });
+                                                
+                                            //
+                                            // 特別なプロパティitem_infoを使う場合　ここまで
+                                            //
+                                            */
+                                            
+                                            /**/
+                                            //
+                                            // 特別なプロパティitem_infoを使わない場合
+                                            //     何回かpostを行う
+                                            //
+                                            
+                                            // データベースを更新する
+                                            console.log('axios.post');
+                                            
+                                            const reqParam = {
+                                                stickerParams: stickerParams,
+                                            };                                            
+                                            
+                                            // start
+                                            axios.post(window.laravel.asset + '/api/work-sticky-note-import-start', {
+                                                reqParam: reqParam,
+                                                user_id: window.laravel.user['id'],
+                                            })
+                                                .then(async function (response) {
+                                                    const stickerIds = response.data;
+                                                    
+                                                    // content-item
+                                                    try {
+                                                        for (let stickerIndex = 0; stickerIndex < stickerParams.length; ++stickerIndex) {
+                                                            const stickerId = stickerIds[stickerIndex];
+                                                            
+                                                            if (stickerId >= 0) {
+                                                                const stickerParam = stickerParams[stickerIndex];
+                                                                const contents = stickerParam.contents;
+                                                                
+                                                                for (let contentIndex = 0; contentIndex < contents.length; ++contentIndex) {
+                                                                    const content = contents[contentIndex];
+                                                                    
+                                                                    const contentItemReqParam = {};
+                                                                    contentItemReqParam.id = stickerId;
+                                                                    contentItemReqParam.item_type = content.link.item_type;
+                         
+                                                                    let contentItemExist = false;
+                                                                    
+                                                                    if (content.link.item_type == 1) {  // app/Sticker.phpで値を定義している
+                                                                        contentItemReqParam.text = content.item.text;
+                                                                        contentItemExist = true;
+                                                                    } else if (content.link.item_type == 2) {  // app/Sticker.phpで値を定義している
+                                                                        const dataIndex = uncompressIndexes[stickerIndex][contentIndex];
+                                                                        if (dataIndex >= 0) {
+                                                                            // 拡張子からMIMEタイプを取得する
+                                                                            const uncompressInfo = uncompressInfos[dataIndex];
+                                                                            const mimeType = this.getMimeTypeFromExtension(uncompressInfo.extName);
+                                                                            console.log(uncompressInfo.extName, mimeType);
+                                
+                                                                            if (mimeType) {
+                                                                                // DataURL
+                                                                                const dataURL = 'data:' + mimeType + ';base64,' + uncompressData[dataIndex];
+                                                                                contentItemReqParam.selectImageFileInfo = dataURL;
+                                                                                contentItemExist = true;
+                                                                            }
+                                                                        }
+                                                                    } else if (content.link.item_type == 3) {  // app/Sticker.phpで値を定義している
+                                                                        const dataIndex = uncompressIndexes[stickerIndex][contentIndex];
+                                                                        if (dataIndex >= 0) {
+                                                                            // 拡張子からMIMEタイプを取得する
+                                                                            const uncompressInfo = uncompressInfos[dataIndex];
+                                                                            const mimeType = this.getMimeTypeFromExtension(uncompressInfo.extName);
+                                                                            console.log(uncompressInfo.extName, mimeType);
+                                
+                                                                            if (mimeType) {
+                                                                                // DataURL
+                                                                                const dataURL = 'data:' + mimeType + ';base64,' + uncompressData[dataIndex];
+                                                                                contentItemReqParam.selectVideoFileInfo = dataURL;
+                                                                                contentItemExist = true;
+                                                                            }
+                                                                        }
+                                                                    }
+                                                                    
+                                                                    if (contentItemExist) {
+                                                                        await axios.post(window.laravel.asset + '/api/work-sticky-note-import-content-item', {
+                                                                            reqParam: contentItemReqParam,
+                                                                            user_id: window.laravel.user['id'],
+                                                                        });
+                                                                    }
+                                                                }
+                                                            }
+                                                        }
+                                                    } catch (error) {
+                                                        console.log('axios.post', error);
+                                                    }
+                                                    
+                                                    // end
+                                                    axios.post(window.laravel.asset + '/api/work-sticky-note-import-end', {
+                                                        user_id: window.laravel.user['id'],
+                                                    })
+                                                        .then(response => {
+                                                            // 特にすることなし
+                                                        })
+                                                        .catch(error => {
+                                                            console.log('axios.post', error);
+                                                        });
+                                                }.bind(this))  // コールバック関数内でthisを使用しているので
+                                                .catch(error => {
+                                                    console.log('axios.post', error);
+                                                });
+                                            
+                                            //
+                                            // 特別なプロパティitem_infoを使わない場合　ここまで
+                                            //
+                                            /**/
                                         });
                                     } else {
                                         // TODO(kawadakoujisun): Promise.all(uncompressFuncs)の配列が空だったときの挙動次第では

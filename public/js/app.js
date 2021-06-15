@@ -3004,13 +3004,18 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
                 var uncompressInfos = [];
                 var uncompressFuncs = [];
+                var uncompressCount = 0;
+                var uncompressIndexes = []; // uncompressIndexes[stickerIndex][contentIndex] = uncompressInfosのインデックス
 
                 for (var stickerIndex = 0; stickerIndex < stickerParams.length; ++stickerIndex) {
                   var stickerParam = stickerParams[stickerIndex];
                   var contents = stickerParam.contents;
+                  var uncompressContentIndexes = [];
 
                   for (var contentIndex = 0; contentIndex < contents.length; ++contentIndex) {
                     var content = contents[contentIndex];
+                    uncompressContentIndexes.push(-1); // uncompressInfosのインデックスがない場合は-1
+
                     var source = null;
 
                     if (content.link.item_type == 2) {
@@ -3067,66 +3072,241 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                         };
                         uncompressInfos.push(uncompressInfo);
                         uncompressFuncs.push(zipContent.files[itemFileName].async('base64'));
+                        uncompressContentIndexes.pop(); // pushしていた-1をpopしておく
+
+                        uncompressContentIndexes.push(uncompressCount);
+                        ++uncompressCount;
                       }
                     }
                   }
+
+                  uncompressIndexes.push(uncompressContentIndexes);
                 }
 
                 if (uncompressFuncs.length >= 1) {
                   Promise.all(uncompressFuncs).then(function (uncompressData) {
                     // this.を使いたかったので、.then(function(uncompressData) {からアロー関数に変えた。
+
+                    /*
+                    //
+                    // 特別なプロパティitem_infoを使う場合
+                    //     1回のpostで済ませる
+                    //
+                    
                     // 読み込んだ画像や動画をDataURLにする
-                    for (var dataIndex = 0; dataIndex < uncompressData.length; ++dataIndex) {
-                      /*
-                      // TODO(kawadakoujisun): このbase64から16進数へ変換する処理は間違っているかもしれない。要確認！
-                      // ファイルの先頭数バイトからMIMEタイプを取得する
-                      const header64 = uncompressData[dataIndex].slice(0, 16);
-                      const headerRaw = atob(header64);
-                      const header16 = '';
-                      for (let charIndex=0; charIndex<headerRaw.length; ++charIndex) {
-                          header16 += headerRaw.charCodeAt(charIndex).toString(16);
-                      }
-                       const mimeType = this.getMimeTypeFromHeader(header16);
-                      console.log(header64, headerRaw, header16, mimeType);
-                      */
-                      // 拡張子からMIMEタイプを取得する
-                      var _uncompressInfo = uncompressInfos[dataIndex];
-
-                      var mimeType = _this.getMimeTypeFromExtension(_uncompressInfo.extName);
-
-                      console.log(_uncompressInfo.extName, mimeType);
-
-                      if (mimeType) {
-                        // DataURL
-                        var dataURL = 'data:' + mimeType + ';base64,' + uncompressData[dataIndex]; // 新しいプロパティitem_infoを追加し、DataURLを設定する。
-                        // ファイルがあるかどうかは、この特別なプロパティitem_infoがあるかどうかで判定する。
-
-                        if (_uncompressInfo.contentItemType == 2) {
-                          // app/Sticker.phpで値を定義している
-                          stickerParams[_uncompressInfo.stickerIndex].contents[_uncompressInfo.contentIndex].item_info = {
-                            selectImageFileInfo: dataURL
-                          };
-                        } else if (_uncompressInfo.contentItemType == 3) {
-                          // app/Sticker.phpで値を定義している
-                          stickerParams[_uncompressInfo.stickerIndex].contents[_uncompressInfo.contentIndex].item_info = {
-                            selectVideoFileInfo: dataURL
-                          };
+                    for (let dataIndex=0; dataIndex<uncompressData.length; ++dataIndex) {
+                        // 
+                        // // TODO(kawadakoujisun): このbase64から16進数へ変換する処理は間違っているかもしれない。要確認！
+                        // // ファイルの先頭数バイトからMIMEタイプを取得する
+                        // const header64 = uncompressData[dataIndex].slice(0, 16);
+                        // const headerRaw = atob(header64);
+                        // const header16 = '';
+                        // for (let charIndex=0; charIndex<headerRaw.length; ++charIndex) {
+                        //     header16 += headerRaw.charCodeAt(charIndex).toString(16);
+                        // }
+                        // 
+                        // const mimeType = this.getMimeTypeFromHeader(header16);
+                        // console.log(header64, headerRaw, header16, mimeType);
+                        // 
+                        
+                        // 拡張子からMIMEタイプを取得する
+                        const uncompressInfo = uncompressInfos[dataIndex];
+                        const mimeType = this.getMimeTypeFromExtension(uncompressInfo.extName);
+                        console.log(uncompressInfo.extName, mimeType);
+                         if (mimeType) {
+                            // DataURL
+                            const dataURL = 'data:' + mimeType + ';base64,' + uncompressData[dataIndex];
+                        
+                            // 新しいプロパティitem_infoを追加し、DataURLを設定する。
+                            // ファイルがあるかどうかは、この特別なプロパティitem_infoがあるかどうかで判定する。
+                            if (uncompressInfo.contentItemType == 2) {  // app/Sticker.phpで値を定義している
+                                stickerParams[uncompressInfo.stickerIndex].contents[uncompressInfo.contentIndex].item_info = {
+                                    selectImageFileInfo: dataURL,
+                                };
+                            } else if (uncompressInfo.contentItemType == 3) {  // app/Sticker.phpで値を定義している
+                                stickerParams[uncompressInfo.stickerIndex].contents[uncompressInfo.contentIndex].item_info = {
+                                    selectVideoFileInfo: dataURL,
+                                };
+                            }
                         }
-                      }
-                    } // 特別なプロパティitem_infoを足した後の状態を確認
+                    }
+                    
+                    // 特別なプロパティitem_infoを足した後の状態を確認
+                    console.log(stickerParams);
+                                                     // データベースを更新する
+                    console.log('axios.post');
+                    
+                    const reqParam = {
+                        stickerParams: stickerParams,
+                    };
+                    
+                    axios.post(window.laravel.asset + '/api/work-sticky-note-import', {
+                        reqParam: reqParam,
+                        user_id: window.laravel.user['id'],
+                    })
+                        .then(response => {
+                            // 特にすることなし
+                        });
+                        
+                    //
+                    // 特別なプロパティitem_infoを使う場合　ここまで
+                    //
+                    */
 
-
-                    console.log(stickerParams); // データベースを更新する
-
+                    /**/
+                    //
+                    // 特別なプロパティitem_infoを使わない場合
+                    //     何回かpostを行う
+                    //
+                    // データベースを更新する
                     console.log('axios.post');
                     var reqParam = {
                       stickerParams: stickerParams
-                    };
-                    axios.post(window.laravel.asset + '/api/work-sticky-note-import', {
+                    }; // start
+
+                    axios.post(window.laravel.asset + '/api/work-sticky-note-import-start', {
                       reqParam: reqParam,
                       user_id: window.laravel.user['id']
-                    }).then(function (response) {// 特にすることなし
-                    });
+                    }).then( /*#__PURE__*/function () {
+                      var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(response) {
+                        var stickerIds, _stickerIndex, stickerId, _stickerParam, _contents, _contentIndex, _content, contentItemReqParam, contentItemExist, dataIndex, _uncompressInfo, mimeType, dataURL, _dataIndex, _uncompressInfo2, _mimeType, _dataURL;
+
+                        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+                          while (1) {
+                            switch (_context.prev = _context.next) {
+                              case 0:
+                                stickerIds = response.data; // content-item
+
+                                _context.prev = 1;
+                                _stickerIndex = 0;
+
+                              case 3:
+                                if (!(_stickerIndex < stickerParams.length)) {
+                                  _context.next = 25;
+                                  break;
+                                }
+
+                                stickerId = stickerIds[_stickerIndex];
+
+                                if (!(stickerId >= 0)) {
+                                  _context.next = 22;
+                                  break;
+                                }
+
+                                _stickerParam = stickerParams[_stickerIndex];
+                                _contents = _stickerParam.contents;
+                                _contentIndex = 0;
+
+                              case 9:
+                                if (!(_contentIndex < _contents.length)) {
+                                  _context.next = 22;
+                                  break;
+                                }
+
+                                _content = _contents[_contentIndex];
+                                contentItemReqParam = {};
+                                contentItemReqParam.id = stickerId;
+                                contentItemReqParam.item_type = _content.link.item_type;
+                                contentItemExist = false;
+
+                                if (_content.link.item_type == 1) {
+                                  // app/Sticker.phpで値を定義している
+                                  contentItemReqParam.text = _content.item.text;
+                                  contentItemExist = true;
+                                } else if (_content.link.item_type == 2) {
+                                  // app/Sticker.phpで値を定義している
+                                  dataIndex = uncompressIndexes[_stickerIndex][_contentIndex];
+
+                                  if (dataIndex >= 0) {
+                                    // 拡張子からMIMEタイプを取得する
+                                    _uncompressInfo = uncompressInfos[dataIndex];
+                                    mimeType = this.getMimeTypeFromExtension(_uncompressInfo.extName);
+                                    console.log(_uncompressInfo.extName, mimeType);
+
+                                    if (mimeType) {
+                                      // DataURL
+                                      dataURL = 'data:' + mimeType + ';base64,' + uncompressData[dataIndex];
+                                      contentItemReqParam.selectImageFileInfo = dataURL;
+                                      contentItemExist = true;
+                                    }
+                                  }
+                                } else if (_content.link.item_type == 3) {
+                                  // app/Sticker.phpで値を定義している
+                                  _dataIndex = uncompressIndexes[_stickerIndex][_contentIndex];
+
+                                  if (_dataIndex >= 0) {
+                                    // 拡張子からMIMEタイプを取得する
+                                    _uncompressInfo2 = uncompressInfos[_dataIndex];
+                                    _mimeType = this.getMimeTypeFromExtension(_uncompressInfo2.extName);
+                                    console.log(_uncompressInfo2.extName, _mimeType);
+
+                                    if (_mimeType) {
+                                      // DataURL
+                                      _dataURL = 'data:' + _mimeType + ';base64,' + uncompressData[_dataIndex];
+                                      contentItemReqParam.selectVideoFileInfo = _dataURL;
+                                      contentItemExist = true;
+                                    }
+                                  }
+                                }
+
+                                if (!contentItemExist) {
+                                  _context.next = 19;
+                                  break;
+                                }
+
+                                _context.next = 19;
+                                return axios.post(window.laravel.asset + '/api/work-sticky-note-import-content-item', {
+                                  reqParam: contentItemReqParam,
+                                  user_id: window.laravel.user['id']
+                                });
+
+                              case 19:
+                                ++_contentIndex;
+                                _context.next = 9;
+                                break;
+
+                              case 22:
+                                ++_stickerIndex;
+                                _context.next = 3;
+                                break;
+
+                              case 25:
+                                _context.next = 30;
+                                break;
+
+                              case 27:
+                                _context.prev = 27;
+                                _context.t0 = _context["catch"](1);
+                                console.log('axios.post', _context.t0);
+
+                              case 30:
+                                // end
+                                axios.post(window.laravel.asset + '/api/work-sticky-note-import-end', {
+                                  user_id: window.laravel.user['id']
+                                }).then(function (response) {// 特にすることなし
+                                })["catch"](function (error) {
+                                  console.log('axios.post', error);
+                                });
+
+                              case 31:
+                              case "end":
+                                return _context.stop();
+                            }
+                          }
+                        }, _callee, this, [[1, 27]]);
+                      }));
+
+                      return function (_x) {
+                        return _ref.apply(this, arguments);
+                      };
+                    }().bind(_this)) // コールバック関数内でthisを使用しているので
+                    ["catch"](function (error) {
+                      console.log('axios.post', error);
+                    }); //
+                    // 特別なプロパティitem_infoを使わない場合　ここまで
+                    //
+
+                    /**/
                   });
                 } else {
                   // TODO(kawadakoujisun): Promise.all(uncompressFuncs)の配列が空だったときの挙動次第では
@@ -3257,11 +3437,11 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       return stickyNoteJson;
     },
     downloadAll: function () {
-      var _downloadAll = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(stickerParams) {
+      var _downloadAll = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee2(stickerParams) {
         var stickyNoteJson, sources, stickerIndex, stickerParam, contents, contentIndex, content, itemPromises, items, zip, folderName, folder;
-        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
+        return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee2$(_context2) {
           while (1) {
-            switch (_context.prev = _context.next) {
+            switch (_context2.prev = _context2.next) {
               case 0:
                 // JSON
                 stickyNoteJson = this.getStickyNoteJson(stickerParams); // 画像や動画のURL
@@ -3326,11 +3506,11 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                   return itemPromise;
                 }); // 画像や動画を全て収集できるまで待つ
 
-                _context.next = 6;
+                _context2.next = 6;
                 return Promise.all(itemPromises);
 
               case 6:
-                items = _context.sent;
+                items = _context2.sent;
                 // zip
                 zip = new JSZip(); // フォルダ作成
 
@@ -3360,13 +3540,13 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
               case 13:
               case "end":
-                return _context.stop();
+                return _context2.stop();
             }
           }
-        }, _callee, this);
+        }, _callee2, this);
       }));
 
-      function downloadAll(_x) {
+      function downloadAll(_x2) {
         return _downloadAll.apply(this, arguments);
       }
 
@@ -10251,7 +10431,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * メニューバーのバーそのもの\n */\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    /*border: 1px solid #000;*/\n    background-color: #ffffff;\n    margin: 20px 20px 0px;\n    padding: 0;\n}\n.menu-bar-mark-class[data-v-76707645] {\n    display: inline-block;\n    vertical-align: middle;\n    padding: 0;\n}    \n\n/*\n * メニューバー上にあるボタン\n */\n.menu-bar-button-outer-class[data-v-76707645] {\n    position: relative;  /* z-indexを指定したいので、positionをデフォルトのstaticからrelativeに変えておく。 */\n    z-index: 2001;\n    margin: 0;\n    display: inline-block;\n}\n.menu-bar-button-inner-class[data-v-76707645] {\n    display: inline-block;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    padding: 0px 10px;\n    line-height: 30px;\n}\n.menu-bar-button-inner-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}    \n\n/*\n * メニューバーに属するウィンドウを表示しているときのオーバーレイ\n */\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    \n    /*left:   0;*/\n    /*top:    30px;*/  /* メニューバーの下の位置 */\n    /*width:  100%;*/  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    /*height: 920px;*/  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    \n    left:   -20px;  /* メニューバーの位置からマージン分左へ */\n    top:    -20px;  /* メニューバーの位置からマージン分上へ */\n    width:  1850px;  /* だいたい『「メニューバーの横幅(=台紙の横幅)」+「ボーダーの太さ」+「左右マージン分」』くらい */\n    height: 980px;  /* だいたい『「メニューバーの高さ」+「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」+「上下マージン分」』くらい */\n    \n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ内のボタン\n */\n.menu-bar-window-button-outer-class[data-v-76707645] {\n    width: 100%;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    line-height: 30px;\n}\n.menu-bar-window-button-outer-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}\n.menu-bar-window-button-inner-space-class[data-v-76707645] {\n    display: inline-block;\n    width: 10px;\n}    \n\n/*\n * メニューバーの上にあるボタンから表示するウィンドウ\n */\n.menu-bar-main-window-class[data-v-76707645] {\n    position: absolute;\n    top:    30px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    left:   0;\n}\n\n/*\n * 「メニューバーの上にあるボタンから表示したウィンドウ」から表示するウィンドウ\n */\n.menu-bar-sub-window-class[data-v-76707645] {\n    position: absolute;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    top:    0;\n    left:   0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * メニューバーのバーそのもの\n */\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    /*border: 1px solid #000;*/\n    background-color: #ffffff;\n    margin: 20px 20px 0px;\n    padding: 0;\n}\n.menu-bar-mark-class[data-v-76707645] {\n    display: inline-block;\n    vertical-align: middle;\n    padding: 0;\n}    \n\n/*\n * メニューバー上にあるボタン\n */\n.menu-bar-button-outer-class[data-v-76707645] {\n    position: relative;  /* z-indexを指定したいので、positionをデフォルトのstaticからrelativeに変えておく。 */\n    z-index: 2001;\n    margin: 0;\n    display: inline-block;\n}\n.menu-bar-button-inner-class[data-v-76707645] {\n    display: inline-block;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    padding: 0px 10px;\n    line-height: 30px;\n}\n.menu-bar-button-inner-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}    \n\n/*\n * メニューバーに属するウィンドウを表示しているときのオーバーレイ\n */\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    \n    /*left:   0;*/\n    /*top:    30px;*/  /* メニューバーの下の位置 */\n    /*width:  100%;*/  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    /*height: 920px;*/  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    \n    left:   -20px;  /* メニューバーの位置からマージン分左へ */\n    top:    -20px;  /* メニューバーの位置からマージン分上へ */\n    width:  1850px;  /* だいたい『「メニューバーの横幅(=台紙の横幅)」+「ボーダーの太さ」+「左右マージン分」』くらい */\n    height: 980px;  /* だいたい『「メニューバーの高さ」+「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」+「上下マージン分」』くらい */\n    \n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ内のボタン\n */\n.menu-bar-window-button-outer-class[data-v-76707645] {\n    width: 100%;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    line-height: 30px;\n}\n.menu-bar-window-button-outer-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}\n.menu-bar-window-button-inner-space-class[data-v-76707645] {\n    display: inline-block;\n    width: 10px;\n}    \n\n/*\n * メニューバーの上にあるボタンから表示するウィンドウ\n */\n.menu-bar-main-window-class[data-v-76707645] {\n    position: absolute;\n    top:    30px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    left:   0;\n}\n\n/*\n * 「メニューバーの上にあるボタンから表示したウィンドウ」から表示するウィンドウ\n */\n.menu-bar-sub-window-class[data-v-76707645] {\n    position: absolute;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    top:    0;\n    left:   0;\n}\n", ""]);
 
 // exports
 

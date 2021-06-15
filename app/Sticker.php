@@ -217,4 +217,112 @@ class Sticker extends Model
             }
         }
     }
+    
+    /**
+     * stickerParamsを取得する
+     */
+    public static function getStickerParams()
+    {
+    	$stickerParams = array();
+    
+        $stickers = self::all();
+        foreach ($stickers as $sticker) {
+    		$stickerInfoItemPos       = $sticker->infoItemPos;
+    		$stickerInfoItemDepth     = $sticker->infoItemDepth;
+    		$stickerInfoItemColor     = $sticker->infoItemColor;
+    		$stickerContentLinks      = $sticker->contentLinks;
+    		$stickerContentItemTexts  = $sticker->contentItemTexts;
+    		$stickerContentItemImages = $sticker->contentItemImages;
+    		$stickerContentItemVideos = $sticker->contentItemVideos;
+    		
+    		if ($stickerInfoItemPos && $stickerInfoItemDepth && $stickerInfoItemColor) {
+    			$stickerParam = [
+    				'id'       => $sticker->id,
+    				'pos_top'  => $stickerInfoItemPos->pos_top,
+    				'pos_left' => $stickerInfoItemPos->pos_left,
+    				'depth'    => $stickerInfoItemDepth->depth,
+    				'color'    => $stickerInfoItemColor->color,
+    				// 'contents' => array(),  // この後要素数0であっても必ず配列を設定します。
+    			];
+    			
+    			$contents = array();
+    			
+    			if ($stickerContentLinks) {
+    				foreach ($stickerContentLinks as $contentLink) {
+    					$item_type = $contentLink->item_type;
+    					$item_id   = $contentLink->item_id;
+    					
+    					$link = [
+    						'id'        => $contentLink->id,
+    						'item_type' => $item_type,
+    						'item_id'   => $item_id,
+    					];
+    					
+    					$content = [
+    						'link' => $link,
+    						// 'item' => $item,  // この後'item'を設定します。
+    					];
+    					
+    					if ($item_type == self::$contentItemType['text']) {
+    						if ($stickerContentItemTexts) {
+    							$contentItemText = $stickerContentItemTexts->where('id', $item_id)->first();
+    							if ($contentItemText) {
+    								$text = $contentItemText->text;
+    								if ($text) {
+    									$item = [
+    										'text' => $text,
+    									];
+    									
+    									$content['item'] = $item;
+    
+    							        array_push($contents, $content);
+    								}
+    							}
+    						}
+    					} else if ($item_type == self::$contentItemType['image']) {
+    						if ($stickerContentItemImages) {
+    							$contentItemImage = $stickerContentItemImages->where('id', $item_id)->first();
+    							if ($contentItemImage) {
+    								$imageURL      = $contentItemImage->image_url;
+    								$imagePublicId = $contentItemImage->image_public_id;
+    								
+    								$item = [
+    								    'image_url'       => $imageURL,
+    								    'image_public_id' => $imagePublicId,
+    								];
+    								
+    								$content['item'] = $item;
+    								
+    							    array_push($contents, $content);
+    							}
+    						}
+    					} else if ($item_type == self::$contentItemType['video']) {
+    						if ($stickerContentItemVideos) {
+    							$contentItemVideo = $stickerContentItemVideos->where('id', $item_id)->first();
+    							if ($contentItemVideo) {
+    								$videoURL      = $contentItemVideo->video_url;
+    								$videoPublicId = $contentItemVideo->video_public_id;
+    								
+    								$item = [
+    								    'video_url'       => $videoURL,
+    								    'video_public_id' => $videoPublicId,
+    								];
+    								
+    								$content['item'] = $item;
+    								
+    							    array_push($contents, $content);
+    							}
+    						}
+    					}
+    				}
+    			}
+    			
+    			$stickerParam['contents'] = $contents;
+    			
+    			array_push($stickerParams, $stickerParam);
+    		}
+    	}
+    	
+    	return $stickerParams;
+    }
 }

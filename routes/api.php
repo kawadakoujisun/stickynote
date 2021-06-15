@@ -287,7 +287,106 @@ Route::post('/work-sticky-note-import', function(Request $request) {
 
 	event((new \App\Events\StickyNoteImport($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
 });
+
+Route::post('/work-sticky-note-import-start', function(Request $request) {
+	// 既存のふせんを全て削除し、データベースに保存する
+	$stickers = \App\Sticker::all();
+	foreach ($stickers as $sticker) {
+		$sticker->destroySticker();
+	}
 	
+	// ふせんを作る
+	$stickerIds = array();  // $stickerIds[stickerIndex] = stickerIndex番目のstickerのid
+	
+	$srcStickerParams = $request->reqParam['stickerParams'];
+	foreach ($srcStickerParams as $srcStickerParam) {
+		// ふせんを作成し、データベースに保存する
+		$sticker = \App\Sticker::createSticker();
+		
+		// ふせんにinfoItemを設定する
+		if ($sticker) {
+			// infoItemPos
+			$stickerInfoItemPos = $sticker->infoItemPos;
+			if ($stickerInfoItemPos) {
+				$stickerInfoItemPos->pos_top  = $srcStickerParam['pos_top'];
+				$stickerInfoItemPos->pos_left = $srcStickerParam['pos_left'];
+				// データベースに保存する
+		    	$stickerInfoItemPos->save();
+			}
+			
+			// infoItemDepth
+			$stickerInfoItemDepth = $sticker->infoItemDepth;
+			if ($stickerInfoItemDepth) {
+				$stickerInfoItemDepth->depth = $srcStickerParam['depth'];
+				// データベースに保存する
+	    		$stickerInfoItemDepth->save();
+			}
+			
+			// infoItemColor
+			$stickerInfoItemColor = $sticker->infoItemColor;
+			if ($stickerInfoItemColor) {
+				$stickerInfoItemColor->color = $srcStickerParam['color'];
+				// データベースに保存する
+		    	$stickerInfoItemColor->save();
+			}
+			
+			array_push($stickerIds, $sticker->id);
+		} else {
+			array_push($stickerIds, -1);  // idがないときは-1
+		}
+	}
+	
+	return $stickerIds;
+});
+
+Route::post('/work-sticky-note-import-content-item', function(Request $request) {
+	$sticker = \App\Sticker::find($request->reqParam['id']);
+
+	// ふせんにcontentItemを設定する
+	if ($sticker) {
+		$item_type = $request->reqParam['item_type'];
+		
+		if ($item_type == \App\Sticker::$contentItemType['text']) {
+			$text = $request->reqParam['text'];
+			
+			// テキストを作成し、データベースに保存する
+			list($contentLink, $contentItem) = $sticker->createContentItemText([
+			    'text' => $text,
+			]);
+		} else if ($item_type == \App\Sticker::$contentItemType['image']) {
+			// 画像ファイルをアップする
+	        list($imageURL, $imagePublicId) = ImageUtil::uploadImage($request->reqParam['selectImageFileInfo']);
+	        
+	        // ContentItemImageを作成し、データベースに保存する
+			list($contentLink, $contentItem) = $sticker->createContentItemImage([
+			    'image_url'       => $imageURL,
+			    'image_public_id' => $imagePublicId,
+			]);			
+		} else if ($item_type == \App\Sticker::$contentItemType['video']) {
+			// 動画ファイルをアップする
+	        list($videoURL, $videoPublicId) = ImageUtil::uploadVideo($request->reqParam['selectVideoFileInfo']);
+	
+	        // ContentItemVideoを作成し、データベースに保存する
+			list($contentLink, $contentItem) = $sticker->createContentItemVideo([
+			    'video_url'       => $videoURL,
+			    'video_public_id' => $videoPublicId,
+			]);
+		}
+	}
+});
+
+Route::post('/work-sticky-note-import-end', function(Request $request) {
+	$stickerParams = \App\Sticker::getStickerParams();
+	
+	// イベント
+	$eventParam = [
+		'stickerParams' => $stickerParams,
+	    'user_id'       => $request->user_id,
+	];	
+
+	event((new \App\Events\StickyNoteImport($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+});
+
 Route::post('/work-sticker-create', function(Request $request) {
 	// ふせんを作成し、データベースに保存する
 	$sticker = \App\Sticker::createSticker();
@@ -349,106 +448,7 @@ Route::delete('/work-sticker-destroy', function(Request $request) {
 });
 
 Route::get('/work-mount', function() {
-	$stickerParams = array();
-
-    $stickers = \App\Sticker::all();
-    foreach ($stickers as $sticker) {
-		$stickerInfoItemPos      = $sticker->infoItemPos;
-		$stickerInfoItemDepth    = $sticker->infoItemDepth;
-		$stickerInfoItemColor    = $sticker->infoItemColor;
-		$stickerContentLinks     = $sticker->contentLinks;
-		$stickerContentItemTexts = $sticker->contentItemTexts;
-		$stickerContentItemImages = $sticker->contentItemImages;
-		$stickerContentItemVideos = $sticker->contentItemVideos;
-		
-		if ($stickerInfoItemPos && $stickerInfoItemDepth && $stickerInfoItemColor) {
-			$stickerParam = [
-				'id'       => $sticker->id,
-				'pos_top'  => $stickerInfoItemPos->pos_top,
-				'pos_left' => $stickerInfoItemPos->pos_left,
-				'depth'    => $stickerInfoItemDepth->depth,
-				'color'    => $stickerInfoItemColor->color,
-				// 'contents' => array(),  // この後要素数0であっても必ず配列を設定します。
-			];
-			
-			$contents = array();
-			
-			if ($stickerContentLinks) {
-				foreach ($stickerContentLinks as $contentLink) {
-					$item_type = $contentLink->item_type;
-					$item_id   = $contentLink->item_id;
-					
-					$link = [
-						'id'        => $contentLink->id,
-						'item_type' => $item_type,
-						'item_id'   => $item_id,
-					];
-					
-					$content = [
-						'link' => $link,
-						// 'item' => $item,  // この後'item'を設定します。
-					];
-					
-					if ($item_type == \App\Sticker::$contentItemType['text']) {
-						if ($stickerContentItemTexts) {
-							$contentItemText = $stickerContentItemTexts->where('id', $item_id)->first();
-							if ($contentItemText) {
-								$text = $contentItemText->text;
-								if ($text) {
-									$item = [
-										'text' => $text,
-									];
-									
-									$content['item'] = $item;
-
-							        array_push($contents, $content);
-								}
-							}
-						}
-					} else if ($item_type == \App\Sticker::$contentItemType['image']) {
-						if ($stickerContentItemImages) {
-							$contentItemImage = $stickerContentItemImages->where('id', $item_id)->first();
-							if ($contentItemImage) {
-								$imageURL      = $contentItemImage->image_url;
-								$imagePublicId = $contentItemImage->image_public_id;
-								
-								$item = [
-								    'image_url'       => $imageURL,
-								    'image_public_id' => $imagePublicId,
-								];
-								
-								$content['item'] = $item;
-								
-							    array_push($contents, $content);
-							}
-						}
-					} else if ($item_type == \App\Sticker::$contentItemType['video']) {
-						if ($stickerContentItemVideos) {
-							$contentItemVideo = $stickerContentItemVideos->where('id', $item_id)->first();
-							if ($contentItemVideo) {
-								$videoURL      = $contentItemVideo->video_url;
-								$videoPublicId = $contentItemVideo->video_public_id;
-								
-								$item = [
-								    'video_url'       => $videoURL,
-								    'video_public_id' => $videoPublicId,
-								];
-								
-								$content['item'] = $item;
-								
-							    array_push($contents, $content);
-							}
-						}
-					}
-				}
-			}
-			
-			$stickerParam['contents'] = $contents;
-			
-			array_push($stickerParams, $stickerParam);
-		}
-	}
-	
+	$stickerParams = \App\Sticker::getStickerParams();
 	return $stickerParams;
 });
 
