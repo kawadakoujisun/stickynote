@@ -143,7 +143,7 @@
      * オーバーレイ
      */
     .sticker-color-change-window-overlay-class {
-        position: fixed;
+        position: fixed;  /* TODO(kawadakoujisun): オーバーレイがこうなっていないところをこうして */
         left:   0;
         top:    0;
         width:  100%;

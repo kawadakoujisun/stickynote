@@ -86,9 +86,7 @@
                 
                 // 前の入力が残っているので、消しておく。
                 if (this.isShow) {
-                    const imageElem = document.getElementById('sticker-image-preview-id');
-                    imageElem.src = '';
-                    this.isImageFileEnabled = false;
+                    this.destroySelectImageFile();
                     
                     const inputElem = document.getElementById('sticker-select-image-file-input-id');
                     inputElem.value = '';
@@ -167,7 +165,14 @@
                     user_id: window.laravel.user['id'],
                 })
                     .then(response => {
-                        // 特にすることなし
+                        // 画像が残っているので削除する
+                        this.destroySelectImageFile();
+                    })
+                    .catch(error => {
+                        console.log('axios.post', error);
+                        
+                        // 画像が残っているので削除する
+                        this.destroySelectImageFile();
                     });
                 
                 // 親に戻る
@@ -189,6 +194,15 @@
                 this.selectImageFileInfo = e.target.result;
                 
                 // console.log(this.selectImageFileInfo);
+            },
+            
+            destroySelectImageFile: function () {
+                // 画像を削除する
+                const imageElem = document.getElementById('sticker-image-preview-id');
+                imageElem.src = '';
+                this.isImageFileEnabled = false;
+                
+                this.selectImageFileInfo = null;
             },
         },
     };

@@ -2371,6 +2371,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../ProjectWorkCommonScript.js */ "./resources/js/ProjectWorkCommonScript.js");
 //
 //
 //
@@ -2389,7 +2390,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
 /* harmony default export */ __webpack_exports__["default"] = ({
+  components: {
+    commonScript: _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
   data: function data() {
     return {
       //
@@ -2444,14 +2449,17 @@ __webpack_require__.r(__webpack_exports__);
           } else if (content['link'].item_type == 2) {
             // app/Sticker.phpで値を定義している
             divItemElem.classList.add('sticker-content-item-image-outer-class');
-            var imageURL = content['item']['image_url'];
-            divItemElem.innerHTML = "<img class=\"sticker-content-item-image-inner-class\" src=\"".concat(imageURL, "\">"); // TODO(kawadakoujisun): https://techacademy.jp/my/frontend/frontend2/jquery
-            //     const img = new Image();をお手本にして画像を表示してみるか？
+            var imageURL = content['item']['image_url']; // divItemElem.innerHTML = `<img class="sticker-content-item-image-inner-class" src="${imageURL}">`;
+            // img要素追加
+
+            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addImageElement(divItemElem, imageURL, 1);
           } else if (content['link'].item_type == 3) {
             // app/Sticker.phpで値を定義している
             divItemElem.classList.add('sticker-content-item-image-outer-class');
-            var videoURL = content['item']['video_url'];
-            divItemElem.innerHTML = "<video class=\"sticker-content-item-image-inner-class\" src=\"".concat(videoURL, "\" controls autoplay loop></video>");
+            var videoURL = content['item']['video_url']; // divItemElem.innerHTML = `<video class="sticker-content-item-image-inner-class" src="${videoURL}" controls autoplay loop></video>`;
+            // video要素追加
+
+            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addVideoElement(divItemElem, videoURL, 1);
           }
         }
       },
@@ -3484,6 +3492,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../ProjectWorkCommonScript.js */ "./resources/js/ProjectWorkCommonScript.js");
 function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
 
 function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
@@ -3543,7 +3552,11 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 //
 //
 //
+
 /* harmony default export */ __webpack_exports__["default"] = ({
+  components: {
+    commonScript: _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
   data: function data() {
     return {
       //
@@ -3942,53 +3955,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         divItemElem.classList.add('sticker-content-item-image-outer-class'); // divItemElem.innerHTML = `<img class="sticker-content-item-image-inner-class" src="${imageURL}" >`;
         // console.log(divItemElem.innerHTML);
 
-        divStickerInnerElem.appendChild(divItemElem); // img要素を作成して画像をロードする
+        divStickerInnerElem.appendChild(divItemElem); // img要素追加
 
-        new Promise(function (resolve, reject) {
-          var img = new Image();
-          img.classList.add('sticker-content-item-image-inner-class');
-
-          img.onload = function () {
-            return resolve(img);
-          };
-
-          img.onerror = function (e) {
-            return reject(e);
-          };
-
-          img.src = imageURL;
-        }).then(function (img) {
-          // 画像のロードが終わったので、img要素を表示する
-          console.log('Image onload END', imageURL);
-          console.log(img);
-          divItemElem.appendChild(img);
-          console.log(divItemElem.innerHTML);
-        })["catch"](function (e) {
-          // 画像のロードでエラー発生
-          console.log('Image onerror END', imageURL);
-          console.log(e); // リトライしてみる
-
-          new Promise(function (resolve, reject) {
-            var img2 = new Image();
-            img2.classList.add('sticker-content-item-image-inner-class');
-
-            img2.onload = function () {
-              return resolve(img2);
-            };
-
-            img2.onerror = function (e2) {
-              return reject(e2);
-            };
-
-            img2.src = imageURL;
-          }).then(function (img2) {
-            divItemElem.appendChild(img2);
-          })["catch"](function (e2) {
-            console.log('Image onerror END 2', imageURL);
-            console.log(e2);
-            divItemElem.textContent = '画像読み込みエラー';
-          });
-        });
+        _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addImageElement(divItemElem, imageURL, 1);
       }
     });
     window.Echo["private"]('sticker-content-item-image-destroy-channel.' + window.laravel.user['id']).listen('StickerContentItemImageDestroy', function (response) {
@@ -4037,10 +4006,12 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         var contentLinkIdBaseName = _this.getContentLinkIdBaseName();
 
         divItemElem.id = "".concat(contentLinkIdBaseName).concat(contentLinkIdNo);
-        divItemElem.classList.add('sticker-content-item-image-outer-class');
-        divItemElem.innerHTML = "<video class=\"sticker-content-item-image-inner-class\" src=\"".concat(videoURL, "\" controls autoplay loop></video>");
-        console.log(divItemElem.innerHTML);
-        divStickerInnerElem.appendChild(divItemElem);
+        divItemElem.classList.add('sticker-content-item-image-outer-class'); // divItemElem.innerHTML = `<video class="sticker-content-item-image-inner-class" src="${videoURL}" controls autoplay loop></video>`;
+        // console.log(divItemElem.innerHTML);
+
+        divStickerInnerElem.appendChild(divItemElem); // video要素追加
+
+        _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addVideoElement(divItemElem, videoURL, 1);
       }
     });
     window.Echo["private"]('sticker-content-item-video-destroy-channel.' + window.laravel.user['id']).listen('StickerContentItemVideoDestroy', function (response) {
@@ -4087,14 +4058,17 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
           } else if (content['link'].item_type == 2) {
             // app/Sticker.phpで値を定義している
             divItemElem.classList.add('sticker-content-item-image-outer-class');
-            var imageURL = content['item']['image_url'];
-            divItemElem.innerHTML = "<img class=\"sticker-content-item-image-inner-class\" src=\"".concat(imageURL, "\">"); // TODO(kawadakoujisun): https://techacademy.jp/my/frontend/frontend2/jquery
-            //     const img = new Image();をお手本にして画像を表示してみるか？
+            var imageURL = content['item']['image_url']; // divItemElem.innerHTML = `<img class="sticker-content-item-image-inner-class" src="${imageURL}">`;
+            // img要素追加
+
+            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addImageElement(divItemElem, imageURL, 1);
           } else if (content['link'].item_type == 3) {
             // app/Sticker.phpで値を定義している
             divItemElem.classList.add('sticker-content-item-image-outer-class');
-            var videoURL = content['item']['video_url'];
-            divItemElem.innerHTML = "<video class=\"sticker-content-item-image-inner-class\" src=\"".concat(videoURL, "\" controls autoplay loop></video>");
+            var videoURL = content['item']['video_url']; // divItemElem.innerHTML = `<video class="sticker-content-item-image-inner-class" src="${videoURL}" controls autoplay loop></video>`;
+            // video要素追加
+
+            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addVideoElement(divItemElem, videoURL, 1);
           }
         }
       },
@@ -4936,6 +4910,7 @@ __webpack_require__.r(__webpack_exports__);
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../ProjectWorkCommonScript.js */ "./resources/js/ProjectWorkCommonScript.js");
 //
 //
 //
@@ -4999,7 +4974,11 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+
 /* harmony default export */ __webpack_exports__["default"] = ({
+  components: {
+    commonScript: _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"]
+  },
   props: {
     showStickerEditWindowProps: Object
   },
@@ -5058,13 +5037,17 @@ __webpack_require__.r(__webpack_exports__);
         } else if (content['link'].item_type == 2) {
           // app/Sticker.phpで値を定義している
           divItemElem.classList.add('sticker-edit-sticker-content-item-image-outer-class');
-          var imageURL = content['item']['image_url'];
-          divItemElem.innerHTML = "<img class=\"sticker-edit-sticker-content-item-image-inner-class\" src=\"".concat(imageURL, "\">");
+          var imageURL = content['item']['image_url']; // divItemElem.innerHTML = `<img class="sticker-edit-sticker-content-item-image-inner-class" src="${imageURL}">`;
+          // img要素追加
+
+          _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addImageElement(divItemElem, imageURL, 1);
         } else if (content['link'].item_type == 3) {
           // app/Sticker.phpで値を定義している
           divItemElem.classList.add('sticker-edit-sticker-content-item-image-outer-class');
-          var videoURL = content['item']['video_url'];
-          divItemElem.innerHTML = "<video class=\"sticker-edit-sticker-content-item-image-inner-class\" src=\"".concat(videoURL, "\" controls autoplay loop></video>");
+          var videoURL = content['item']['video_url']; // divItemElem.innerHTML = `<video class="sticker-edit-sticker-content-item-image-inner-class" src="${videoURL}" controls autoplay loop></video>`;
+          // video要素追加
+
+          _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addVideoElement(divItemElem, videoURL, 1);
         }
       },
       inserted: function inserted(el, binding) {
@@ -5314,9 +5297,7 @@ __webpack_require__.r(__webpack_exports__);
       this.isShow = this.showStickerImageAddWindowProps.isShow; // 前の入力が残っているので、消しておく。
 
       if (this.isShow) {
-        var imageElem = document.getElementById('sticker-image-preview-id');
-        imageElem.src = '';
-        this.isImageFileEnabled = false;
+        this.destroySelectImageFile();
         var inputElem = document.getElementById('sticker-select-image-file-input-id');
         inputElem.value = '';
       }
@@ -5362,6 +5343,8 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     onClickAddImage: function onClickAddImage(e) {
+      var _this = this;
+
       console.log('onClickAddImage');
       var targetFile = e.target.elements.selectImageFile.files[0];
       console.log(targetFile); // 画像をアップロードし、ふせんに追加する
@@ -5374,7 +5357,13 @@ __webpack_require__.r(__webpack_exports__);
       axios.post(window.laravel.asset + '/api/work-sticker-content-item-image-create', {
         reqParam: reqParam,
         user_id: window.laravel.user['id']
-      }).then(function (response) {// 特にすることなし
+      }).then(function (response) {
+        // 画像が残っているので削除する
+        _this.destroySelectImageFile();
+      })["catch"](function (error) {
+        console.log('axios.post', error); // 画像が残っているので削除する
+
+        _this.destroySelectImageFile();
       }); // 親に戻る
 
       var emitParam = {
@@ -5390,6 +5379,13 @@ __webpack_require__.r(__webpack_exports__);
       imageElem.src = e.target.result;
       this.isImageFileEnabled = true;
       this.selectImageFileInfo = e.target.result; // console.log(this.selectImageFileInfo);
+    },
+    destroySelectImageFile: function destroySelectImageFile() {
+      // 画像を削除する
+      var imageElem = document.getElementById('sticker-image-preview-id');
+      imageElem.src = '';
+      this.isImageFileEnabled = false;
+      this.selectImageFileInfo = null;
     }
   }
 });
@@ -5613,6 +5609,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     showStickerVideoAddWindowProps: Object
@@ -5629,9 +5626,7 @@ __webpack_require__.r(__webpack_exports__);
       this.isShow = this.showStickerVideoAddWindowProps.isShow; // 前の入力が残っているので、消しておく。
 
       if (this.isShow) {
-        var videoElem = document.getElementById('sticker-video-preview-id');
-        videoElem.src = '';
-        this.isVideoFileEnabled = false;
+        this.destroySelectVideoFile();
         var inputElem = document.getElementById('sticker-select-video-file-input-id');
         inputElem.value = '';
       }
@@ -5677,6 +5672,8 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     onClickAddVideo: function onClickAddVideo(e) {
+      var _this = this;
+
       console.log('onClickAddVideo');
       var targetFile = e.target.elements.selectVideoFile.files[0];
       console.log(targetFile); // 画像をアップロードし、ふせんに追加する
@@ -5689,7 +5686,13 @@ __webpack_require__.r(__webpack_exports__);
       axios.post(window.laravel.asset + '/api/work-sticker-content-item-video-create', {
         reqParam: reqParam,
         user_id: window.laravel.user['id']
-      }).then(function (response) {// 特にすることなし
+      }).then(function (response) {
+        // 画像が残っているので削除する
+        _this.destroySelectVideoFile();
+      })["catch"](function (error) {
+        console.log('axios.post', error); // 画像が残っているので削除する
+
+        _this.destroySelectVideoFile();
       }); // 親に戻る
 
       var emitParam = {
@@ -5705,6 +5708,13 @@ __webpack_require__.r(__webpack_exports__);
       videoElem.src = e.target.result;
       this.isVideoFileEnabled = true;
       this.selectVideoFileInfo = e.target.result;
+    },
+    destroySelectVideoFile: function destroySelectVideoFile() {
+      // 画像を削除する
+      var videoElem = document.getElementById('sticker-video-preview-id');
+      videoElem.src = '';
+      this.isVideoFileEnabled = false;
+      this.selectVideoFileInfo = null;
     }
   }
 });
@@ -10203,7 +10213,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-453180c5] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px 20px 20px;\n    padding: 0;\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-453180c5] {\n    position: absolute;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 0;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n.sticker-inner-class[data-v-453180c5] {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n\n/*\n * 画像(動画も)\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-453180c5] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px 20px 20px;\n    padding: 0;\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-453180c5] {\n    position: absolute;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 0;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n.sticker-inner-class[data-v-453180c5] {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n\n/*\n * 画像(動画も)\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
 
 // exports
 
@@ -10260,7 +10270,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px 20px 20px;\n    padding: 0;\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 0;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n.sticker-inner-class[data-v-652fa580] {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px 20px 20px;\n    padding: 0;\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 0;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n.sticker-inner-class[data-v-652fa580] {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n", ""]);
 
 // exports
 
@@ -10279,7 +10289,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 画像(動画も)\n */\n.sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト\n */\n.sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 画像(動画も)\n */\n.sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト\n */\n.sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
 
 // exports
 
@@ -10298,7 +10308,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-color-change-window-overlay-class[data-v-14581d2b] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-color-change-window-class[data-v-14581d2b] {\n    position: fixed;\n    left:   50%;\n    top:    50%;\n    min-width: 150px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n.sticker-color-change-window-space-class[data-v-14581d2b] {\n    height: 20px;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-color-change-window-overlay-class[data-v-14581d2b] {\n    position: fixed;  /* TODO(kawadakoujisun): オーバーレイがこうなっていないところをこうして */\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-color-change-window-class[data-v-14581d2b] {\n    position: fixed;\n    left:   50%;\n    top:    50%;\n    min-width: 150px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n.sticker-color-change-window-space-class[data-v-14581d2b] {\n    height: 20px;\n}\n", ""]);
 
 // exports
 
@@ -10336,7 +10346,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-edit-window-overlay-class[data-v-1ec0eebc] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-edit-window-class[data-v-1ec0eebc] {\n    position: fixed;\n    /*left:   50%;\n    top:    50%;*/\n    left: 10px;\n    top: 10px;\n    min-width: 480px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n\n/*\n * ふせん(+削除ボタン)\n */\n.sticker-edit-sticker-class[data-v-1ec0eebc] {\n    position: relative;\n    width:      440px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin-left:  auto;\n    margin-right: auto;\n    padding: 0;\n    overflow-y: scroll;\n    \n    /* 外部から変更するもの */\n    background-color: #000000;\n}\n.sticker-edit-sticker-inner-class[data-v-1ec0eebc] {\n    width:      380px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n.sticker-edit-sticker-content-item-outer-class[data-v-1ec0eebc] {\n    display: inline-block;\n    width: 280px;\n    padding: 0;\n    vertical-align: middle;\n}\n.sticker-edit-sticker-content-remove-button-outer-class[data-v-1ec0eebc] {\n    display: inline-block;\n    width:  80px;\n    padding: 0;\n    vertical-align: middle;\n    text-align: right;\n}\n\n/*\n * ボタン\n */\n.sticker-edit-buttons-outer-class[data-v-1ec0eebc] {\n    position: relative;\n    width:      440px;\n}\n.sticker-edit-button-space-class[data-v-1ec0eebc] {\n    height: 10px;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-edit-window-overlay-class[data-v-1ec0eebc] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-edit-window-class[data-v-1ec0eebc] {\n    position: fixed;\n    /*left:   50%;\n    top:    50%;*/\n    left: 10px;\n    top: 10px;\n    min-width: 480px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n\n/*\n * ふせん(+削除ボタン)\n */\n.sticker-edit-sticker-class[data-v-1ec0eebc] {\n    position: relative;\n    width:      440px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin-left:  auto;\n    margin-right: auto;\n    padding: 0;\n    overflow-y: scroll;\n    \n    /* 外部から変更するもの */\n    background-color: #000000;\n}\n.sticker-edit-sticker-inner-class[data-v-1ec0eebc] {\n    width:      380px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n.sticker-edit-sticker-content-item-outer-class[data-v-1ec0eebc] {\n    display: inline-block;\n    width: 280px;\n    padding: 0;\n    vertical-align: middle;\n}\n.sticker-edit-sticker-content-remove-button-outer-class[data-v-1ec0eebc] {\n    display: inline-block;\n    width:  80px;\n    padding: 0;\n    vertical-align: middle;\n    text-align: right;\n}\n\n/*\n * ボタン\n */\n.sticker-edit-buttons-outer-class[data-v-1ec0eebc] {\n    position: relative;\n    width:      440px;\n}\n.sticker-edit-button-space-class[data-v-1ec0eebc] {\n    height: 10px;\n}\n", ""]);
 
 // exports
 
@@ -10355,7 +10365,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* TODO(kawadakoujisun): ::v-deepを試してみたい */\n\n/*\n * 画像(動画も)\n */\n.sticker-edit-sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-edit-sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト\n */\n.sticker-edit-sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* TODO(kawadakoujisun): ::v-deepを試してみたい */\n\n/*\n * 画像(動画も)\n */\n.sticker-edit-sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-edit-sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト\n */\n.sticker-edit-sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
 
 // exports
 
@@ -10374,7 +10384,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-image-add-window-overlay-class[data-v-744f6466] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-image-add-window-class[data-v-744f6466] {\n    position: fixed;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:  400px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n}\n.sticker-image-add-window-image-outer-class[data-v-744f6466] {\n    position: relative;\n    width:  200px;\n    height: 200px;\n    border: 1px solid #000;\n    background-color: #cccccc;\n    margin-left:  auto;\n    margin-right: auto;\n    padding: 0;\n}\n.sticker-image-add-window-image-inner-class[data-v-744f6466] {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n.sticker-image-add-window-space-class[data-v-744f6466] {\n    height: 10px;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-image-add-window-overlay-class[data-v-744f6466] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-image-add-window-class[data-v-744f6466] {\n    position: fixed;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:  400px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n}\n.sticker-image-add-window-image-outer-class[data-v-744f6466] {\n    position: relative;\n    width:  200px;\n    height: 200px;\n    border: 1px solid #000;\n    background-color: #cccccc;\n    margin-left:  auto;\n    margin-right: auto;\n    padding: 0;\n}\n.sticker-image-add-window-image-inner-class[data-v-744f6466] {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n.sticker-image-add-window-space-class[data-v-744f6466] {\n    height: 10px;\n}\n", ""]);
 
 // exports
 
@@ -10412,7 +10422,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-video-add-window-overlay-class[data-v-5ef490f4] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-video-add-window-class[data-v-5ef490f4] {\n    position: fixed;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:  400px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n}\n.sticker-video-add-window-video-outer-class[data-v-5ef490f4] {\n    position: relative;\n    width:  200px;\n    height: 200px;\n    border: 1px solid #000;\n    background-color: #cccccc;\n    margin-left:  auto;\n    margin-right: auto;\n    padding: 0;\n}\n.sticker-video-add-window-video-inner-class[data-v-5ef490f4] {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n.sticker-video-add-window-space-class[data-v-5ef490f4] {\n    height: 10px;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-video-add-window-overlay-class[data-v-5ef490f4] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-video-add-window-class[data-v-5ef490f4] {\n    position: fixed;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:  400px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n}\n.sticker-video-add-window-video-outer-class[data-v-5ef490f4] {\n    position: relative;\n    width:  200px;\n    height: 200px;\n    border: 1px solid #000;\n    background-color: #cccccc;\n    margin-left:  auto;\n    margin-right: auto;\n    padding: 0;\n}\n.sticker-video-add-window-video-inner-class[data-v-5ef490f4] {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n.sticker-video-add-window-space-class[data-v-5ef490f4] {\n    height: 10px;\n}\n", ""]);
 
 // exports
 
@@ -51545,9 +51555,11 @@ var render = function() {
                   id: "sticker-video-preview-id",
                   src: "",
                   controls: "",
+                  muted: "",
                   autoplay: "",
                   loop: ""
-                }
+                },
+                domProps: { muted: true }
               })
             ]
           ),
@@ -63793,6 +63805,112 @@ module.exports = function(module) {
 	return module;
 };
 
+
+/***/ }),
+
+/***/ "./resources/js/ProjectWorkCommonScript.js":
+/*!*************************************************!*\
+  !*** ./resources/js/ProjectWorkCommonScript.js ***!
+  \*************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/*
+ * img要素追加
+ */
+function addImageElement(parentElem, imageURL, retryCount) {
+  var _this = this;
+
+  // console.log('addImageElement', imageURL, retryCount);
+  // img要素を作成して画像をロードする
+  new Promise(function (resolve, reject) {
+    var img = new Image();
+    img.classList.add('sticker-content-item-image-inner-class');
+
+    img.onload = function () {
+      return resolve(img);
+    };
+
+    img.onerror = function (e) {
+      return reject(e);
+    };
+
+    img.src = imageURL;
+  }).then(function (img) {
+    // 画像のロードが終わったので、img要素を表示する
+    // console.log('Image onload END', imageURL, retryCount);
+    // console.log(img);
+    parentElem.appendChild(img); // console.log(parentElem.innerHTML);
+  })["catch"](function (e) {
+    // 画像のロードでエラー発生
+    console.log('Image onerror END', imageURL, retryCount);
+    console.log(e); // リトライするか？
+
+    if (retryCount > 0) {
+      // リトライしてみる
+      _this.addImageElement(parentElem, imageURL, retryCount - 1);
+    } else {
+      // リトライしない
+      parentElem.textContent = '画像読み込みエラー';
+    }
+  });
+}
+/*
+ * video要素追加
+ */
+
+
+function addVideoElement(parentElem, videoURL, retryCount) {
+  var _this2 = this;
+
+  // console.log('addVideoElement', videoURL, retryCount);
+  // video要素を作成して動画をロードする
+  new Promise(function (resolve, reject) {
+    var video = document.createElement("video");
+    video.classList.add('sticker-content-item-image-inner-class'); // video.setAttribute('controls', true);
+    // video.setAttribute('muted', true);  // この書き方だとミュートにならなかったのでコメントアウト
+    // video.setAttribute('autoplay', true);
+    // video.setAttribute('loop', true);
+
+    video.controls = true;
+    video.muted = true;
+    video.autoplay = true;
+    video.loop = true; // video.addEventListener('loadeddata', () => resolve(video));
+
+    video.addEventListener('canplay', function () {
+      return resolve(video);
+    });
+    video.addEventListener('error', function (e) {
+      return reject(e);
+    });
+    video.setAttribute('src', videoURL);
+  }).then(function (video) {
+    // 動画のロードが終わったので、video要素を表示する
+    // console.log('Video loadeddata, canplay, or canplaythrough END', videoURL, retryCount);
+    // console.log(video);
+    parentElem.appendChild(video);
+    console.log(parentElem.innerHTML);
+  })["catch"](function (e) {
+    // 動画のロードでエラー発生
+    console.log('Video error END', videoURL, retryCount);
+    console.log(e); // リトライするか？
+
+    if (retryCount > 0) {
+      // リトライしてみる
+      _this2.addVideoElement(parentElem, videoURL, retryCount - 1);
+    } else {
+      // リトライしない
+      parentElem.textContent = '動画読み込みエラー';
+    }
+  });
+}
+
+/* harmony default export */ __webpack_exports__["default"] = ({
+  addImageElement: addImageElement,
+  addVideoElement: addVideoElement
+});
 
 /***/ }),
 

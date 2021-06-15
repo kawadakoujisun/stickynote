@@ -17,7 +17,13 @@
 </template>
 
 <script>
+    import commonScript from '../ProjectWorkCommonScript.js';
+    
     export default {
+        components: {
+            commonScript,    
+        },
+        
         data() {
             return {
                 //
@@ -76,13 +82,17 @@
                         } else if (content['link'].item_type == 2) {  // app/Sticker.phpで値を定義している
                             divItemElem.classList.add('sticker-content-item-image-outer-class');
                             const imageURL = content['item']['image_url'];
-                            divItemElem.innerHTML = `<img class="sticker-content-item-image-inner-class" src="${imageURL}">`;
-                            // TODO(kawadakoujisun): https://techacademy.jp/my/frontend/frontend2/jquery
-                            //     const img = new Image();をお手本にして画像を表示してみるか？
+                            // divItemElem.innerHTML = `<img class="sticker-content-item-image-inner-class" src="${imageURL}">`;
+                            
+                            // img要素追加
+                            commonScript.addImageElement(divItemElem, imageURL, 1);
                         } else if (content['link'].item_type == 3) {  // app/Sticker.phpで値を定義している
                             divItemElem.classList.add('sticker-content-item-image-outer-class');
                             const videoURL = content['item']['video_url'];
-                            divItemElem.innerHTML = `<video class="sticker-content-item-image-inner-class" src="${videoURL}" controls autoplay loop></video>`;
+                            // divItemElem.innerHTML = `<video class="sticker-content-item-image-inner-class" src="${videoURL}" controls autoplay loop></video>`;
+                            
+                            // video要素追加
+                            commonScript.addVideoElement(divItemElem, videoURL, 1);
                         }
                     }
                 },

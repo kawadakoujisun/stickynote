@@ -23,6 +23,7 @@
                     id="sticker-video-preview-id"
                     src=""
                     controls
+                    muted
                     autoplay
                     loop
                 >
@@ -90,9 +91,7 @@
                 
                 // 前の入力が残っているので、消しておく。
                 if (this.isShow) {
-                    const videoElem = document.getElementById('sticker-video-preview-id');
-                    videoElem.src = '';
-                    this.isVideoFileEnabled = false;
+                    this.destroySelectVideoFile();
                     
                     const inputElem = document.getElementById('sticker-select-video-file-input-id');
                     inputElem.value = '';
@@ -170,7 +169,14 @@
                     user_id: window.laravel.user['id'],
                 })
                     .then(response => {
-                        // 特にすることなし
+                        // 画像が残っているので削除する
+                        this.destroySelectVideoFile();
+                    })
+                    .catch(error => {
+                        console.log('axios.post', error);
+                        
+                        // 画像が残っているので削除する
+                        this.destroySelectVideoFile();
                     });
                 
                 // 親に戻る
@@ -190,6 +196,15 @@
                 this.isVideoFileEnabled = true;
                 
                 this.selectVideoFileInfo = e.target.result;
+            },
+            
+            destroySelectVideoFile: function () {
+                // 画像を削除する
+                const videoElem = document.getElementById('sticker-video-preview-id');
+                videoElem.src = '';
+                this.isVideoFileEnabled = false;
+                
+                this.selectVideoFileInfo = null;
             },
         },
     };

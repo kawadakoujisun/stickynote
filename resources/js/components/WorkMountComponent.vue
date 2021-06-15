@@ -52,7 +52,13 @@
 </template>
 
 <script>
+    import commonScript from '../ProjectWorkCommonScript.js';
+    
     export default {
+        components: {
+            commonScript,    
+        },
+        
         data() {
             return {
                 //
@@ -466,44 +472,8 @@
                         // console.log(divItemElem.innerHTML);
                         divStickerInnerElem.appendChild(divItemElem);
                         
-                        // img要素を作成して画像をロードする
-                        new Promise((resolve, reject) => {
-                            const img = new Image();
-                            img.classList.add('sticker-content-item-image-inner-class');
-                            img.onload = () => resolve(img);
-                            img.onerror = (e) => reject(e);
-                            img.src = imageURL;
-                        })
-                        .then((img) => {
-                            // 画像のロードが終わったので、img要素を表示する
-                            console.log('Image onload END', imageURL);
-                            console.log(img);
-                            divItemElem.appendChild(img);
-                            console.log(divItemElem.innerHTML);
-                        })
-                        .catch((e) => {
-                            // 画像のロードでエラー発生
-                            console.log('Image onerror END', imageURL);
-                            console.log(e);
-                            
-                            // リトライしてみる
-                            new Promise((resolve, reject) => {
-                                const img2 = new Image();
-                                img2.classList.add('sticker-content-item-image-inner-class');
-                                img2.onload = () => resolve(img2);
-                                img2.onerror = (e2) => reject(e2);
-                                img2.src = imageURL;
-                            })
-                            .then((img2) => {
-                                divItemElem.appendChild(img2);
-                            })
-                            .catch((e2) => {
-                                console.log('Image onerror END 2', imageURL);
-                                console.log(e2);
-                                
-                                divItemElem.textContent = '画像読み込みエラー';
-                            });
-                        });
+                        // img要素追加
+                        commonScript.addImageElement(divItemElem, imageURL, 1);
                     }
                 });
                 
@@ -560,9 +530,12 @@
                         divItemElem.id = `${contentLinkIdBaseName}${contentLinkIdNo}`;
                         
                         divItemElem.classList.add('sticker-content-item-image-outer-class');
-                        divItemElem.innerHTML = `<video class="sticker-content-item-image-inner-class" src="${videoURL}" controls autoplay loop></video>`;
-                        console.log(divItemElem.innerHTML);
+                        // divItemElem.innerHTML = `<video class="sticker-content-item-image-inner-class" src="${videoURL}" controls autoplay loop></video>`;
+                        // console.log(divItemElem.innerHTML);
                         divStickerInnerElem.appendChild(divItemElem);
+                        
+                        // video要素追加
+                        commonScript.addVideoElement(divItemElem, videoURL, 1);
                     }
                 });
                 
@@ -614,17 +587,21 @@
                         } else if (content['link'].item_type == 2) {  // app/Sticker.phpで値を定義している
                             divItemElem.classList.add('sticker-content-item-image-outer-class');
                             const imageURL = content['item']['image_url'];
-                            divItemElem.innerHTML = `<img class="sticker-content-item-image-inner-class" src="${imageURL}">`;
-                            // TODO(kawadakoujisun): https://techacademy.jp/my/frontend/frontend2/jquery
-                            //     const img = new Image();をお手本にして画像を表示してみるか？
+                            // divItemElem.innerHTML = `<img class="sticker-content-item-image-inner-class" src="${imageURL}">`;
+                            
+                            // img要素追加
+                            commonScript.addImageElement(divItemElem, imageURL, 1);
                         } else if (content['link'].item_type == 3) {  // app/Sticker.phpで値を定義している
                             divItemElem.classList.add('sticker-content-item-image-outer-class');
                             const videoURL = content['item']['video_url'];
-                            divItemElem.innerHTML = `<video class="sticker-content-item-image-inner-class" src="${videoURL}" controls autoplay loop></video>`;
+                            // divItemElem.innerHTML = `<video class="sticker-content-item-image-inner-class" src="${videoURL}" controls autoplay loop></video>`;
+                            
+                            // video要素追加
+                            commonScript.addVideoElement(divItemElem, videoURL, 1);
                         }
                     }
                 },
-                
+
                 inserted: function(el, binding) {
                     console.log('sticker-custom-directive inserted', binding.value.index);
                 },
