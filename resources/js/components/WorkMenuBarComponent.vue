@@ -106,6 +106,8 @@
                 activeMainMenu: '',
                 activeSubMenu:  '',
                 markSrc: window.laravel.asset + '/images/stickynote_mark.jpg',
+                
+                menuBarNowLoadingIconIntervalCount: 0,
             };
         },
         
@@ -203,6 +205,8 @@
                 
                 // ファイルが指定された後に行う処理
                 input.addEventListener("change", e => {
+                    this.displayNowLoadingScreen(true);
+                    
                     const file = e.target.files[0];
                     
                     if (file) {
@@ -212,6 +216,7 @@
                         // ファイルの非同期読み込み
                         reader.readAsText(file);
 
+                        try {
                         // ファイルが読み込まれた後に行う処理
                         reader.addEventListener("load", () => {
                             // 読み込んだJSONをJavaScriptのオブジェクトに変換する
@@ -235,8 +240,19 @@
                             })
                                 .then(response => {
                                     // 特にすることなし
+                                    this.displayNowLoadingScreen(false);
+                                })
+                                .catch(error => {
+                                    console.log('axios.post', error);
+                                    this.displayNowLoadingScreen(false);
                                 });
                         });
+                        } catch (error) {  // 開始はtry {
+                            console.log(error);
+                            this.displayNowLoadingScreen(false);
+                        }
+                    } else {  // 開始はif (file) {
+                        this.displayNowLoadingScreen(false);
                     }
                 });
                 
@@ -260,6 +276,8 @@
                 
                 // ファイルが指定された後に行う処理
                 input.addEventListener("change", e => {
+                    this.displayNowLoadingScreen(true);
+                    
                     const file = e.target.files[0];
                     
                     if (file) {
@@ -524,8 +542,9 @@
                                                                 }
                                                             }
                                                         }
-                                                    } catch (error) {
+                                                    } catch (error) {  // 開始はtry {
                                                         console.log('axios.post', error);
+                                                        this.displayNowLoadingScreen(false);
                                                     }
                                                     
                                                     // end
@@ -534,19 +553,26 @@
                                                     })
                                                         .then(response => {
                                                             // 特にすることなし
+                                                            this.displayNowLoadingScreen(false);
                                                         })
                                                         .catch(error => {
                                                             console.log('axios.post', error);
+                                                            this.displayNowLoadingScreen(false);
                                                         });
                                                 }.bind(this))  // コールバック関数内でthisを使用しているので
-                                                .catch(error => {
+                                                .catch(error => {  // 開始は.then(async function (response) {
                                                     console.log('axios.post', error);
+                                                    this.displayNowLoadingScreen(false);
                                                 });
                                             
                                             //
                                             // 特別なプロパティitem_infoを使わない場合 ここまで
                                             //
                                             /**/
+                                        })
+                                        .catch(error => {  // 開始は.then((uncompressData) => {
+                                            console.log(error);
+                                            this.displayNowLoadingScreen(false);
                                         });
                                     } else {
                                         // TODO(kawadakoujisun): Promise.all(uncompressFuncs)の配列が空だったときの挙動次第では
@@ -565,12 +591,27 @@
                                             })
                                                 .then(response => {
                                                     // 特にすることなし
+                                                    this.displayNowLoadingScreen(false);
+                                                })
+                                                .catch(error => {
+                                                    console.log('axios.post', error);
+                                                    this.displayNowLoadingScreen(false);
                                                 });
                                         }
                                     }
+                                }, (error) => {  // 開始は.then((jsonData) => {
+                                    console.log(error);
+                                    this.displayNowLoadingScreen(false);
                                 });
+                            } else {  // 開始はif (jsonFileName) {
+                                this.displayNowLoadingScreen(false);
                             }
+                        }, (error) => {  // 開始は.then((zipContent) => {
+                            console.log(error);
+                            this.displayNowLoadingScreen(false);
                         });
+                    } else {  // 開始はif (file) {
+                        this.displayNowLoadingScreen(false);
                     }
                 });
 
@@ -896,6 +937,122 @@
                 return 0;  
             },            
             
+            displayNowLoadingScreen: function (doesShow) {
+                console.log('displayNowLoadingScreen', doesShow);
+                
+                // jQuery
+                if (doesShow) {
+                    // 既に存在していたら、新しいものを生成する前に古いものを削除しておく
+                    const $oldTopElem = $('#menu-bar-now-loading-id');
+                    if ($oldTopElem.length > 0) {  // jQueryは要素がなくてもオブジェクトを返してくる
+                        // 削除
+                        $oldTopElem.remove();
+                    }
+                    
+                    // DOM要素を生成する
+                    const $topElem = $('<div></div>', {
+                        class: 'menu-bar-now-loading-class',
+                        id:    'menu-bar-now-loading-id', 
+                    });
+                    
+                    const $overlayElem = $('<div></div>', {
+                        class: 'menu-bar-now-loading-overlay-class',
+                    });
+                    $topElem.append($overlayElem);
+                    
+                    // ローディングアイコン
+                    const iconNum = 4;
+                    
+                    const iconParams = [
+                        // x, y
+                        [  0, 0  ],
+                        [  1, 0  ],
+                        [  1, 1  ],
+                        [  0, 1  ],
+                    ];
+                    const iconFrameWidth = 100;
+                    const iconWidth      = 14;
+                    
+                    const $iconElems = [];
+                    for (let i=0; i<iconNum; ++i) {
+                        const $iconElem = $('<div></div>', {
+                            class: 'menu-bar-now-loading-icon-class',
+                        });
+                        $topElem.append($iconElem);
+                        
+                        const posLeft = -iconFrameWidth/2 + iconParams[i][0] * iconFrameWidth - iconWidth/2;
+                        const posTop  = -iconFrameWidth/2 + iconParams[i][1] * iconFrameWidth - iconWidth/2;
+
+                        $iconElem.css('left', `${posLeft}px`);
+                        $iconElem.css('top', `${posTop}px`);
+
+                        $iconElems.push($iconElem);
+                    }
+                    
+                    // ローディングアイコンのアニメ
+                    this.menuBarNowLoadingIconIntervalCount = 0;
+                    
+                    const animateIcons = () => {
+                        // トップがなくなっていたらもうアニメを実行しないので、
+                        // まず最初にトップの有無を確認する。
+                        const $currTopElem = $('#menu-bar-now-loading-id');
+                        if ($currTopElem.length > 0) {  // jQueryは要素がなくてもオブジェクトを返してくる
+                            ++this.menuBarNowLoadingIconIntervalCount;
+                            // console.log(this.menuBarNowLoadingIconIntervalCount);
+    
+                            // $('.menu-bar-now-loading-icon-class').each(  // これでもアイコン配列を取得できるが、今回は外で定義している$iconElemsを使うことにしたのでコメントアウト。
+                            //     (index, iconElem) => {
+                            //         const $iconElem = $(iconElem);
+                            $iconElems.forEach(
+                                ($iconElem, index) => {
+                                    const goalIndex = (index + this.menuBarNowLoadingIconIntervalCount) % 4;
+                                    
+                                    const posLeft = -iconFrameWidth/2 + iconParams[goalIndex][0] * iconFrameWidth - iconWidth/2;
+                                    const posTop  = -iconFrameWidth/2 + iconParams[goalIndex][1] * iconFrameWidth - iconWidth/2;
+    
+                                    $iconElem.animate(
+                                        {
+                                            left: `${posLeft}px`,
+                                            top:  `${posTop}px`,
+                                        },
+                                        1000,
+                                        'linear'
+                                    );
+                                }
+                            );
+                            
+                            // アニメが全て終わったら、次のアニメを実行する
+                            // $.when($iconElems).done(() => {  // この書き方はダメ。直ちに全処理が終わった扱いになってしまう（というか処理が取れていないのだろう）。
+                            $.when($('.menu-bar-now-loading-icon-class')).done(() => {
+                                // console.log(this.menuBarNowLoadingIconIntervalCount);
+                                animateIcons();
+                            });
+                        }
+                    };
+                    
+                    // ローディングアイコンのアニメの初回実行
+                    setTimeout(() => {
+                        animateIcons();
+                    }, 100);
+                    
+                    // 追加
+                    $('body').append($topElem);
+
+                    // フェードイン
+                    $topElem.fadeIn(1000);
+                } else {
+                    const $topElem = $('#menu-bar-now-loading-id');
+                    
+                    if ($topElem.length > 0) {  // jQueryは要素がなくてもオブジェクトを返してくる
+                        // フェードアウト
+                        $topElem.fadeOut(1000, () => {
+                            // 削除
+                            $topElem.remove();
+                        });
+                    }
+                }
+            },
+            
             // ビジーwaitを使いsleepするデバッグ用途のメソッド
             debug_sleep: function (waitMilliSecond) {
               var startTime = new Date();
@@ -1025,5 +1182,42 @@
         /* 外部から変更するもの */
         top:    0;
         left:   0;
+    }
+</style>
+
+<style>
+    /*
+     * Nowローディング
+     */ 
+    .menu-bar-now-loading-class {
+        position: fixed;
+        left: 50%;
+        top:  50%;
+        z-index: 4000;
+        display: none;  /* フェードインするので非表示で開始 */
+    }
+    
+    .menu-bar-now-loading-overlay-class {
+        position: fixed;
+        left:   0;
+        top:    0;
+        width:  100%;
+        height: 100%;
+        z-index: 4001;
+        background: rgba(0, 0, 0, 0.7);
+        margin: 0;        
+    }
+    
+    .menu-bar-now-loading-icon-class {
+        position: absolute;
+        width:  14px;
+        height: 14px;
+        z-index: 4002;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 1.0);
+        
+        /* 外部から変更するもの */
+        left: 0;
+        top:  0;
     }
 </style>

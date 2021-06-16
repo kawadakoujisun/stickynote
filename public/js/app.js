@@ -2840,7 +2840,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     return {
       activeMainMenu: '',
       activeSubMenu: '',
-      markSrc: window.laravel.asset + '/images/stickynote_mark.jpg'
+      markSrc: window.laravel.asset + '/images/stickynote_mark.jpg',
+      menuBarNowLoadingIconIntervalCount: 0
     };
   },
   methods: {
@@ -2909,6 +2910,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     // ファイルサブのインポート
     //
     onClickFileSubImportText: function onClickFileSubImportText(e) {
+      var _this = this;
+
       this.activeMainMenu = '';
       this.activeSubMenu = '';
       console.log('onClickFileSubImportText'); // HTMLのinput要素を生成
@@ -2918,6 +2921,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       input.accept = "application/json"; // ファイルが指定された後に行う処理
 
       input.addEventListener("change", function (e) {
+        _this.displayNowLoadingScreen(true);
+
         var file = e.target.files[0];
 
         if (file) {
@@ -2925,27 +2930,44 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
           var reader = new FileReader(); // ファイルの非同期読み込み
 
-          reader.readAsText(file); // ファイルが読み込まれた後に行う処理
+          reader.readAsText(file);
 
-          reader.addEventListener("load", function () {
-            // 読み込んだJSONをJavaScriptのオブジェクトに変換する
-            var stickyNoteData = JSON.parse(reader.result);
-            console.log(stickyNoteData);
-            var stickerParams = stickyNoteData.sticker_params; // routes/api.phpのRoute::postのwork-sticky-note-importにて、
-            // 特別なプロパティitem_infoがなければ画像や動画を追加しないようにしてあるので、
-            // テキストだけ抽出するというようなことはしなくてもよい。
-            // データベースを更新する
+          try {
+            // ファイルが読み込まれた後に行う処理
+            reader.addEventListener("load", function () {
+              // 読み込んだJSONをJavaScriptのオブジェクトに変換する
+              var stickyNoteData = JSON.parse(reader.result);
+              console.log(stickyNoteData);
+              var stickerParams = stickyNoteData.sticker_params; // routes/api.phpのRoute::postのwork-sticky-note-importにて、
+              // 特別なプロパティitem_infoがなければ画像や動画を追加しないようにしてあるので、
+              // テキストだけ抽出するというようなことはしなくてもよい。
+              // データベースを更新する
 
-            console.log('axios.post');
-            var reqParam = {
-              stickerParams: stickerParams
-            };
-            axios.post(window.laravel.asset + '/api/work-sticky-note-import', {
-              reqParam: reqParam,
-              user_id: window.laravel.user['id']
-            }).then(function (response) {// 特にすることなし
+              console.log('axios.post');
+              var reqParam = {
+                stickerParams: stickerParams
+              };
+              axios.post(window.laravel.asset + '/api/work-sticky-note-import', {
+                reqParam: reqParam,
+                user_id: window.laravel.user['id']
+              }).then(function (response) {
+                // 特にすることなし
+                _this.displayNowLoadingScreen(false);
+              })["catch"](function (error) {
+                console.log('axios.post', error);
+
+                _this.displayNowLoadingScreen(false);
+              });
             });
-          });
+          } catch (error) {
+            // 開始はtry {
+            console.log(error);
+
+            _this.displayNowLoadingScreen(false);
+          }
+        } else {
+          // 開始はif (file) {
+          _this.displayNowLoadingScreen(false);
         }
       }); // 「ファイルを開く」ダイアログを表示
 
@@ -2955,7 +2977,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       document.body.removeChild(input);
     },
     onClickFileSubImportAll: function onClickFileSubImportAll(e) {
-      var _this = this;
+      var _this2 = this;
 
       this.activeMainMenu = '';
       this.activeSubMenu = '';
@@ -2966,6 +2988,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       input.accept = "application/zip"; // ファイルが指定された後に行う処理
 
       input.addEventListener("change", function (e) {
+        _this2.displayNowLoadingScreen(true);
+
         var file = e.target.files[0];
 
         if (file) {
@@ -3169,6 +3193,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                       user_id: window.laravel.user['id']
                     }).then( /*#__PURE__*/function () {
                       var _ref = _asyncToGenerator( /*#__PURE__*/_babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.mark(function _callee(response) {
+                        var _this3 = this;
+
                         var stickerIds, _stickerIndex, stickerId, _stickerParam, _contents, _contentIndex, _content, contentItemReqParam, contentItemExist, dataIndex, _uncompressInfo, mimeType, dataURL, _dataIndex, _uncompressInfo2, _mimeType, _dataURL;
 
                         return _babel_runtime_regenerator__WEBPACK_IMPORTED_MODULE_0___default.a.wrap(function _callee$(_context) {
@@ -3271,24 +3297,30 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                                 break;
 
                               case 25:
-                                _context.next = 30;
+                                _context.next = 31;
                                 break;
 
                               case 27:
                                 _context.prev = 27;
                                 _context.t0 = _context["catch"](1);
+                                // 開始はtry {
                                 console.log('axios.post', _context.t0);
+                                this.displayNowLoadingScreen(false);
 
-                              case 30:
+                              case 31:
                                 // end
                                 axios.post(window.laravel.asset + '/api/work-sticky-note-import-end', {
                                   user_id: window.laravel.user['id']
-                                }).then(function (response) {// 特にすることなし
+                                }).then(function (response) {
+                                  // 特にすることなし
+                                  _this3.displayNowLoadingScreen(false);
                                 })["catch"](function (error) {
                                   console.log('axios.post', error);
+
+                                  _this3.displayNowLoadingScreen(false);
                                 });
 
-                              case 31:
+                              case 32:
                               case "end":
                                 return _context.stop();
                             }
@@ -3299,14 +3331,22 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                       return function (_x) {
                         return _ref.apply(this, arguments);
                       };
-                    }().bind(_this)) // コールバック関数内でthisを使用しているので
+                    }().bind(_this2)) // コールバック関数内でthisを使用しているので
                     ["catch"](function (error) {
+                      // 開始は.then(async function (response) {
                       console.log('axios.post', error);
+
+                      _this2.displayNowLoadingScreen(false);
                     }); //
                     // 特別なプロパティitem_infoを使わない場合 ここまで
                     //
 
                     /**/
+                  })["catch"](function (error) {
+                    // 開始は.then((uncompressData) => {
+                    console.log(error);
+
+                    _this2.displayNowLoadingScreen(false);
                   });
                 } else {
                   // TODO(kawadakoujisun): Promise.all(uncompressFuncs)の配列が空だったときの挙動次第では
@@ -3320,13 +3360,35 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                     axios.post(window.laravel.asset + '/api/work-sticky-note-import', {
                       reqParam: reqParam,
                       user_id: window.laravel.user['id']
-                    }).then(function (response) {// 特にすることなし
+                    }).then(function (response) {
+                      // 特にすることなし
+                      _this2.displayNowLoadingScreen(false);
+                    })["catch"](function (error) {
+                      console.log('axios.post', error);
+
+                      _this2.displayNowLoadingScreen(false);
                     });
                   }
                 }
+              }, function (error) {
+                // 開始は.then((jsonData) => {
+                console.log(error);
+
+                _this2.displayNowLoadingScreen(false);
               });
+            } else {
+              // 開始はif (jsonFileName) {
+              _this2.displayNowLoadingScreen(false);
             }
+          }, function (error) {
+            // 開始は.then((zipContent) => {
+            console.log(error);
+
+            _this2.displayNowLoadingScreen(false);
           });
+        } else {
+          // 開始はif (file) {
+          _this2.displayNowLoadingScreen(false);
         }
       }); // 「ファイルを開く」ダイアログを表示
 
@@ -3339,7 +3401,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     // ファイルサブのダウンロード
     //
     onClickFileSubDownloadText: function onClickFileSubDownloadText(e) {
-      var _this2 = this;
+      var _this4 = this;
 
       this.activeMainMenu = '';
       this.activeSubMenu = '';
@@ -3348,7 +3410,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         console.log('axios.get');
         var stickerParams = response.data; // JSON
 
-        var stickyNoteJson = _this2.getStickyNoteJson(stickerParams); // ダウンロード
+        var stickyNoteJson = _this4.getStickyNoteJson(stickerParams); // ダウンロード
 
 
         var blob = new Blob([stickyNoteJson], {
@@ -3364,7 +3426,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       });
     },
     onClickFileSubDownloadAll: function onClickFileSubDownloadAll(e) {
-      var _this3 = this;
+      var _this5 = this;
 
       this.activeMainMenu = '';
       this.activeSubMenu = '';
@@ -3373,7 +3435,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         console.log('axios.get');
         var stickerParams = response.data;
 
-        _this3.downloadAll(stickerParams);
+        _this5.downloadAll(stickerParams);
       });
     },
     //
@@ -3649,6 +3711,104 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     },
     getMountBorderWidth: function getMountBorderWidth() {
       return 0;
+    },
+    displayNowLoadingScreen: function displayNowLoadingScreen(doesShow) {
+      var _this6 = this;
+
+      console.log('displayNowLoadingScreen', doesShow); // jQuery
+
+      if (doesShow) {
+        // 既に存在していたら、新しいものを生成する前に古いものを削除しておく
+        var $oldTopElem = $('#menu-bar-now-loading-id');
+
+        if ($oldTopElem.length > 0) {
+          // jQueryは要素がなくてもオブジェクトを返してくる
+          // 削除
+          $oldTopElem.remove();
+        } // DOM要素を生成する
+
+
+        var $topElem = $('<div></div>', {
+          "class": 'menu-bar-now-loading-class',
+          id: 'menu-bar-now-loading-id'
+        });
+        var $overlayElem = $('<div></div>', {
+          "class": 'menu-bar-now-loading-overlay-class'
+        });
+        $topElem.append($overlayElem); // ローディングアイコン
+
+        var iconNum = 4;
+        var iconParams = [// x, y
+        [0, 0], [1, 0], [1, 1], [0, 1]];
+        var iconFrameWidth = 100;
+        var iconWidth = 14;
+        var $iconElems = [];
+
+        for (var i = 0; i < iconNum; ++i) {
+          var $iconElem = $('<div></div>', {
+            "class": 'menu-bar-now-loading-icon-class'
+          });
+          $topElem.append($iconElem);
+          var posLeft = -iconFrameWidth / 2 + iconParams[i][0] * iconFrameWidth - iconWidth / 2;
+          var posTop = -iconFrameWidth / 2 + iconParams[i][1] * iconFrameWidth - iconWidth / 2;
+          $iconElem.css('left', "".concat(posLeft, "px"));
+          $iconElem.css('top', "".concat(posTop, "px"));
+          $iconElems.push($iconElem);
+        } // ローディングアイコンのアニメ
+
+
+        this.menuBarNowLoadingIconIntervalCount = 0;
+
+        var animateIcons = function animateIcons() {
+          // トップがなくなっていたらもうアニメを実行しないので、
+          // まず最初にトップの有無を確認する。
+          var $currTopElem = $('#menu-bar-now-loading-id');
+
+          if ($currTopElem.length > 0) {
+            // jQueryは要素がなくてもオブジェクトを返してくる
+            ++_this6.menuBarNowLoadingIconIntervalCount; // console.log(this.menuBarNowLoadingIconIntervalCount);
+            // $('.menu-bar-now-loading-icon-class').each(  // これでもアイコン配列を取得できるが、今回は外で定義している$iconElemsを使うことにしたのでコメントアウト。
+            //     (index, iconElem) => {
+            //         const $iconElem = $(iconElem);
+
+            $iconElems.forEach(function ($iconElem, index) {
+              var goalIndex = (index + _this6.menuBarNowLoadingIconIntervalCount) % 4;
+              var posLeft = -iconFrameWidth / 2 + iconParams[goalIndex][0] * iconFrameWidth - iconWidth / 2;
+              var posTop = -iconFrameWidth / 2 + iconParams[goalIndex][1] * iconFrameWidth - iconWidth / 2;
+              $iconElem.animate({
+                left: "".concat(posLeft, "px"),
+                top: "".concat(posTop, "px")
+              }, 1000, 'linear');
+            }); // アニメが全て終わったら、次のアニメを実行する
+            // $.when($iconElems).done(() => {  // この書き方はダメ。直ちに全処理が終わった扱いになってしまう（というか処理が取れていないのだろう）。
+
+            $.when($('.menu-bar-now-loading-icon-class')).done(function () {
+              // console.log(this.menuBarNowLoadingIconIntervalCount);
+              animateIcons();
+            });
+          }
+        }; // ローディングアイコンのアニメの初回実行
+
+
+        setTimeout(function () {
+          animateIcons();
+        }, 100); // 追加
+
+        $('body').append($topElem); // フェードイン
+
+        $topElem.fadeIn(1000);
+      } else {
+        var _$topElem = $('#menu-bar-now-loading-id');
+
+        if (_$topElem.length > 0) {
+          // jQueryは要素がなくてもオブジェクトを返してくる
+          // フェードアウト
+          _$topElem.fadeOut(1000, function () {
+            // 削除
+            _$topElem.remove();
+          });
+        }
+      }
     },
     // ビジーwaitを使いsleepするデバッグ用途のメソッド
     debug_sleep: function debug_sleep(waitMilliSecond) {
@@ -10467,7 +10627,26 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * メニューバーのバーそのもの\n */\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    /*border: 1px solid #000;*/\n    background-color: #ffffff;\n    margin: 20px 20px 0px;\n    padding: 0;\n}\n.menu-bar-mark-class[data-v-76707645] {\n    display: inline-block;\n    vertical-align: middle;\n    padding: 0;\n}    \n\n/*\n * メニューバー上にあるボタン\n */\n.menu-bar-button-outer-class[data-v-76707645] {\n    position: relative;  /* z-indexを指定したいので、positionをデフォルトのstaticからrelativeに変えておく。 */\n    z-index: 2001;\n    margin: 0;\n    display: inline-block;\n}\n.menu-bar-button-inner-class[data-v-76707645] {\n    display: inline-block;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    padding: 0px 10px;\n    line-height: 30px;\n}\n.menu-bar-button-inner-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}    \n\n/*\n * メニューバーに属するウィンドウを表示しているときのオーバーレイ\n */\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    \n    /*left:   0;*/\n    /*top:    30px;*/  /* メニューバーの下の位置 */\n    /*width:  100%;*/  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    /*height: 920px;*/  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    \n    left:   -20px;  /* メニューバーの位置からマージン分左へ */\n    top:    -20px;  /* メニューバーの位置からマージン分上へ */\n    width:  1850px;  /* だいたい『「メニューバーの横幅(=台紙の横幅)」+「ボーダーの太さ」+「左右マージン分」』くらい */\n    height: 980px;  /* だいたい『「メニューバーの高さ」+「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」+「上下マージン分」』くらい */\n    \n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ内のボタン\n */\n.menu-bar-window-button-outer-class[data-v-76707645] {\n    width: 100%;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    line-height: 30px;\n}\n.menu-bar-window-button-outer-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}\n.menu-bar-window-button-inner-space-class[data-v-76707645] {\n    display: inline-block;\n    width: 10px;\n}    \n\n/*\n * メニューバーの上にあるボタンから表示するウィンドウ\n */\n.menu-bar-main-window-class[data-v-76707645] {\n    position: absolute;\n    top:    30px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    left:   0;\n}\n\n/*\n * 「メニューバーの上にあるボタンから表示したウィンドウ」から表示するウィンドウ\n */\n.menu-bar-sub-window-class[data-v-76707645] {\n    position: absolute;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    top:    0;\n    left:   0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * メニューバーのバーそのもの\n */\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    /*border: 1px solid #000;*/\n    background-color: #ffffff;\n    margin: 20px 20px 0px;\n    padding: 0;\n}\n.menu-bar-mark-class[data-v-76707645] {\n    display: inline-block;\n    vertical-align: middle;\n    padding: 0;\n}    \n\n/*\n * メニューバー上にあるボタン\n */\n.menu-bar-button-outer-class[data-v-76707645] {\n    position: relative;  /* z-indexを指定したいので、positionをデフォルトのstaticからrelativeに変えておく。 */\n    z-index: 2001;\n    margin: 0;\n    display: inline-block;\n}\n.menu-bar-button-inner-class[data-v-76707645] {\n    display: inline-block;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    padding: 0px 10px;\n    line-height: 30px;\n}\n.menu-bar-button-inner-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}    \n\n/*\n * メニューバーに属するウィンドウを表示しているときのオーバーレイ\n */\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    \n    /*left:   0;*/\n    /*top:    30px;*/  /* メニューバーの下の位置 */\n    /*width:  100%;*/  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    /*height: 920px;*/  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    \n    left:   -20px;  /* メニューバーの位置からマージン分左へ */\n    top:    -20px;  /* メニューバーの位置からマージン分上へ */\n    width:  1850px;  /* だいたい『「メニューバーの横幅(=台紙の横幅)」+「ボーダーの太さ」+「左右マージン分」』くらい */\n    height: 980px;  /* だいたい『「メニューバーの高さ」+「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」+「上下マージン分」』くらい */\n    \n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ内のボタン\n */\n.menu-bar-window-button-outer-class[data-v-76707645] {\n    width: 100%;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    line-height: 30px;\n}\n.menu-bar-window-button-outer-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}\n.menu-bar-window-button-inner-space-class[data-v-76707645] {\n    display: inline-block;\n    width: 10px;\n}    \n\n/*\n * メニューバーの上にあるボタンから表示するウィンドウ\n */\n.menu-bar-main-window-class[data-v-76707645] {\n    position: absolute;\n    top:    30px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    left:   0;\n}\n\n/*\n * 「メニューバーの上にあるボタンから表示したウィンドウ」から表示するウィンドウ\n */\n.menu-bar-sub-window-class[data-v-76707645] {\n    position: absolute;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    top:    0;\n    left:   0;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=1&lang=css&":
+/*!**************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=1&lang=css& ***!
+  \**************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * Nowローディング\n */\n.menu-bar-now-loading-class {\n    position: fixed;\n    left: 50%;\n    top:  50%;\n    z-index: 4000;\n    display: none;  /* フェードインするので非表示で開始 */\n}\n.menu-bar-now-loading-overlay-class {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 4001;\n    background: rgba(0, 0, 0, 0.7);\n    margin: 0;\n}\n.menu-bar-now-loading-icon-class {\n    position: absolute;\n    width:  14px;\n    height: 14px;\n    z-index: 4002;\n    border-radius: 50%;\n    background: rgba(255, 255, 255, 1.0);\n    \n    /* 外部から変更するもの */\n    left: 0;\n    top:  0;\n}\n", ""]);
 
 // exports
 
@@ -48887,6 +49066,36 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=1&lang=css&":
+/*!******************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=1&lang=css& ***!
+  \******************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkMenuBarComponent.vue?vue&type=style&index=1&lang=css& */ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=1&lang=css&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css&":
 /*!****************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkMountComponent.vue?vue&type=style&index=0&id=652fa580&scoped=true&lang=css& ***!
@@ -64730,7 +64939,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _WorkMenuBarComponent_vue_vue_type_template_id_76707645_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./WorkMenuBarComponent.vue?vue&type=template&id=76707645&scoped=true& */ "./resources/js/components/WorkMenuBarComponent.vue?vue&type=template&id=76707645&scoped=true&");
 /* harmony import */ var _WorkMenuBarComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./WorkMenuBarComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/WorkMenuBarComponent.vue?vue&type=script&lang=js&");
 /* empty/unused harmony star reexport *//* harmony import */ var _WorkMenuBarComponent_vue_vue_type_style_index_0_id_76707645_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./WorkMenuBarComponent.vue?vue&type=style&index=0&id=76707645&scoped=true&lang=css& */ "./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=0&id=76707645&scoped=true&lang=css&");
-/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+/* harmony import */ var _WorkMenuBarComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./WorkMenuBarComponent.vue?vue&type=style&index=1&lang=css& */ "./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=1&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
 
 
 
@@ -64739,7 +64950,7 @@ __webpack_require__.r(__webpack_exports__);
 
 /* normalize component */
 
-var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_4__["default"])(
   _WorkMenuBarComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
   _WorkMenuBarComponent_vue_vue_type_template_id_76707645_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
   _WorkMenuBarComponent_vue_vue_type_template_id_76707645_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
@@ -64783,6 +64994,22 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_style_index_0_id_76707645_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkMenuBarComponent.vue?vue&type=style&index=0&id=76707645&scoped=true&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=0&id=76707645&scoped=true&lang=css&");
 /* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_style_index_0_id_76707645_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_style_index_0_id_76707645_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__);
 /* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_style_index_0_id_76707645_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_style_index_0_id_76707645_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=1&lang=css&":
+/*!*******************************************************************************************!*\
+  !*** ./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=1&lang=css& ***!
+  \*******************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkMenuBarComponent.vue?vue&type=style&index=1&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkMenuBarComponent.vue?vue&type=style&index=1&lang=css&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkMenuBarComponent_vue_vue_type_style_index_1_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
 
 
 /***/ }),
