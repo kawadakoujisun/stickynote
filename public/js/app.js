@@ -2372,6 +2372,12 @@ __webpack_require__.r(__webpack_exports__);
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ../ProjectWorkCommonScript.js */ "./resources/js/ProjectWorkCommonScript.js");
+function _createForOfIteratorHelper(o, allowArrayLike) { var it = typeof Symbol !== "undefined" && o[Symbol.iterator] || o["@@iterator"]; if (!it) { if (Array.isArray(o) || (it = _unsupportedIterableToArray(o)) || allowArrayLike && o && typeof o.length === "number") { if (it) o = it; var i = 0; var F = function F() {}; return { s: F, n: function n() { if (i >= o.length) return { done: true }; return { done: false, value: o[i++] }; }, e: function e(_e) { throw _e; }, f: F }; } throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); } var normalCompletion = true, didErr = false, err; return { s: function s() { it = it.call(o); }, n: function n() { var step = it.next(); normalCompletion = step.done; return step; }, e: function e(_e2) { didErr = true; err = _e2; }, f: function f() { try { if (!normalCompletion && it["return"] != null) it["return"](); } finally { if (didErr) throw err; } } }; }
+
+function _unsupportedIterableToArray(o, minLen) { if (!o) return; if (typeof o === "string") return _arrayLikeToArray(o, minLen); var n = Object.prototype.toString.call(o).slice(8, -1); if (n === "Object" && o.constructor) n = o.constructor.name; if (n === "Map" || n === "Set") return Array.from(o); if (n === "Arguments" || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(n)) return _arrayLikeToArray(o, minLen); }
+
+function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len = arr.length; for (var i = 0, arr2 = new Array(len); i < len; i++) { arr2[i] = arr[i]; } return arr2; }
+
 //
 //
 //
@@ -2400,7 +2406,8 @@ __webpack_require__.r(__webpack_exports__);
       //
       // 台紙に貼ってあるふせん
       //
-      stickerParams: []
+      stickerParams: [],
+      lastWindowInnerWidth: null
     };
   },
   mounted: function mounted() {
@@ -2410,6 +2417,75 @@ __webpack_require__.r(__webpack_exports__);
       console.log('axios.get');
       _this.stickerParams = response.data;
     });
+
+    window.onresize = function () {
+      var needRelocate = false;
+
+      if (_this.lastWindowInnerWidth === null) {
+        needRelocate = true;
+      } else {
+        if (_this.lastWindowInnerWidth >= 576 && window.innerWidth < 576) {
+          needRelocate = true;
+        } else if (_this.lastWindowInnerWidth < 576 && window.innerWidth >= 576) {
+          needRelocate = true;
+        }
+      }
+
+      if (needRelocate) {
+        // 配置し直し
+        if (window.innerWidth >= 576) {
+          // 画面の横幅が576px以上のとき
+          var _iterator = _createForOfIteratorHelper(_this.stickerParams),
+              _step;
+
+          try {
+            for (_iterator.s(); !(_step = _iterator.n()).done;) {
+              var stickerParam = _step.value;
+
+              var idBaseName = _this.getStickerIdBaseName();
+
+              var updateId = "".concat(idBaseName).concat(stickerParam.id);
+              var updateElem = document.getElementById(updateId);
+
+              if (updateElem) {
+                updateElem.style.top = "".concat(stickerParam['pos_top'], "px");
+                updateElem.style.left = "".concat(stickerParam['pos_left'], "px");
+              }
+            }
+          } catch (err) {
+            _iterator.e(err);
+          } finally {
+            _iterator.f();
+          }
+        } else {
+          var _iterator2 = _createForOfIteratorHelper(_this.stickerParams),
+              _step2;
+
+          try {
+            for (_iterator2.s(); !(_step2 = _iterator2.n()).done;) {
+              var _stickerParam = _step2.value;
+
+              var _idBaseName = _this.getStickerIdBaseName();
+
+              var _updateId = "".concat(_idBaseName).concat(_stickerParam.id);
+
+              var _updateElem = document.getElementById(_updateId);
+
+              if (_updateElem) {
+                _updateElem.style.top = 0;
+                _updateElem.style.left = 0;
+              }
+            }
+          } catch (err) {
+            _iterator2.e(err);
+          } finally {
+            _iterator2.f();
+          }
+        }
+      }
+
+      _this.lastWindowInnerWidth = window.innerWidth;
+    };
   },
   directives: {
     'sticker-custom-directive': {
@@ -2418,8 +2494,13 @@ __webpack_require__.r(__webpack_exports__);
         var stickerParam = binding.value.stickerParam;
         var colorHex = '000000' + stickerParam['color'].toString(16);
         colorHex = colorHex.substr(colorHex.length - 6);
-        el.style.top = "".concat(stickerParam['pos_top'], "px");
-        el.style.left = "".concat(stickerParam['pos_left'], "px");
+
+        if (window.innerWidth >= 576) {
+          // 画面の横幅が576px以上のとき
+          el.style.top = "".concat(stickerParam['pos_top'], "px");
+          el.style.left = "".concat(stickerParam['pos_left'], "px");
+        }
+
         el.style.zIndex = stickerParam['depth']; // z-index
 
         el.style.backgroundColor = '#' + colorHex; // background-color
@@ -2472,6 +2553,11 @@ __webpack_require__.r(__webpack_exports__);
       componentUpdated: function componentUpdated(el, binding) {
         console.log('sticker-custom-directive componentUpdated', binding.value.index);
       }
+    }
+  },
+  methods: {
+    getStickerIdBaseName: function getStickerIdBaseName() {
+      return 'sticker-id-';
     }
   }
 });
@@ -10589,7 +10675,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-453180c5] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px 20px 20px;\n    padding: 0;\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-453180c5] {\n    position: absolute;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 0;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n.sticker-inner-class[data-v-453180c5] {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n\n/*\n * 画像(動画も)\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-453180c5] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  100%;\n    /*height: 900px;*/\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px auto 20px;\n    padding: 0;\n}\n@media (min-width: 576px) {\n/* 画面の横幅が576px以上のとき */\n.mount-class[data-v-453180c5] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px 20px 20px;\n    padding: 0;\n}\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-453180c5] {\n    position: relative;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 10px auto 10px;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n@media (min-width: 576px) {\n/* 画面の横幅が576px以上のとき */\n.sticker-class[data-v-453180c5] {\n    position: absolute;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 0;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n}\n.sticker-inner-class[data-v-453180c5] {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n\n/*\n * 画像(動画も)\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
 
 // exports
 

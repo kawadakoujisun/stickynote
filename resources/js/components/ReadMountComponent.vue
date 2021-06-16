@@ -30,6 +30,8 @@
                 // 台紙に貼ってあるふせん
                 //
                 stickerParams: [],
+                
+                lastWindowInnerWidth: null,
             };
         },
         
@@ -40,6 +42,51 @@
                     
                     this.stickerParams = response.data;
                 });
+                
+            window.onresize = () => {
+                let needRelocate = false;
+                if (this.lastWindowInnerWidth === null) {
+                    needRelocate = true;
+                } else {
+                    if (this.lastWindowInnerWidth >= 576 && window.innerWidth < 576) {
+                        needRelocate = true;
+                    } else if (this.lastWindowInnerWidth < 576 && window.innerWidth >= 576) {
+                        needRelocate = true;
+                    }
+                }
+                
+                if (needRelocate) {
+                    // 配置し直し
+                    if (window.innerWidth >= 576) {
+                        // 画面の横幅が576px以上のとき
+                        for (let stickerParam of this.stickerParams) {
+                            const idBaseName = this.getStickerIdBaseName();
+                            const updateId = `${idBaseName}${stickerParam.id}`;
+                            
+                            const updateElem = document.getElementById(updateId);
+                            
+                            if (updateElem) {
+                                updateElem.style.top  = `${stickerParam['pos_top']}px`;
+                                updateElem.style.left = `${stickerParam['pos_left']}px`;
+                            }
+                        }
+                    } else {
+                        for (let stickerParam of this.stickerParams) {
+                            const idBaseName = this.getStickerIdBaseName();
+                            const updateId = `${idBaseName}${stickerParam.id}`;
+                            
+                            const updateElem = document.getElementById(updateId);
+                            
+                            if (updateElem) {
+                                updateElem.style.top  = 0;
+                                updateElem.style.left = 0;
+                            }
+                        }    
+                    }
+                }
+                
+                this.lastWindowInnerWidth = window.innerWidth;
+            };
         },
         
         directives: {
@@ -52,8 +99,11 @@
                     let colorHex = '000000' + stickerParam['color'].toString(16);
                     colorHex = colorHex.substr(colorHex.length - 6);
                     
+                    if (window.innerWidth >= 576) {
+                    // 画面の横幅が576px以上のとき
                     el.style.top  = `${stickerParam['pos_top']}px`;
                     el.style.left = `${stickerParam['pos_left']}px`;
+                    }
                     el.style.zIndex = stickerParam['depth'];  // z-index
                     el.style.backgroundColor = '#'+colorHex;  // background-color
                     
@@ -110,6 +160,12 @@
                 },
             },
         },
+        
+        methods: {
+            getStickerIdBaseName: function () {
+                return 'sticker-id-';
+            },
+        },
     };
 </script>
 
@@ -119,6 +175,18 @@
      */
     .mount-class {
         position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */
+        width:  100%;
+        /*height: 900px;*/
+        border: 1px solid #000;
+        background-color: #ffffff;
+        margin: 0px auto 20px;
+        padding: 0;
+    }
+    
+    @media (min-width: 576px) {
+    /* 画面の横幅が576px以上のとき */
+    .mount-class {
+        position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */
         width:  1800px;
         height: 900px;
         border: 1px solid #000;
@@ -126,10 +194,29 @@
         margin: 0px 20px 20px;
         padding: 0;
     }
+    }
     
     /*
      * ふせん
      */
+    .sticker-class {
+        position: relative;
+        width:      340px;
+        min-height: 200px;
+        max-height: 430px;
+        border: 1px solid #000;
+        margin: 10px auto 10px;
+        padding: 0;
+        overflow-y: scroll;        
+        
+        /* 外部から変更するもの */
+        top:  0;
+        left: 0;
+        background-color: #000000;
+    }
+    
+    @media (min-width: 576px) {
+    /* 画面の横幅が576px以上のとき */
     .sticker-class {
         position: absolute;
         width:      340px;
@@ -144,6 +231,7 @@
         top:  0;
         left: 0;
         background-color: #000000;
+    }
     }
 
     .sticker-inner-class {

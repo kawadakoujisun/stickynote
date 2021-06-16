@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
     <head>
         <meta charset="utf-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <title>StickyNote Mount ReadOnly</title>
@@ -13,12 +13,25 @@
         <style type="text/css">
             .menu-bar-class {
                 position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */
+                width:  100%;
+                height: 30px;
+                /*border: 1px solid #000;*/
+                background-color: #ffffff;
+                margin: 20px auto 0px;
+                padding: 0;
+            }
+            
+            @media (min-width: 576px) {
+            /* 画面の横幅が576px以上のとき */
+            .menu-bar-class {
+                position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */
                 width:  1800px;
                 height: 30px;
                 /*border: 1px solid #000;*/
                 background-color: #ffffff;
                 margin: 20px 20px 0px;
                 padding: 0;
+            }
             }
             
             .menu-bar-mark-class {
