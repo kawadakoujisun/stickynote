@@ -270,6 +270,42 @@ Route::post('/work-sticky-note-import', function(Request $request) {
 						];
 						array_push($dstContents, $dstContent);
 					}
+				} else if ($srcContent['link']['item_type'] == \App\Sticker::$contentItemType['taskStartTime']
+					|| $srcContent['link']['item_type'] == \App\Sticker::$contentItemType['taskEndTime']) {
+					$taskTimeType = null;
+					if ($srcContent['link']['item_type'] == \App\Sticker::$contentItemType['taskStartTime']) {
+						$taskTimeType = 'taskStartTime';
+					} else if ($srcContent['link']['item_type'] == \App\Sticker::$contentItemType['taskEndTime']) {
+						$taskTimeType = 'taskEndTime';
+					}
+					
+					// 時刻データを作成し、データベースに保存する
+					list($contentLink, $contentItem) = $sticker->createContentItemTaskTime([
+			            'task_time_type' => $taskTimeType,
+			            'time_zone_type' => $srcContent['item']['time_zone_type'],
+			            'year_value'     => $srcContent['item']['year_value'],
+			            'month_value'    => $srcContent['item']['month_value'],
+			            'day_value'      => $srcContent['item']['day_value'],
+			            'hour_value'     => $srcContent['item']['hour_value'],
+			            'minute_value'   => $srcContent['item']['minute_value'],
+					]);
+					
+					$dstContent = [
+						'link' => [
+							'id'        => $contentLink->id,
+							'item_type' => $contentLink->item_type,
+							'item_id'   => $contentLink->item_id,
+						],
+						'item' => [
+							'time_zone_type' => $contentItem->time_zone_type,
+							'year_value'     => $contentItem->year_value,
+							'month_value'    => $contentItem->month_value,
+							'day_value'      => $contentItem->day_value,
+							'hour_value'     => $contentItem->hour_value,
+							'minute_value'   => $contentItem->minute_value,
+						],
+					];
+					array_push($dstContents, $dstContent);
 				}
 			}
 			
@@ -370,6 +406,25 @@ Route::post('/work-sticky-note-import-content-item', function(Request $request) 
 			list($contentLink, $contentItem) = $sticker->createContentItemVideo([
 			    'video_url'       => $videoURL,
 			    'video_public_id' => $videoPublicId,
+			]);
+		} else if ($item_type == \App\Sticker::$contentItemType['taskStartTime']
+			|| $item_type == \App\Sticker::$contentItemType['taskEndTime']) {
+			$taskTimeType = null;
+			if ($item_type == \App\Sticker::$contentItemType['taskStartTime']) {
+				$taskTimeType = 'taskStartTime';
+			} else if ($item_type == \App\Sticker::$contentItemType['taskEndTime']) {
+				$taskTimeType = 'taskEndTime';
+			}
+			
+			// 時刻データを作成し、データベースに保存する
+			list($contentLink, $contentItem) = $sticker->createContentItemTaskTime([
+			    'task_time_type' => $taskTimeType,
+			    'time_zone_type' => $request->time_zone_type,
+			    'year_value'     => $request->year_value,
+			    'month_value'    => $request->month_value,
+			    'day_value'      => $request->day_value,
+			    'hour_value'     => $request->hour_value,
+			    'minute_value'   => $request->minute_value,
 			]);
 		}
 	}
@@ -836,5 +891,71 @@ Route::delete('/work-sticker-content-item-video-destroy', function(Request $requ
 				}
 			}
 		}
+	}
+});
+
+Route::post('/work-sticker-content-item-task-time-create', function(Request $request) {
+	$sticker = \App\Sticker::find($request->reqParam['id']);
+
+	if ($sticker) {
+		$taskTimeType = $request->reqParam['taskTimeType'];  // 'taskStartTime' or 'taskEndTime'
+		$timeZoneType = $request->reqParam['timeZoneType'];
+		$yearValue    = $request->reqParam['yearValue'];
+		$monthValue   = $request->reqParam['monthValue'];
+		$dayValue     = $request->reqParam['dayValue'];
+		$hourValue    = $request->reqParam['hourValue'];
+		$minuteValue  = $request->reqParam['minuteValue'];
+		
+		// 時刻データを作成し、データベースに保存する
+		list($contentLink, $contentItem) = $sticker->createContentItemTaskTime([
+            'task_time_type' => $taskTimeType,
+            'time_zone_type' => $timeZoneType,
+            'year_value'     => $yearValue,
+            'month_value'    => $monthValue,
+            'day_value'      => $dayValue,
+            'hour_value'     => $hourValue,
+            'minute_value'   => $minuteValue,
+		]);
+		
+		if ($contentLink != null && $contentItem != null) {
+		    // イベント
+		    $eventParam = [
+		    	'id'                => $sticker->id,
+		    	'content_link_id'   => $contentLink->id,
+		    	'content_item_type' => $contentLink->item_type,
+		    	'content_item_id'   => $contentLink->item_id,
+	            'time_zone_type'    => $timeZoneType,
+	            'year_value'        => $yearValue,
+	            'month_value'       => $monthValue,
+	            'day_value'         => $dayValue,
+	            'hour_value'        => $hourValue,
+	            'minute_value'      => $minuteValue,
+		    	'user_id'           => $request->user_id,
+		    ];
+		    
+		    event((new \App\Events\StickerContentItemTaskTimeCreate($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+		}
+	}
+});
+
+Route::delete('/work-sticker-content-item-task-time-destroy', function(Request $request) {
+	$sticker = \App\Sticker::find($request->reqParam['id']);
+
+	if ($sticker) {
+		$content_link_id = $request->reqParam['content_link_id'];
+		
+		// 時刻データを削除し、データベースに保存する
+		$sticker->destroyContentItem([
+		    'content_link_id' => $content_link_id,
+		]);
+	    
+	    // イベント
+	    $eventParam = [
+	    	'id'              => $sticker->id,
+	    	'content_link_id' => $content_link_id,
+	    	'user_id'         => $request->user_id,
+	    ];
+	    
+	    event((new \App\Events\StickerContentItemTaskTimeDestroy($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
 	}
 });

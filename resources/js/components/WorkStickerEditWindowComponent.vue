@@ -53,6 +53,8 @@
                 <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickAddText">テキストを追加</button></p></div>
                 <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickAddImage">画像を追加</button></p></div>
                 <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickAddVideo">動画を追加</button></p></div>
+                <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickAddTaskStartTime">開始時刻を追加</button></p></div>
+                <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickAddTaskEndTime">終了時刻を追加</button></p></div>
                 
                 <div class="sticker-edit-button-space-class"></div>
                 <div class="text-center"><button class="btn btn-secondary" @click.prevent="onClickClose">戻る</button></div>
@@ -147,6 +149,9 @@
                         
                         // video要素追加
                         commonScript.addVideoElement(divItemElem, videoURL, 1);
+                    } else if (content['link'].item_type == 4 || content['link'].item_type == 5) {  // app/Sticker.phpで値を定義している
+                        divItemElem.classList.add('sticker-content-item-text-outer-class');
+                        commonScript.addTaskTimeText(divItemElem, content);
                     }
                 },
                 
@@ -257,6 +262,18 @@
                                 });
                                 
                             result = 'removeVideo';
+                        } else if (contentItemType == 4 || contentItemType == 5) {  // app/Sticker.phpで値を定義している
+                            axios.delete(window.laravel.asset + '/api/work-sticker-content-item-task-time-destroy', {
+                                data: {
+                                    reqParam: reqParam,
+                                    user_id: window.laravel.user['id'],
+                                },
+                            })
+                                .then(response => {
+                                    // 特にすることなし
+                                });
+                                
+                            result = 'removeTaskTime';
                         }
                             
                         // 親に戻る
@@ -312,6 +329,24 @@
                 };
                 this.backToMount(emitParam);
             },
+            
+            onClickAddTaskStartTime: function (e) {
+                console.log('onClickAddTaskStartTime');
+                const emitParam = {
+                    event: e,
+                    result: 'openStickerTaskStartTimeAddWindow',
+                };
+                this.backToMount(emitParam);
+            },
+            
+            onClickAddTaskEndTime: function (e) {
+                console.log('onClickAddTaskEndTime');
+                const emitParam = {
+                    event: e,
+                    result: 'openStickerTaskEndTimeAddWindow',
+                };
+                this.backToMount(emitParam);
+            },  
             
             backToMount: function (emitParam) {
                 if (this.stickerEditWindowTimeoutId !== null) {
@@ -441,7 +476,7 @@
     }
     
     /*
-     * テキスト
+     * テキスト(時刻も)
      */
     .sticker-edit-sticker-content-item-text-outer-class {
         position: relative;

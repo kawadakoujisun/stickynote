@@ -2541,6 +2541,10 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
             // video要素追加
 
             _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addVideoElement(divItemElem, videoURL, 1);
+          } else if (content['link'].item_type == 4 || content['link'].item_type == 5) {
+            // app/Sticker.phpで値を定義している
+            divItemElem.classList.add('sticker-content-item-text-outer-class');
+            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addTaskTimeText(divItemElem, content);
           }
         }
       },
@@ -3359,6 +3363,15 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                                       contentItemExist = true;
                                     }
                                   }
+                                } else if (_content.link.item_type == 4 || _content.link.item_type == 5) {
+                                  // app/Sticker.phpで値を定義している
+                                  contentItemReqParam.time_zone_type = _content.item.time_zone_type;
+                                  contentItemReqParam.year_value = _content.item.year_value;
+                                  contentItemReqParam.month_value = _content.item.month_value;
+                                  contentItemReqParam.day_value = _content.item.day_value;
+                                  contentItemReqParam.hour_value = _content.item.hour_value;
+                                  contentItemReqParam.minute_value = _content.item.minute_value;
+                                  contentItemExist = true;
                                 }
 
                                 if (!contentItemExist) {
@@ -3978,6 +3991,11 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 //
 //
 //
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
@@ -4085,6 +4103,16 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       showStickerVideoAddWindowParam: {
         isShow: false,
         idNo: null // 要素のidの文字列から抽出した数値
+
+      },
+      //
+      // ふせんに時刻を追加するウィンドウに渡すパラメータ
+      //
+      showStickerTaskTimeAddWindowParam: {
+        isShow: false,
+        idNo: null,
+        // 要素のidの文字列から抽出した数値
+        taskTimeType: null // 'taskStartTime' or 'taskEndTime'
 
       }
     };
@@ -4481,6 +4509,59 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
       _this.removeStickerContentItem(response.eventParam);
     });
+    window.Echo["private"]('sticker-content-item-task-time-create-channel.' + window.laravel.user['id']).listen('StickerContentItemTaskTimeCreate', function (response) {
+      console.log('window.Echo.private sticker-content-item-task-time-create-channel listen');
+      var idNo = response.eventParam.id;
+
+      var idBaseName = _this.getStickerIdBaseName();
+
+      var updateId = "".concat(idBaseName).concat(idNo);
+      var updateElem = document.getElementById(updateId);
+
+      if (updateElem) {
+        var contentLinkIdNo = response.eventParam.content_link_id;
+        var content = {
+          link: {
+            id: contentLinkIdNo,
+            item_type: response.eventParam.content_item_type,
+            item_id: response.eventParam.content_item_id
+          },
+          item: {
+            time_zone_type: response.eventParam.time_zone_type,
+            year_value: response.eventParam.year_value,
+            month_value: response.eventParam.month_value,
+            day_value: response.eventParam.day_value,
+            hour_value: response.eventParam.hour_value,
+            minute_value: response.eventParam.minute_value
+          }
+        }; // データ更新
+
+        var index = _this.getStickerParamIndex(idNo);
+
+        if (index !== null) {
+          var contents = _this.stickerParams[index]['contents']; // JavaScriptの配列は参照渡し
+
+          contents.push(content); // TODO(kawadakoujisun): id順に並び替える必要あるかも。見た目のdivの並びも。
+        }
+
+        var divStickerInnerElems = updateElem.getElementsByClassName('sticker-inner-class');
+        var divStickerInnerElem = divStickerInnerElems[0]; // 見た目更新
+
+        var divItemElem = document.createElement('div');
+
+        var contentLinkIdBaseName = _this.getContentLinkIdBaseName();
+
+        divItemElem.id = "".concat(contentLinkIdBaseName).concat(contentLinkIdNo);
+        divItemElem.classList.add('sticker-content-item-text-outer-class');
+        _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addTaskTimeText(divItemElem, content);
+        divStickerInnerElem.appendChild(divItemElem);
+      }
+    });
+    window.Echo["private"]('sticker-content-item-task-time-destroy-channel.' + window.laravel.user['id']).listen('StickerContentItemTaskTimeDestroy', function (response) {
+      console.log('window.Echo.private sticker-content-item-task-time-destroy-channel listen');
+
+      _this.removeStickerContentItem(response.eventParam);
+    });
   },
   directives: {
     'sticker-custom-directive': {
@@ -4531,6 +4612,10 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
             // video要素追加
 
             _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addVideoElement(divItemElem, videoURL, 1);
+          } else if (content['link'].item_type == 4 || content['link'].item_type == 5) {
+            // app/Sticker.phpで値を定義している
+            divItemElem.classList.add('sticker-content-item-text-outer-class');
+            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addTaskTimeText(divItemElem, content);
           }
         }
       },
@@ -4684,6 +4769,7 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         if (emitParam.result == 'removeText') {// ここに来る前にテキストを削除しているので、ここでは何もしない
         } else if (emitParam.result == 'removeImage') {// ここに来る前に画像を削除しているので、ここでは何もしない
         } else if (emitParam.result == 'removeVideo') {// ここに来る前に動画を削除しているので、ここでは何もしない
+        } else if (emitParam.result == 'removeTaskTime') {// ここに来る前に時刻を削除しているので、ここでは何もしない
         } else if (emitParam.result == 'openStickerColorChangeWindow') {
           this.showStickerColorChangeWindowParam.isShow = true;
           this.showStickerColorChangeWindowParam.idNo = idNo;
@@ -4696,6 +4782,14 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         } else if (emitParam.result == 'openStickerVideoAddWindow') {
           this.showStickerVideoAddWindowParam.isShow = true;
           this.showStickerVideoAddWindowParam.idNo = idNo;
+        } else if (emitParam.result == 'openStickerTaskStartTimeAddWindow') {
+          this.showStickerTaskTimeAddWindowParam.isShow = true;
+          this.showStickerTaskTimeAddWindowParam.idNo = idNo;
+          this.showStickerTaskTimeAddWindowParam.taskTimeType = 'taskStartTime';
+        } else if (emitParam.result == 'openStickerTaskEndTimeAddWindow') {
+          this.showStickerTaskTimeAddWindowParam.isShow = true;
+          this.showStickerTaskTimeAddWindowParam.idNo = idNo;
+          this.showStickerTaskTimeAddWindowParam.taskTimeType = 'taskEndTime';
         }
       }
     },
@@ -4736,6 +4830,17 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
       if (emitParam.result != 'none') {
         if (emitParam.result == 'addVideo') {// ここに来る前に動画を追加しているので、ここでは何もしない
+        }
+      }
+    },
+    onHideStickerTaskTimeAddWindow: function onHideStickerTaskTimeAddWindow(emitParam) {
+      console.log('onHideStickerTaskTimeAddWindow', emitParam.event);
+      this.showStickerTaskTimeAddWindowParam.isShow = false;
+      this.showStickerTaskTimeAddWindowParam.idNo = null;
+      this.showStickerTaskTimeAddWindowParam.taskTimeType = null;
+
+      if (emitParam.result != 'none') {
+        if (emitParam.result == 'addTaskTime') {// ここに来る前に時刻を追加しているので、ここでは何もしない
         }
       }
     },
@@ -4985,7 +5090,13 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
               image_url: srcContent.item.image_url,
               image_public_id: srcContent.item.image_public_id,
               video_url: srcContent.item.video_url,
-              video_public_id: srcContent.item.video_public_id
+              video_public_id: srcContent.item.video_public_id,
+              time_zone_type: srcContent.item.time_zone_type,
+              year_value: srcContent.item.year_value,
+              month_value: srcContent.item.month_value,
+              day_value: srcContent.item.day_value,
+              hour_value: srcContent.item.hour_value,
+              minute_value: srcContent.item.minute_value
             }
           };
           contents.push(content);
@@ -5436,6 +5547,8 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
@@ -5510,6 +5623,10 @@ __webpack_require__.r(__webpack_exports__);
           // video要素追加
 
           _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addVideoElement(divItemElem, videoURL, 1);
+        } else if (content['link'].item_type == 4 || content['link'].item_type == 5) {
+          // app/Sticker.phpで値を定義している
+          divItemElem.classList.add('sticker-content-item-text-outer-class');
+          _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addTaskTimeText(divItemElem, content);
         }
       },
       inserted: function inserted(el, binding) {
@@ -5605,6 +5722,16 @@ __webpack_require__.r(__webpack_exports__);
             }).then(function (response) {// 特にすることなし
             });
             result = 'removeVideo';
+          } else if (contentItemType == 4 || contentItemType == 5) {
+            // app/Sticker.phpで値を定義している
+            axios["delete"](window.laravel.asset + '/api/work-sticker-content-item-task-time-destroy', {
+              data: {
+                reqParam: reqParam,
+                user_id: window.laravel.user['id']
+              }
+            }).then(function (response) {// 特にすることなし
+            });
+            result = 'removeTaskTime';
           } // 親に戻る
 
 
@@ -5652,6 +5779,22 @@ __webpack_require__.r(__webpack_exports__);
       var emitParam = {
         event: e,
         result: 'openStickerVideoAddWindow'
+      };
+      this.backToMount(emitParam);
+    },
+    onClickAddTaskStartTime: function onClickAddTaskStartTime(e) {
+      console.log('onClickAddTaskStartTime');
+      var emitParam = {
+        event: e,
+        result: 'openStickerTaskStartTimeAddWindow'
+      };
+      this.backToMount(emitParam);
+    },
+    onClickAddTaskEndTime: function onClickAddTaskEndTime(e) {
+      console.log('onClickAddTaskEndTime');
+      var emitParam = {
+        event: e,
+        result: 'openStickerTaskEndTimeAddWindow'
       };
       this.backToMount(emitParam);
     },
@@ -5848,6 +5991,255 @@ __webpack_require__.r(__webpack_exports__);
       imageElem.src = '';
       this.isImageFileEnabled = false;
       this.selectImageFileInfo = null;
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=script&lang=js&":
+/*!************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=script&lang=js& ***!
+  \************************************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: {
+    showStickerTaskTimeAddWindowProps: Object
+  },
+  data: function data() {
+    return {
+      isShow: this.showStickerTaskTimeAddWindowProps.isShow,
+      yearText: '',
+      monthText: '',
+      dayText: '',
+      hourText: '',
+      minuteText: '',
+      stickerTaskTimeAddWindowTimeoutId: null
+    };
+  },
+  watch: {
+    'showStickerTaskTimeAddWindowProps.isShow': function showStickerTaskTimeAddWindowPropsIsShow(newValue, oldValue) {
+      this.isShow = this.showStickerTaskTimeAddWindowProps.isShow;
+
+      if (this.isShow) {
+        // 前の入力が残っているので、消しておく。
+        this.yearText = '';
+        this.monthText = '';
+        this.dayText = '';
+        this.hourText = '';
+        this.minuteText = '';
+        var windowElem = document.getElementById("sticker-task-time-add-window-id"); // いったん表示しないとサイズを取得できないので、最初は見えないところにおいておく。
+
+        windowElem.style.left = '-10000px';
+        windowElem.style.top = 0;
+        this.stickerTaskTimeAddWindowTimeoutId = setTimeout(function () {
+          var windowElemRect = windowElem.getBoundingClientRect();
+          windowElem.style.left = '50%';
+          windowElem.style.top = '50%';
+          windowElem.style.marginLeft = "".concat(-windowElemRect.width / 2, "px"); // margin-left
+
+          windowElem.style.marginTop = "".concat(-windowElemRect.height / 2, "px"); // margin-top
+        }, 10);
+      }
+    }
+  },
+  methods: {
+    onClickStickerTaskTimeAddWindowOverlay: function onClickStickerTaskTimeAddWindowOverlay(e) {
+      console.log('onClickStickerTaskTimeAddWindowOverlay');
+      var emitParam = {
+        event: e,
+        result: 'none'
+      };
+      this.backToMount(emitParam);
+    },
+    onClickStickerTaskTimeAddWindow: function onClickStickerTaskTimeAddWindow(e) {
+      console.log('onClickStickerTaskTimeAddWindow'); // 何もしない
+    },
+    onClickClose: function onClickClose(e) {
+      var emitParam = {
+        event: e,
+        result: 'none'
+      };
+      this.backToMount(emitParam);
+    },
+    onClickAddTaskTime: function onClickAddTaskTime(e) {
+      // 時刻を追加する
+      var yearValue = parseInt(this.yearText, 10);
+      var monthValue = parseInt(this.monthText, 10);
+      var dayValue = parseInt(this.dayText, 10);
+      var hourValue = parseInt(this.hourText, 10);
+      var minuteValue = parseInt(this.minuteText, 10);
+      console.log("taskTime=".concat(yearValue, "/").concat(monthValue, "/").concat(dayValue, " ").concat(hourValue, ":").concat(minuteValue)); // 入力が適切かどうかチェックする
+
+      var inputOK = false;
+
+      do {
+        // 整数か？
+        if (!(Number.isInteger(yearValue) && Number.isInteger(monthValue) && Number.isInteger(dayValue) && Number.isInteger(hourValue) && Number.isInteger(minuteValue))) {
+          break;
+        } // 年、日、時、分
+
+
+        if (!(0 <= yearValue && yearValue <= 9999)) break;
+        if (!(1 <= monthValue && monthValue <= 12)) break;
+        if (!(0 <= hourValue && hourValue <= 23)) break;
+        if (!(0 <= minuteValue && minuteValue <= 59)) break; // 月
+
+        if (!(1 <= dayValue && dayValue <= 31)) break;
+
+        if (monthValue == 4 || monthValue == 6 || monthValue == 9 || monthValue == 11) {
+          if (dayValue > 30) break;
+        } // 2月
+
+
+        if (monthValue == 2) {
+          var leapYear = false; // うるう年ならtrue
+
+          if (yearValue % 4 == 0) {
+            if (yearValue % 100 == 0) {
+              if (yearValue % 400 == 0) {
+                leapYear = true;
+              } else {
+                leapYear = false;
+              }
+            } else {
+              leapYear = true;
+            }
+          } else {
+            leapYear = false;
+          }
+
+          if (leapYear) {
+            // うるう年
+            if (dayValue > 29) break;
+          } else {
+            // 平年
+            if (dayValue > 28) break;
+          }
+        } // ここまで到達できたのなら、入力は適切
+
+
+        inputOK = true;
+      } while (0);
+
+      if (inputOK) {
+        this.yearText = '';
+        this.monthText = '';
+        this.dayText = '';
+        this.hourText = '';
+        this.minuteText = '';
+        console.log('axios.post');
+        var reqParam = {
+          id: this.showStickerTaskTimeAddWindowProps.idNo,
+          taskTimeType: this.showStickerTaskTimeAddWindowProps.taskTimeType,
+          // 'taskStartTime' or 'taskEndTime'
+          timeZoneType: 'jst',
+          // utcで保存して表示するときにjstに変えるほうがいいだろう
+          yearValue: yearValue,
+          monthValue: monthValue,
+          dayValue: dayValue,
+          hourValue: hourValue,
+          minuteValue: minuteValue
+        };
+        axios.post(window.laravel.asset + '/api/work-sticker-content-item-task-time-create', {
+          reqParam: reqParam,
+          user_id: window.laravel.user['id']
+        }).then(function (response) {// 特にすることなし
+        }); // 親に戻る
+
+        var emitParam = {
+          event: e,
+          result: 'addTaskTime'
+        };
+        this.backToMount(emitParam);
+      }
+    },
+    backToMount: function backToMount(emitParam) {
+      if (this.stickerTaskTimeAddWindowTimeoutId !== null) {
+        clearTimeout(this.stickerTaskTimeAddWindowTimeoutId);
+        this.stickerTaskTimeAddWindowTimeoutId = null;
+      }
+
+      this.$emit('hide-sticker-task-time-add-window-custom-event', emitParam);
     }
   }
 });
@@ -10675,7 +11067,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-453180c5] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  100%;\n    /*height: 900px;*/\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px auto 20px;\n    padding: 0;\n}\n@media (min-width: 576px) {\n    /* 画面の横幅が576px以上のとき */\n.mount-class[data-v-453180c5] {\n        position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n        width:  1800px;\n        height: 900px;\n        border: 1px solid #000;\n        background-color: #ffffff;\n        margin: 0px 20px 20px;\n        padding: 0;\n}\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-453180c5] {\n    position: relative;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 10px auto 10px;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n@media (min-width: 576px) {\n    /* 画面の横幅が576px以上のとき */\n.sticker-class[data-v-453180c5] {\n        position: absolute;\n        width:      340px;\n        min-height: 200px;\n        max-height: 430px;\n        border: 1px solid #000;\n        margin: 0;\n        padding: 0;\n        overflow-y: scroll;        \n        \n        /* 外部から変更するもの */\n        top:  0;\n        left: 0;\n        background-color: #000000;\n}\n}\n.sticker-inner-class[data-v-453180c5] {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n\n/*\n * 画像(動画も)\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-453180c5] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  100%;\n    /*height: 900px;*/\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px auto 20px;\n    padding: 0;\n}\n@media (min-width: 576px) {\n    /* 画面の横幅が576px以上のとき */\n.mount-class[data-v-453180c5] {\n        position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n        width:  1800px;\n        height: 900px;\n        border: 1px solid #000;\n        background-color: #ffffff;\n        margin: 0px 20px 20px;\n        padding: 0;\n}\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-453180c5] {\n    position: relative;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 10px auto 10px;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n@media (min-width: 576px) {\n    /* 画面の横幅が576px以上のとき */\n.sticker-class[data-v-453180c5] {\n        position: absolute;\n        width:      340px;\n        min-height: 200px;\n        max-height: 430px;\n        border: 1px solid #000;\n        margin: 0;\n        padding: 0;\n        overflow-y: scroll;        \n        \n        /* 外部から変更するもの */\n        top:  0;\n        left: 0;\n        background-color: #000000;\n}\n}\n.sticker-inner-class[data-v-453180c5] {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n\n/*\n * 画像(動画も)\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト(時刻も)\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
 
 // exports
 
@@ -10713,7 +11105,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * メニューバーのバーそのもの\n */\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    /*border: 1px solid #000;*/\n    background-color: #ffffff;\n    margin: 20px 20px 0px;\n    padding: 0;\n}\n.menu-bar-mark-class[data-v-76707645] {\n    display: inline-block;\n    vertical-align: middle;\n    padding: 0;\n}    \n\n/*\n * メニューバー上にあるボタン\n */\n.menu-bar-button-outer-class[data-v-76707645] {\n    position: relative;  /* z-indexを指定したいので、positionをデフォルトのstaticからrelativeに変えておく。 */\n    z-index: 2001;\n    margin: 0;\n    display: inline-block;\n}\n.menu-bar-button-inner-class[data-v-76707645] {\n    display: inline-block;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    padding: 0px 10px;\n    line-height: 30px;\n}\n.menu-bar-button-inner-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}    \n\n/*\n * メニューバーに属するウィンドウを表示しているときのオーバーレイ\n */\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    \n    /*left:   0;*/\n    /*top:    30px;*/  /* メニューバーの下の位置 */\n    /*width:  100%;*/  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    /*height: 920px;*/  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    \n    left:   -20px;  /* メニューバーの位置からマージン分左へ */\n    top:    -20px;  /* メニューバーの位置からマージン分上へ */\n    width:  1850px;  /* だいたい『「メニューバーの横幅(=台紙の横幅)」+「ボーダーの太さ」+「左右マージン分」』くらい */\n    height: 980px;  /* だいたい『「メニューバーの高さ」+「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」+「上下マージン分」』くらい */\n    \n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ内のボタン\n */\n.menu-bar-window-button-outer-class[data-v-76707645] {\n    width: 100%;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    line-height: 30px;\n}\n.menu-bar-window-button-outer-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}\n.menu-bar-window-button-inner-space-class[data-v-76707645] {\n    display: inline-block;\n    width: 10px;\n}    \n\n/*\n * メニューバーの上にあるボタンから表示するウィンドウ\n */\n.menu-bar-main-window-class[data-v-76707645] {\n    position: absolute;\n    top:    30px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    left:   0;\n}\n\n/*\n * 「メニューバーの上にあるボタンから表示したウィンドウ」から表示するウィンドウ\n */\n.menu-bar-sub-window-class[data-v-76707645] {\n    position: absolute;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    top:    0;\n    left:   0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * メニューバーのバーそのもの\n */\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    /*border: 1px solid #000;*/\n    background-color: #ffffff;\n    margin: 20px 20px 0px;\n    padding: 0;\n}\n.menu-bar-mark-class[data-v-76707645] {\n    display: inline-block;\n    vertical-align: middle;\n    padding: 0;\n}    \n\n/*\n * メニューバー上にあるボタン\n */\n.menu-bar-button-outer-class[data-v-76707645] {\n    position: relative;  /* z-indexを指定したいので、positionをデフォルトのstaticからrelativeに変えておく。 */\n    z-index: 2001;\n    margin: 0;\n    display: inline-block;\n}\n.menu-bar-button-inner-class[data-v-76707645] {\n    display: inline-block;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    padding: 0px 10px;\n    line-height: 30px;\n}\n.menu-bar-button-inner-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}    \n\n/*\n * メニューバーに属するウィンドウを表示しているときのオーバーレイ\n */\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    \n    /*left:   0;*/\n    /*top:    30px;*/  /* メニューバーの下の位置 */\n    /*width:  100%;*/  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    /*height: 920px;*/  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    \n    left:   -20px;  /* メニューバーの位置からマージン分左へ */\n    top:    -20px;  /* メニューバーの位置からマージン分上へ */\n    width:  1850px;  /* だいたい『「メニューバーの横幅(=台紙の横幅)」+「ボーダーの太さ」+「左右マージン分」』くらい */\n    height: 980px;  /* だいたい『「メニューバーの高さ」+「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」+「上下マージン分」』くらい */\n    \n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ内のボタン\n */\n.menu-bar-window-button-outer-class[data-v-76707645] {\n    width: 100%;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    line-height: 30px;\n}\n.menu-bar-window-button-outer-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}\n.menu-bar-window-button-inner-space-class[data-v-76707645] {\n    display: inline-block;\n    width: 10px;\n}    \n\n/*\n * メニューバーの上にあるボタンから表示するウィンドウ\n */\n.menu-bar-main-window-class[data-v-76707645] {\n    position: absolute;\n    top:    30px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    left:   0;\n}\n\n/*\n * 「メニューバーの上にあるボタンから表示したウィンドウ」から表示するウィンドウ\n */\n.menu-bar-sub-window-class[data-v-76707645] {\n    position: absolute;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    top:    0;\n    left:   0;\n}\n", ""]);
 
 // exports
 
@@ -10732,7 +11124,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * Nowローディング\n */\n.menu-bar-now-loading-class {\n    position: fixed;\n    left: 50%;\n    top:  50%;\n    z-index: 4000;\n    display: none;  /* フェードインするので非表示で開始 */\n}\n.menu-bar-now-loading-overlay-class {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 4001;\n    background: rgba(0, 0, 0, 0.7);\n    margin: 0;\n}\n.menu-bar-now-loading-icon-class {\n    position: absolute;\n    width:  14px;\n    height: 14px;\n    z-index: 4002;\n    border-radius: 50%;\n    background: rgba(255, 255, 255, 1.0);\n    \n    /* 外部から変更するもの */\n    left: 0;\n    top:  0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * Nowローディング\n */\n.menu-bar-now-loading-class {\n    position: fixed;\n    left: 50%;\n    top:  50%;\n    z-index: 4000;\n    display: none;  /* フェードインするので非表示で開始 */\n}\n.menu-bar-now-loading-overlay-class {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 4001;\n    background: rgba(0, 0, 0, 0.7);\n    margin: 0;\n}\n.menu-bar-now-loading-icon-class {\n    position: absolute;\n    width:  14px;\n    height: 14px;\n    z-index: 4002;\n    border-radius: 50%;\n    background: rgba(255, 255, 255, 1.0);\n    \n    /* 外部から変更するもの */\n    left: 0;\n    top:  0;\n}\n", ""]);
 
 // exports
 
@@ -10751,7 +11143,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px 20px 20px;\n    padding: 0;\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 0;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n.sticker-inner-class[data-v-652fa580] {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px 20px 20px;\n    padding: 0;\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 0;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n.sticker-inner-class[data-v-652fa580] {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n", ""]);
 
 // exports
 
@@ -10770,7 +11162,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 画像(動画も)\n */\n.sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト\n */\n.sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 画像(動画も)\n */\n.sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト(時刻も)\n */\n.sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
 
 // exports
 
@@ -10827,7 +11219,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-edit-window-overlay-class[data-v-1ec0eebc] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-edit-window-class[data-v-1ec0eebc] {\n    position: fixed;\n    /*left:   50%;\n    top:    50%;*/\n    left: 10px;\n    top: 10px;\n    min-width: 480px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n\n/*\n * ふせん(+削除ボタン)\n */\n.sticker-edit-sticker-class[data-v-1ec0eebc] {\n    position: relative;\n    width:      440px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin-left:  auto;\n    margin-right: auto;\n    padding: 0;\n    overflow-y: scroll;\n    \n    /* 外部から変更するもの */\n    background-color: #000000;\n}\n.sticker-edit-sticker-inner-class[data-v-1ec0eebc] {\n    width:      380px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n.sticker-edit-sticker-content-item-outer-class[data-v-1ec0eebc] {\n    display: inline-block;\n    width: 280px;\n    padding: 0;\n    vertical-align: middle;\n}\n.sticker-edit-sticker-content-remove-button-outer-class[data-v-1ec0eebc] {\n    display: inline-block;\n    width:  80px;\n    padding: 0;\n    vertical-align: middle;\n    text-align: right;\n}\n\n/*\n * ボタン\n */\n.sticker-edit-buttons-outer-class[data-v-1ec0eebc] {\n    position: relative;\n    width:      440px;\n}\n.sticker-edit-button-space-class[data-v-1ec0eebc] {\n    height: 10px;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-edit-window-overlay-class[data-v-1ec0eebc] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-edit-window-class[data-v-1ec0eebc] {\n    position: fixed;\n    /*left:   50%;\n    top:    50%;*/\n    left: 10px;\n    top: 10px;\n    min-width: 480px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n\n/*\n * ふせん(+削除ボタン)\n */\n.sticker-edit-sticker-class[data-v-1ec0eebc] {\n    position: relative;\n    width:      440px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin-left:  auto;\n    margin-right: auto;\n    padding: 0;\n    overflow-y: scroll;\n    \n    /* 外部から変更するもの */\n    background-color: #000000;\n}\n.sticker-edit-sticker-inner-class[data-v-1ec0eebc] {\n    width:      380px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n.sticker-edit-sticker-content-item-outer-class[data-v-1ec0eebc] {\n    display: inline-block;\n    width: 280px;\n    padding: 0;\n    vertical-align: middle;\n}\n.sticker-edit-sticker-content-remove-button-outer-class[data-v-1ec0eebc] {\n    display: inline-block;\n    width:  80px;\n    padding: 0;\n    vertical-align: middle;\n    text-align: right;\n}\n\n/*\n * ボタン\n */\n.sticker-edit-buttons-outer-class[data-v-1ec0eebc] {\n    position: relative;\n    width:      440px;\n}\n.sticker-edit-button-space-class[data-v-1ec0eebc] {\n    height: 10px;\n}\n", ""]);
 
 // exports
 
@@ -10846,7 +11238,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* TODO(kawadakoujisun): ::v-deepを試してみたい */\n\n/*\n * 画像(動画も)\n */\n.sticker-edit-sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-edit-sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト\n */\n.sticker-edit-sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* TODO(kawadakoujisun): ::v-deepを試してみたい */\n\n/*\n * 画像(動画も)\n */\n.sticker-edit-sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-edit-sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト(時刻も)\n */\n.sticker-edit-sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
 
 // exports
 
@@ -10866,6 +11258,25 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 // module
 exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-image-add-window-overlay-class[data-v-744f6466] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-image-add-window-class[data-v-744f6466] {\n    position: fixed;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:  400px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n}\n.sticker-image-add-window-image-outer-class[data-v-744f6466] {\n    position: relative;\n    width:  200px;\n    height: 200px;\n    border: 1px solid #000;\n    background-color: #cccccc;\n    margin-left:  auto;\n    margin-right: auto;\n    padding: 0;\n}\n.sticker-image-add-window-image-inner-class[data-v-744f6466] {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n.sticker-image-add-window-space-class[data-v-744f6466] {\n    height: 10px;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=style&index=0&id=57774f4f&scoped=true&lang=css&":
+/*!*******************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=style&index=0&id=57774f4f&scoped=true&lang=css& ***!
+  \*******************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-task-time-add-window-overlay-class[data-v-57774f4f] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-task-time-add-window-class[data-v-57774f4f] {\n    position: fixed;\n    left:   50%;\n    top:    50%;\n    min-width: 400px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n.sticker-task-time-add-window-space-class[data-v-57774f4f] {\n    height: 10px;\n}\n\n/*\n * 入力欄\n */\n.sticker-task-time-add-input-4-digits-class[data-v-57774f4f] {\n    width: 140px;  /* 100 + 30 */\n}\n.sticker-task-time-add-input-2-digits-class[data-v-57774f4f] {\n    width: 80px;  /* 50 + 30 */\n}\n", ""]);
 
 // exports
 
@@ -49392,6 +49803,36 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=style&index=0&id=57774f4f&scoped=true&lang=css&":
+/*!***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=style&index=0&id=57774f4f&scoped=true&lang=css& ***!
+  \***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerTaskTimeAddWindowComponent.vue?vue&type=style&index=0&id=57774f4f&scoped=true&lang=css& */ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=style&index=0&id=57774f4f&scoped=true&lang=css&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerTextAddWindowComponent.vue?vue&type=style&index=0&id=d8ba2e6c&scoped=true&lang=css&":
 /*!*******************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerTextAddWindowComponent.vue?vue&type=style&index=0&id=d8ba2e6c&scoped=true&lang=css& ***!
@@ -51065,6 +51506,17 @@ var render = function() {
           "hide-sticker-video-add-window-custom-event":
             _vm.onHideStickerVideoAddWindow
         }
+      }),
+      _vm._v(" "),
+      _c("work-sticker-task-time-add-window", {
+        attrs: {
+          "show-sticker-task-time-add-window-props":
+            _vm.showStickerTaskTimeAddWindowParam
+        },
+        on: {
+          "hide-sticker-task-time-add-window-custom-event":
+            _vm.onHideStickerTaskTimeAddWindow
+        }
       })
     ],
     2
@@ -51639,6 +52091,42 @@ var render = function() {
               ])
             ]),
             _vm._v(" "),
+            _c("div", [
+              _c("p", [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary btn-block",
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        return _vm.onClickAddTaskStartTime($event)
+                      }
+                    }
+                  },
+                  [_vm._v("開始時刻を追加")]
+                )
+              ])
+            ]),
+            _vm._v(" "),
+            _c("div", [
+              _c("p", [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary btn-block",
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        return _vm.onClickAddTaskEndTime($event)
+                      }
+                    }
+                  },
+                  [_vm._v("終了時刻を追加")]
+                )
+              ])
+            ]),
+            _vm._v(" "),
             _c("div", { staticClass: "sticker-edit-button-space-class" }),
             _vm._v(" "),
             _c("div", { staticClass: "text-center" }, [
@@ -51828,6 +52316,331 @@ var render = function() {
   )
 }
 var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=template&id=57774f4f&scoped=true&":
+/*!****************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=template&id=57774f4f&scoped=true& ***!
+  \****************************************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    {
+      directives: [
+        {
+          name: "show",
+          rawName: "v-show",
+          value: _vm.isShow,
+          expression: "isShow"
+        }
+      ]
+    },
+    [
+      _c("div", {
+        staticClass: "sticker-task-time-add-window-overlay-class",
+        on: {
+          click: function($event) {
+            if ($event.target !== $event.currentTarget) {
+              return null
+            }
+            $event.preventDefault()
+            return _vm.onClickStickerTaskTimeAddWindowOverlay($event)
+          },
+          contextmenu: function($event) {
+            if ($event.target !== $event.currentTarget) {
+              return null
+            }
+            $event.preventDefault()
+            return _vm.onClickStickerTaskTimeAddWindowOverlay($event)
+          }
+        }
+      }),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          staticClass: "sticker-task-time-add-window-class",
+          attrs: { id: "sticker-task-time-add-window-id" },
+          on: {
+            click: function($event) {
+              if ($event.target !== $event.currentTarget) {
+                return null
+              }
+              $event.preventDefault()
+              return _vm.onClickStickerTaskTimeAddWindow($event)
+            }
+          }
+        },
+        [
+          _c(
+            "form",
+            {
+              on: {
+                submit: function($event) {
+                  $event.preventDefault()
+                  return _vm.onClickAddTaskTime($event)
+                }
+              }
+            },
+            [
+              _c("table", [
+                _c("tr", [
+                  _c("td", [
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.yearText,
+                          expression: "yearText"
+                        }
+                      ],
+                      staticClass:
+                        "form-control sticker-task-time-add-input-4-digits-class",
+                      attrs: { type: "number" },
+                      domProps: { value: _vm.yearText },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.yearText = $event.target.value
+                        }
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("td", [_vm._v("年")]),
+                  _vm._v(" "),
+                  _c("td"),
+                  _vm._v(" "),
+                  _c("td", [
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.monthText,
+                          expression: "monthText"
+                        }
+                      ],
+                      staticClass:
+                        "form-control sticker-task-time-add-input-2-digits-class",
+                      attrs: { type: "number" },
+                      domProps: { value: _vm.monthText },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.monthText = $event.target.value
+                        }
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("td", [_vm._v("月")]),
+                  _vm._v(" "),
+                  _c("td"),
+                  _vm._v(" "),
+                  _c("td", [
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.dayText,
+                          expression: "dayText"
+                        }
+                      ],
+                      staticClass:
+                        "form-control sticker-task-time-add-input-2-digits-class",
+                      attrs: { type: "number" },
+                      domProps: { value: _vm.dayText },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.dayText = $event.target.value
+                        }
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("td", [_vm._v("日")]),
+                  _vm._v(" "),
+                  _c("td"),
+                  _vm._v(" "),
+                  _c("td", [
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.hourText,
+                          expression: "hourText"
+                        }
+                      ],
+                      staticClass:
+                        "form-control sticker-task-time-add-input-2-digits-class",
+                      attrs: { type: "number" },
+                      domProps: { value: _vm.hourText },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.hourText = $event.target.value
+                        }
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("td", [_vm._v("時")]),
+                  _vm._v(" "),
+                  _c("td"),
+                  _vm._v(" "),
+                  _c("td", [
+                    _c("input", {
+                      directives: [
+                        {
+                          name: "model",
+                          rawName: "v-model",
+                          value: _vm.minuteText,
+                          expression: "minuteText"
+                        }
+                      ],
+                      staticClass:
+                        "form-control sticker-task-time-add-input-2-digits-class",
+                      attrs: { type: "number" },
+                      domProps: { value: _vm.minuteText },
+                      on: {
+                        input: function($event) {
+                          if ($event.target.composing) {
+                            return
+                          }
+                          _vm.minuteText = $event.target.value
+                        }
+                      }
+                    })
+                  ]),
+                  _vm._v(" "),
+                  _c("td", [_vm._v("分")])
+                ]),
+                _vm._v(" "),
+                _vm._m(0)
+              ]),
+              _vm._v(" "),
+              _c("div", {
+                staticClass: "sticker-task-time-add-window-space-class"
+              }),
+              _vm._v(" "),
+              _vm._m(1)
+            ]
+          ),
+          _vm._v(" "),
+          _c("div", {
+            staticClass: "sticker-task-time-add-window-space-class"
+          }),
+          _vm._v(" "),
+          _c("div", { staticClass: "text-center" }, [
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-secondary",
+                on: {
+                  click: function($event) {
+                    $event.preventDefault()
+                    return _vm.onClickClose($event)
+                  }
+                }
+              },
+              [_vm._v("戻る")]
+            )
+          ])
+        ]
+      )
+    ]
+  )
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("tr", [
+      _c(
+        "td",
+        { staticClass: "text-muted text-center", attrs: { colspan: "2" } },
+        [_vm._v("（西暦4桁）")]
+      ),
+      _vm._v(" "),
+      _c("td", { attrs: { colspan: "1" } }),
+      _vm._v(" "),
+      _c(
+        "td",
+        { staticClass: "text-muted text-center", attrs: { colspan: "2" } },
+        [_vm._v("（1～12）")]
+      ),
+      _vm._v(" "),
+      _c("td", { attrs: { colspan: "1" } }),
+      _vm._v(" "),
+      _c(
+        "td",
+        { staticClass: "text-muted text-center", attrs: { colspan: "2" } },
+        [_vm._v("（1～31）")]
+      ),
+      _vm._v(" "),
+      _c("td", { attrs: { colspan: "1" } }),
+      _vm._v(" "),
+      _c(
+        "td",
+        { staticClass: "text-muted text-center", attrs: { colspan: "2" } },
+        [_vm._v("（0～23）")]
+      ),
+      _vm._v(" "),
+      _c("td", { attrs: { colspan: "1" } }),
+      _vm._v(" "),
+      _c(
+        "td",
+        { staticClass: "text-muted text-center", attrs: { colspan: "2" } },
+        [_vm._v("（0～59）")]
+      )
+    ])
+  },
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", [
+      _c("p", [
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-secondary btn-block",
+            attrs: { type: "submit" }
+          },
+          [_vm._v("追加")]
+        )
+      ])
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -64417,10 +65230,33 @@ function addVideoElement(parentElem, videoURL, retryCount) {
     }
   });
 }
+/*
+ * 時刻テキスト取得
+ */
+
+
+function addTaskTimeText(parentElem, content) {
+  var taskTimeTypeText = '';
+
+  if (content.link.item_type == 4) {
+    // app/Sticker.phpで値を定義している
+    taskTimeTypeText = '開始時刻';
+  } else if (content.link.item_type == 5) {
+    // app/Sticker.phpで値を定義している
+    taskTimeTypeText = '終了時刻';
+  }
+
+  var ymdText = content.item.year_value + '/' + ('00' + content.item.month_value).slice(-2) + '/' + ('00' + content.item.day_value).slice(-2);
+  var hmText = ('00' + content.item.hour_value).slice(-2) + ':' + ('00' + content.item.minute_value).slice(-2);
+  var taskTimeText = taskTimeTypeText + '&nbsp; &nbsp; &nbsp;' + ymdText + '&nbsp; &nbsp;' + hmText;
+  parentElem.innerHTML = taskTimeText; // &nbsp;を解釈させるにはinnerHTMLにせざるを得なかった。innerTextやtextContentでは&nbsp;のまま表示されてしまった。
+  // TODO(kawadakoujisun): html構文をそのまま出力して！    
+}
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   addImageElement: addImageElement,
-  addVideoElement: addVideoElement
+  addVideoElement: addVideoElement,
+  addTaskTimeText: addTaskTimeText
 });
 
 /***/ }),
@@ -64464,6 +65300,7 @@ Vue.component('work-sticker-color-change-window', __webpack_require__(/*! ./comp
 Vue.component('work-sticker-text-add-window', __webpack_require__(/*! ./components/WorkStickerTextAddWindowComponent.vue */ "./resources/js/components/WorkStickerTextAddWindowComponent.vue")["default"]);
 Vue.component('work-sticker-image-add-window', __webpack_require__(/*! ./components/WorkStickerImageAddWindowComponent.vue */ "./resources/js/components/WorkStickerImageAddWindowComponent.vue")["default"]);
 Vue.component('work-sticker-video-add-window', __webpack_require__(/*! ./components/WorkStickerVideoAddWindowComponent.vue */ "./resources/js/components/WorkStickerVideoAddWindowComponent.vue")["default"]);
+Vue.component('work-sticker-task-time-add-window', __webpack_require__(/*! ./components/WorkStickerTaskTimeAddWindowComponent.vue */ "./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue")["default"]);
 Vue.component('read-mount', __webpack_require__(/*! ./components/ReadMountComponent.vue */ "./resources/js/components/ReadMountComponent.vue")["default"]);
 /**
  * Next, we will create a fresh Vue application instance and attach it to
@@ -65584,6 +66421,93 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerImageAddWindowComponent_vue_vue_type_template_id_744f6466_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerImageAddWindowComponent_vue_vue_type_template_id_744f6466_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue":
+/*!***************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue ***!
+  \***************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _WorkStickerTaskTimeAddWindowComponent_vue_vue_type_template_id_57774f4f_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./WorkStickerTaskTimeAddWindowComponent.vue?vue&type=template&id=57774f4f&scoped=true& */ "./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=template&id=57774f4f&scoped=true&");
+/* harmony import */ var _WorkStickerTaskTimeAddWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./WorkStickerTaskTimeAddWindowComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _WorkStickerTaskTimeAddWindowComponent_vue_vue_type_style_index_0_id_57774f4f_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./WorkStickerTaskTimeAddWindowComponent.vue?vue&type=style&index=0&id=57774f4f&scoped=true&lang=css& */ "./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=style&index=0&id=57774f4f&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _WorkStickerTaskTimeAddWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _WorkStickerTaskTimeAddWindowComponent_vue_vue_type_template_id_57774f4f_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _WorkStickerTaskTimeAddWindowComponent_vue_vue_type_template_id_57774f4f_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  "57774f4f",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=script&lang=js&":
+/*!****************************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=script&lang=js& ***!
+  \****************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerTaskTimeAddWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerTaskTimeAddWindowComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerTaskTimeAddWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=style&index=0&id=57774f4f&scoped=true&lang=css&":
+/*!************************************************************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=style&index=0&id=57774f4f&scoped=true&lang=css& ***!
+  \************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerTaskTimeAddWindowComponent_vue_vue_type_style_index_0_id_57774f4f_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerTaskTimeAddWindowComponent.vue?vue&type=style&index=0&id=57774f4f&scoped=true&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=style&index=0&id=57774f4f&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerTaskTimeAddWindowComponent_vue_vue_type_style_index_0_id_57774f4f_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerTaskTimeAddWindowComponent_vue_vue_type_style_index_0_id_57774f4f_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerTaskTimeAddWindowComponent_vue_vue_type_style_index_0_id_57774f4f_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerTaskTimeAddWindowComponent_vue_vue_type_style_index_0_id_57774f4f_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=template&id=57774f4f&scoped=true&":
+/*!**********************************************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=template&id=57774f4f&scoped=true& ***!
+  \**********************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerTaskTimeAddWindowComponent_vue_vue_type_template_id_57774f4f_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerTaskTimeAddWindowComponent.vue?vue&type=template&id=57774f4f&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=template&id=57774f4f&scoped=true&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerTaskTimeAddWindowComponent_vue_vue_type_template_id_57774f4f_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerTaskTimeAddWindowComponent_vue_vue_type_template_id_57774f4f_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 

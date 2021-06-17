@@ -531,6 +531,14 @@
                                                                                 contentItemExist = true;
                                                                             }
                                                                         }
+                                                                    } else if (content.link.item_type == 4 || content.link.item_type == 5) {  // app/Sticker.phpで値を定義している
+                                                                        contentItemReqParam.time_zone_type = content.item.time_zone_type;
+                                                                        contentItemReqParam.year_value     = content.item.year_value;
+                                                                        contentItemReqParam.month_value    = content.item.month_value;
+                                                                        contentItemReqParam.day_value      = content.item.day_value;
+                                                                        contentItemReqParam.hour_value     = content.item.hour_value;
+                                                                        contentItemReqParam.minute_value   = content.item.minute_value;
+                                                                        contentItemExist = true;
                                                                     }
                                                                     
                                                                     if (contentItemExist) {

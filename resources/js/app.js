@@ -33,6 +33,7 @@ Vue.component('work-sticker-color-change-window', require('./components/WorkStic
 Vue.component('work-sticker-text-add-window', require('./components/WorkStickerTextAddWindowComponent.vue').default);
 Vue.component('work-sticker-image-add-window', require('./components/WorkStickerImageAddWindowComponent.vue').default);
 Vue.component('work-sticker-video-add-window', require('./components/WorkStickerVideoAddWindowComponent.vue').default);
+Vue.component('work-sticker-task-time-add-window', require('./components/WorkStickerTaskTimeAddWindowComponent.vue').default);
 Vue.component('read-mount', require('./components/ReadMountComponent.vue').default);
 
 /**

@@ -12,11 +12,15 @@ class Sticker extends Model
         'text'  => 1,
         'image' => 2,
         'video' => 3,
+        'taskStartTime' => 4,
+        'taskEndTime'   => 5,
     ];
     // ↑ $contentItemTypeで定義しているのと同じ値を使っている箇所
+    // resources/js/components/ReadMountComponent.vue
     // resources/js/components/WorkMenuBarComponent.vue
     // resources/js/components/WorkMountComponent.vue
     // resources/js/components/WorkStickerEditWindowComponent.vue
+    // resources/js/ProjectWorkCommonScript.js
     // ↑ これらの箇所には「app/Sticker.phpで値を定義している」というコメントをいれてある。
     
     public static $infoItemDepthDefault = 400;
@@ -85,6 +89,15 @@ class Sticker extends Model
     {
         return $this->hasMany(StickerContentItemVideo::class);
     }
+    
+    /**
+     * このStickerが所有するStickerContentItemTaskTime。（StickerContentItemTaskTimeモデルとの関係を定義）
+     * ※StickerContentItemTaskTimeを生成するするときはcreateContentItemTaskTimeを使用して下さい。
+     */
+    public function contentItemTaskTimes()
+    {
+        return $this->hasMany(StickerContentItemTaskTime::class);
+    }    
     
     /**
      * Stickerを新規作成する。
@@ -188,6 +201,31 @@ class Sticker extends Model
     }
     
     /**
+     * このStickerが所有するStickerContentItemTaskTimeを生成する。
+     * このStickerが所有するStickerContentLinkを生成し、そこに先ほど生成したもののidを設定する。
+     */
+    public function createContentItemTaskTime($arg)
+    {
+        $item_type = null;
+        if ($arg['task_time_type'] == 'taskStartTime') {
+            $item_type = self::$contentItemType['taskStartTime'];
+        } else if ($arg['task_time_type'] == 'taskEndTime') {
+            $item_type = self::$contentItemType['taskEndTime'];
+        }
+        
+        if ($item_type != null) {
+            $contentItem = $this->contentItemTaskTimes()->create($arg);
+            $contentLink = $this->contentLinks()->create([
+                'item_type' => $item_type,
+                'item_id'   => $contentItem->id,
+            ]);
+            return [ $contentLink, $contentItem ];
+        } else {
+            return [ null, null ];
+        }
+    }
+    
+    /**
      * このStickerが所有するStickerContentItem〇〇とそれと関連があるStickerContentLinkを削除する。
      */
     public function destroyContentItem($arg)
@@ -214,6 +252,12 @@ class Sticker extends Model
                 if ($contentItem) {
                     $contentItem->delete();
                 }
+            } else if ($item_type == self::$contentItemType['taskStartTime']
+                || $item_type == self::$contentItemType['taskEndTime']) {
+                $contentItem = $this->contentItemTaskTimes()->where('id', $item_id)->first();
+                if ($contentItem) {
+                    $contentItem->delete();
+                }
             }
         }
     }
@@ -234,6 +278,7 @@ class Sticker extends Model
     		$stickerContentItemTexts  = $sticker->contentItemTexts;
     		$stickerContentItemImages = $sticker->contentItemImages;
     		$stickerContentItemVideos = $sticker->contentItemVideos;
+    		$stickerContentItemTaskTimes = $sticker->contentItemTaskTimes;
     		
     		if ($stickerInfoItemPos && $stickerInfoItemDepth && $stickerInfoItemColor) {
     			$stickerParam = [
@@ -310,6 +355,25 @@ class Sticker extends Model
     								
     								$content['item'] = $item;
     								
+    							    array_push($contents, $content);
+    							}
+    						}
+    					} else if ($item_type == self::$contentItemType['taskStartTime']
+    					    || $item_type == self::$contentItemType['taskEndTime']) {
+                            if ($stickerContentItemTaskTimes) {
+    							$contentItemTaskTime = $stickerContentItemTaskTimes->where('id', $item_id)->first();
+    							if ($contentItemTaskTime) {
+    								$item = [
+                                        'time_zone_type' => $contentItemTaskTime->time_zone_type,
+                                        'year_value'     => $contentItemTaskTime->year_value,
+                                        'month_value'    => $contentItemTaskTime->month_value,
+                                        'day_value'      => $contentItemTaskTime->day_value,
+                                        'hour_value'     => $contentItemTaskTime->hour_value,
+                                        'minute_value'   => $contentItemTaskTime->minute_value,
+    								];
+    								
+    								$content['item'] = $item;
+    
     							    array_push($contents, $content);
     							}
     						}

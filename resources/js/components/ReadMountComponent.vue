@@ -143,6 +143,9 @@
                             
                             // video要素追加
                             commonScript.addVideoElement(divItemElem, videoURL, 1);
+                        } else if (content['link'].item_type == 4 || content['link'].item_type == 5) {  // app/Sticker.phpで値を定義している
+                            divItemElem.classList.add('sticker-content-item-text-outer-class');
+                            commonScript.addTaskTimeText(divItemElem, content);
                         }
                     }
                 },
@@ -265,7 +268,7 @@
     }
     
     /*
-     * テキスト
+     * テキスト(時刻も)
      */
     .sticker-inner-class ::v-deep .sticker-content-item-text-outer-class {
         position: relative;

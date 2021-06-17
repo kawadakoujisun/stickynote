@@ -88,7 +88,29 @@ function addVideoElement(parentElem, videoURL, retryCount) {
     });
 }
 
+/*
+ * 時刻テキスト取得
+ */
+function addTaskTimeText(parentElem, content) {
+    let taskTimeTypeText = '';
+    if (content.link.item_type == 4) {  // app/Sticker.phpで値を定義している
+        taskTimeTypeText = '開始時刻';
+    } else if (content.link.item_type == 5) {  // app/Sticker.phpで値を定義している
+        taskTimeTypeText = '終了時刻';
+    }
+    
+    const ymdText = content.item.year_value + '/' + ('00'+content.item.month_value).slice(-2) + '/' + ('00'+content.item.day_value).slice(-2);
+    const hmText  = ('00'+content.item.hour_value).slice(-2) + ':' + ('00'+content.item.minute_value).slice(-2);
+    
+    const taskTimeText = taskTimeTypeText + '&nbsp; &nbsp; &nbsp;' + ymdText + '&nbsp; &nbsp;' + hmText;
+    
+    parentElem.innerHTML = taskTimeText;
+        // &nbsp;を解釈させるにはinnerHTMLにせざるを得なかった。innerTextやtextContentでは&nbsp;のまま表示されてしまった。
+        // TODO(kawadakoujisun): html構文をそのまま出力して！    
+}
+
 export default {
     addImageElement,
     addVideoElement,
+    addTaskTimeText,
 };

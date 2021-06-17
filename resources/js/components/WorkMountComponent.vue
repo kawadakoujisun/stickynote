@@ -48,6 +48,11 @@
             @hide-sticker-video-add-window-custom-event="onHideStickerVideoAddWindow"
         >
         </work-sticker-video-add-window>        
+        <work-sticker-task-time-add-window
+            v-bind:show-sticker-task-time-add-window-props="showStickerTaskTimeAddWindowParam"
+            @hide-sticker-task-time-add-window-custom-event="onHideStickerTaskTimeAddWindow"
+        >
+        </work-sticker-task-time-add-window>
     </div>
 </template>
 
@@ -150,6 +155,15 @@
                     isShow: false,
                     idNo: null,  // 要素のidの文字列から抽出した数値
                 },
+                
+                //
+                // ふせんに時刻を追加するウィンドウに渡すパラメータ
+                //
+                showStickerTaskTimeAddWindowParam: {
+                    isShow: false,
+                    idNo: null,  // 要素のidの文字列から抽出した数値
+                    taskTimeType: null,  // 'taskStartTime' or 'taskEndTime'
+                },                
             };
         },
         
@@ -577,6 +591,65 @@
                     
                     this.removeStickerContentItem(response.eventParam);
                 });
+                
+            window.Echo.private('sticker-content-item-task-time-create-channel.' + window.laravel.user['id'])
+                .listen('StickerContentItemTaskTimeCreate', response => {
+                    console.log('window.Echo.private sticker-content-item-task-time-create-channel listen');
+                    
+                    const idNo = response.eventParam.id;
+                    
+                    const idBaseName = this.getStickerIdBaseName();
+                    const updateId = `${idBaseName}${idNo}`; 
+                    
+                    const updateElem = document.getElementById(updateId);
+                    
+                    if (updateElem) {
+                        const contentLinkIdNo = response.eventParam.content_link_id;
+                        
+                        const content = {
+                            link: {
+                                id:        contentLinkIdNo,
+                                item_type: response.eventParam.content_item_type,
+                                item_id:   response.eventParam.content_item_id,
+                            },
+                            item: {
+                                time_zone_type: response.eventParam.time_zone_type,
+                                year_value:     response.eventParam.year_value,
+                                month_value:    response.eventParam.month_value,
+                                day_value:      response.eventParam.day_value,
+                                hour_value:     response.eventParam.hour_value,
+                                minute_value:   response.eventParam.minute_value,
+                            },
+                        };
+                            
+                        // データ更新
+                        const index = this.getStickerParamIndex(idNo);
+                        if (index !== null) {
+                            const contents = this.stickerParams[index]['contents'];  // JavaScriptの配列は参照渡し
+                            contents.push(content);  // TODO(kawadakoujisun): id順に並び替える必要あるかも。見た目のdivの並びも。
+                        }
+                        
+                        const divStickerInnerElems = updateElem.getElementsByClassName('sticker-inner-class');
+                        const divStickerInnerElem = divStickerInnerElems[0];
+                        
+                        // 見た目更新
+                        const divItemElem = document.createElement('div');
+                        
+                        const contentLinkIdBaseName = this.getContentLinkIdBaseName();
+                        divItemElem.id = `${contentLinkIdBaseName}${contentLinkIdNo}`;
+                        
+                        divItemElem.classList.add('sticker-content-item-text-outer-class');
+                        commonScript.addTaskTimeText(divItemElem, content);
+                        divStickerInnerElem.appendChild(divItemElem);
+                    }
+                });
+                
+            window.Echo.private('sticker-content-item-task-time-destroy-channel.' + window.laravel.user['id'])
+                .listen('StickerContentItemTaskTimeDestroy', response => {
+                    console.log('window.Echo.private sticker-content-item-task-time-destroy-channel listen');
+                    
+                    this.removeStickerContentItem(response.eventParam);
+                });
         },
         
         directives: {
@@ -630,6 +703,9 @@
                             
                             // video要素追加
                             commonScript.addVideoElement(divItemElem, videoURL, 1);
+                        } else if (content['link'].item_type == 4 || content['link'].item_type == 5) {  // app/Sticker.phpで値を定義している
+                            divItemElem.classList.add('sticker-content-item-text-outer-class');
+                            commonScript.addTaskTimeText(divItemElem, content);
                         }
                     }
                 },
@@ -807,6 +883,8 @@
                         // ここに来る前に画像を削除しているので、ここでは何もしない
                     } else if (emitParam.result == 'removeVideo') {
                         // ここに来る前に動画を削除しているので、ここでは何もしない
+                    } else if (emitParam.result == 'removeTaskTime') {
+                        // ここに来る前に時刻を削除しているので、ここでは何もしない
                     } else if (emitParam.result == 'openStickerColorChangeWindow') {
                         this.showStickerColorChangeWindowParam.isShow = true;
                         this.showStickerColorChangeWindowParam.idNo = idNo;
@@ -819,6 +897,14 @@
                     } else if (emitParam.result == 'openStickerVideoAddWindow') {
                         this.showStickerVideoAddWindowParam.isShow = true;
                         this.showStickerVideoAddWindowParam.idNo = idNo;
+                    } else if (emitParam.result == 'openStickerTaskStartTimeAddWindow') {
+                        this.showStickerTaskTimeAddWindowParam.isShow = true;
+                        this.showStickerTaskTimeAddWindowParam.idNo = idNo;
+                        this.showStickerTaskTimeAddWindowParam.taskTimeType = 'taskStartTime';
+                    } else if (emitParam.result == 'openStickerTaskEndTimeAddWindow') {
+                        this.showStickerTaskTimeAddWindowParam.isShow = true;
+                        this.showStickerTaskTimeAddWindowParam.idNo = idNo;
+                        this.showStickerTaskTimeAddWindowParam.taskTimeType = 'taskEndTime';                        
                     }
                 }
             },
@@ -874,6 +960,20 @@
                     }
                 }
             },            
+
+            onHideStickerTaskTimeAddWindow: function (emitParam) {
+                console.log('onHideStickerTaskTimeAddWindow', emitParam.event);
+                
+                this.showStickerTaskTimeAddWindowParam.isShow = false;
+                this.showStickerTaskTimeAddWindowParam.idNo = null;
+                this.showStickerTaskTimeAddWindowParam.taskTimeType = null;
+
+                if (emitParam.result != 'none') {
+                    if (emitParam.result == 'addTaskTime') {
+                        // ここに来る前に時刻を追加しているので、ここでは何もしない
+                    }
+                }
+            },
             
             releaseTargetElem: function () {
                 this.updateTargetElem();
@@ -1152,6 +1252,12 @@
                                 image_public_id : srcContent.item.image_public_id,
                                 video_url       : srcContent.item.video_url,
                                 video_public_id : srcContent.item.video_public_id,
+                	            time_zone_type  : srcContent.item.time_zone_type,
+                	            year_value      : srcContent.item.year_value,
+                	            month_value     : srcContent.item.month_value,
+                	            day_value       : srcContent.item.day_value,
+                	            hour_value      : srcContent.item.hour_value,
+                	            minute_value    : srcContent.item.minute_value,
                             },
                         };
                         
@@ -1237,7 +1343,7 @@
     }
     
     /*
-     * テキスト
+     * テキスト(時刻も)
      */
     .sticker-content-item-text-outer-class {
         position: relative;
