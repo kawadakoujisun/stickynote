@@ -64,12 +64,21 @@
             commonScript,    
         },
         
+        props: {
+            receiveWorkMountProps: Object,
+        },        
+        
         data() {
             return {
                 //
                 // 台紙に貼ってあるふせん
                 //
                 stickerParams: [],
+                
+                //
+                // 配置
+                //
+                arrangementType: 'free',  // 'free', 'sortedByTaskStartTime', 'sortedByTaskEndTime'
                 
                 //
                 // 選んだふせん
@@ -167,7 +176,154 @@
             };
         },
         
+        watch: {
+            'receiveWorkMountProps.isArrangementButtonClicked': function(newValue, oldValue) {
+                console.log('receiveWorkMountProps.arrangementType',
+                    this.receiveWorkMountProps.isArrangementButtonClicked,
+                    this.receiveWorkMountProps.arrangementType);
+                
+                // if (this.arrangementType != this.receiveWorkMountProps.arrangementType) {
+                // リアルタイム並び替えは行わない。
+                // ユーザーがメニューの配置で並び順を指定したときにだけ並び替えを実施する。
+                // 既に並び替えているところに、新たにふせんを足したりitemを足したりしても並び替えは実施されない。
+                // 最新の状態で並び替えを実施したい場合は、ユーザーがメニューの配置から
+                // 今選んでいるのと同じ並び順を選ぶ必要がある。
+                // 同じ並び順を選んだときに、再度並び替えを実施しなければならないので、
+                // 条件 (this.arrangementType != this.receiveWorkMountProps.arrangementType) はナシにする。
+                {
+                    this.arrangementType = this.receiveWorkMountProps.arrangementType;
+                    
+                    // 配置変更
+                    const mountElems = document.getElementsByClassName('mount-class');
+                    const mountElem = mountElems[0];
+                    
+                    const idBaseName = this.getStickerIdBaseName();
+                    
+                    if (this.arrangementType == 'free') {
+                        mountElem.classList.remove('mount-sorted-class');
+                        
+                        for (let stickerParam of this.stickerParams) {
+                            const updateId = `${idBaseName}${stickerParam.id}`;
+                            const updateElem = document.getElementById(updateId);
+                            
+                            if (updateElem) {
+                                updateElem.style.top  = `${stickerParam.pos_top}px`;
+                                updateElem.style.left = `${stickerParam.pos_left}px`;
+                                updateElem.classList.remove('sticker-sorted-class');
+                            }
+                        }
+                    } else if (this.arrangementType == 'sortedByTaskStartTime') {
+                        if (mountElem.classList.contains('mount-sorted-class') == false) {
+                            mountElem.classList.add('mount-sorted-class');
+                                // 同じclassを何度addしても1つしか追加されないようなので、
+                                // containsで有無を事前に確認する必要はなさそうだが、念のため。
+                        }
+
+                        for (let stickerParam of this.stickerParams) {
+                            const updateId = `${idBaseName}${stickerParam.id}`;
+                            const updateElem = document.getElementById(updateId);
+                            
+                            if (updateElem) {
+                                updateElem.style.top  = 0;
+                                updateElem.style.left = 0;
+                                if (updateElem.classList.contains('sticker-sorted-class') == false) {
+                                    updateElem.classList.add('sticker-sorted-class');
+                                }
+                            }
+                        }
+                        
+                        // 並び替え
+                        for (let stickerParam of this.stickerParams) {
+                            let value0 = 10000;
+                            let value1 = 0;
+                            for (let content of stickerParam.contents) {
+                                if (content.link.item_type == 4) {  // app/Sticker.phpで値を定義している
+                                    value0 = content.item.year_value;
+                                    value1 = content.item.month_value * 1000000
+                                        + content.item.day_value * 10000
+                                        + content.item.hour_value * 100
+                                        + content.item.minute_value;
+                                    break;
+                                }
+                            }
+                            stickerParam.sortValue = {
+                                value0: value0,
+                                value1: value1,
+                            };
+                        }
+                        
+                        this.stickerParams.sort((a, b) => {
+                            if (a.sortValue.value0 == b.sortValue.value0) {
+                                if (a.sortValue.value1 == b.sortValue.value1) {
+                                    return a.id - b.id;
+                                } else {
+                                    return a.sortValue.value1 - b.sortValue.value1;
+                                }
+                            } else {
+                                return a.sortValue.value0 - b.sortValue.value0;
+                            }
+                        });
+                        
+                        console.log(this.stickerParams);
+                    } else if (this.arrangementType == 'sortedByTaskEndTime') {
+                        if (mountElem.classList.contains('mount-sorted-class') == false) {
+                            mountElem.classList.add('mount-sorted-class');
+                        }
+                        
+                        for (let stickerParam of this.stickerParams) {
+                            const updateId = `${idBaseName}${stickerParam.id}`;
+                            const updateElem = document.getElementById(updateId);
+                            
+                            if (updateElem) {
+                                updateElem.style.top  = 0;
+                                updateElem.style.left = 0;
+                                if (updateElem.classList.contains('sticker-sorted-class') == false) {
+                                    updateElem.classList.add('sticker-sorted-class');
+                                }
+                            }
+                        }
+                        
+                        // 並び替え
+                        for (let stickerParam of this.stickerParams) {
+                            let value0 = 10000;
+                            let value1 = 0;
+                            for (let content of stickerParam.contents) {
+                                if (content.link.item_type == 5) {  // app/Sticker.phpで値を定義している
+                                    value0 = content.item.year_value;
+                                    value1 = content.item.month_value * 1000000
+                                        + content.item.day_value * 10000
+                                        + content.item.hour_value * 100
+                                        + content.item.minute_value;
+                                    break;
+                                }
+                            }
+                            stickerParam.sortValue = {
+                                value0: value0,
+                                value1: value1,
+                            };
+                        }
+                        
+                        this.stickerParams.sort((a, b) => {
+                            if (a.sortValue.value0 == b.sortValue.value0) {
+                                if (a.sortValue.value1 == b.sortValue.value1) {
+                                    return a.id - b.id;
+                                } else {
+                                    return a.sortValue.value1 - b.sortValue.value1;
+                                }
+                            } else {
+                                return a.sortValue.value0 - b.sortValue.value0;
+                            }
+                        });
+                        
+                        console.log(this.stickerParams);
+                    }
+                }
+            },
+        },
+        
         mounted() {
+            console.log('mounted');
+            
             axios.get(window.laravel.asset + '/api/work-mount')
                 .then(response => {
                     console.log('axios.get');
@@ -261,6 +417,25 @@
                     // ↑
                     // directivesのsticker-custom-directiveのbindが呼ばれているおかげで見た目が更新される。
                     // 追加したstickerParamについてだけsticker-custom-directiveのbindが呼ばれている（既存のstickerParamについては呼ばれない）。
+                    
+                    // DOMの更新サイクル後に見た目更新
+                    this.$nextTick(() => {
+                        console.log('nextTick', stickerParam.id);
+                        
+                        if (this.arrangementType != 'free') {
+                            const idBaseName = this.getStickerIdBaseName();
+                            const updateId = `${idBaseName}${stickerParam.id}`;
+                            const updateElem = document.getElementById(updateId);
+                            
+                            if (updateElem) {
+                                updateElem.style.top  = 0;
+                                updateElem.style.left = 0;
+                                if (updateElem.classList.contains('sticker-sorted-class') == false) {
+                                    updateElem.classList.add('sticker-sorted-class');
+                                }
+                            }
+                        }
+                    });
                 });                
                 
             window.Echo.private('sticker-destroy-channel.' + window.laravel.user['id'])
@@ -325,8 +500,10 @@
                             }
                         
                             // 見た目更新
-                            updateElem.style.top  = `${posTop}px`;
-                            updateElem.style.left = `${posLeft}px`;
+                            if (this.arrangementType == 'free') {
+                                updateElem.style.top  = `${posTop}px`;
+                                updateElem.style.left = `${posLeft}px`;
+                            }
                         }
                     }
                 });
@@ -726,6 +903,8 @@
         
         methods: {
             onChildMouseDownLeft: function (e) {
+                if (this.arrangementType != 'free') return;
+                
                 if (this.targetElem === null) {
                     const idBaseName = this.getStickerIdBaseName();
                     
@@ -1291,6 +1470,16 @@
         padding: 0;
     }
     
+    .mount-sorted-class {
+        position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */
+        width:  100%;
+        height: auto;  /* heightをここで指定し直さないと、先に書いてあるmount-classのheightが使われてしまう。 */
+        border: 1px solid #000;
+        background-color: #ffffff;
+        margin: 0px auto 20px;
+        padding: 0;
+    }
+    
     /*
      * ふせん
      */
@@ -1301,6 +1490,23 @@
         max-height: 430px;
         border: 1px solid #000;
         margin: 0;
+        padding: 0;
+        overflow-y: scroll;        
+        
+        /* 外部から変更するもの */
+        top:  0;
+        left: 0;
+        background-color: #000000;
+    }
+
+    /* 要素のclass=""に書いた順番ではなく、css内で書いた順番によって優先度が決まるようだ。 */
+    .sticker-sorted-class {
+        position: relative;
+        width:      340px;
+        min-height: 200px;
+        max-height: 430px;
+        border: 1px solid #000;
+        margin: 10px auto 10px;
         padding: 0;
         overflow-y: scroll;        
         

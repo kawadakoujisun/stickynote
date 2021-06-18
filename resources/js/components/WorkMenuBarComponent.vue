@@ -8,6 +8,9 @@
         <div class="menu-bar-button-outer-class" id="menu-bar-button-insert-id">
             <a @click.prevent="onClickMainInsert"><span class="menu-bar-button-inner-class">挿入</span></a>
         </div>
+        <div class="menu-bar-button-outer-class" id="menu-bar-button-arrangement-id">
+            <a @click.prevent="onClickMainArrangement"><span class="menu-bar-button-inner-class">配置</span></a>
+        </div>
         <div class="menu-bar-button-outer-class" id="menu-bar-button-user-id">
             <a @click.prevent="onClickMainUser"><span class="menu-bar-button-inner-class">ユーザー</span></a>
         </div>
@@ -81,6 +84,27 @@
             </div>        
         </div>        
 
+        <!-- 配置 -->
+        <div v-show="activeMainMenu === 'mainArrangement'">
+            <div class="menu-bar-main-window-class" id="menu-bar-main-arrangement-window-id">
+                <div class="menu-bar-window-button-outer-class" @click.prevent="onClickArrangementSubFree">
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                    フリー
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                </div>
+                <div class="menu-bar-window-button-outer-class" @click.prevent="onClickArrangementSubSortedByTaskStartTime">
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                    開始時刻順
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                </div>
+                <div class="menu-bar-window-button-outer-class" @click.prevent="onClickArrangementSubSortedByTaskEndTime">
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                    終了時刻順
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                </div>
+            </div>        
+        </div> 
+
         <!-- ユーザー -->
         <div v-show="activeMainMenu === 'mainUser'">
             <div class="menu-bar-main-window-class" id="menu-bar-main-user-window-id">
@@ -142,6 +166,15 @@
                     this.activeSubMenu = '';
                     
                     this.setWindowPos('menu-bar-button-insert-id', 'menu-bar-main-insert-window-id', false);
+                }
+            },
+            
+            onClickMainArrangement: function (e) {
+                if (this.activeMainMenu !== 'mainArrangement') {
+                    this.activeMainMenu = 'mainArrangement';
+                    this.activeSubMenu = '';
+                    
+                    this.setWindowPos('menu-bar-button-arrangement-id', 'menu-bar-main-arrangement-window-id', false);
                 }
             },
             
@@ -697,6 +730,39 @@
                     });
             },
             
+            //
+            // 配置サブ
+            //
+            onClickArrangementSubFree: function (e) {
+                this.activeMainMenu = '';
+                this.activeSubMenu = '';
+                
+                const emitParam = {
+                    result: 'arrangementTypeFree',
+                };
+                this.$emit('send-work-menu-bar-state-custom-event', emitParam);
+            },
+
+            onClickArrangementSubSortedByTaskStartTime: function (e) {
+                this.activeMainMenu = '';
+                this.activeSubMenu = '';
+                
+                const emitParam = {
+                    result: 'arrangementTypeSortedByTaskStartTime',
+                };
+                this.$emit('send-work-menu-bar-state-custom-event', emitParam);
+            },
+            
+            onClickArrangementSubSortedByTaskEndTime: function (e) {
+                this.activeMainMenu = '';
+                this.activeSubMenu = '';
+                
+                const emitParam = {
+                    result: 'arrangementTypeSortedByTaskEndTime',
+                };
+                this.$emit('send-work-menu-bar-state-custom-event', emitParam);
+            },
+
             //
             // ユーザーサブ
             //            

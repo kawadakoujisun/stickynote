@@ -179,7 +179,7 @@
     .mount-class {
         position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */
         width:  100%;
-        /*height: 900px;*/
+        height: auto;
         border: 1px solid #000;
         background-color: #ffffff;
         margin: 0px auto 20px;

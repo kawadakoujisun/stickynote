@@ -13,8 +13,7 @@
     <body>
         <div id="app">
 
-        <work-menu-bar></work-menu-bar>
-        <work-mount></work-mount>
+            <work-top></work-top>
 
         </div>
 
