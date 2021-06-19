@@ -28,6 +28,11 @@
             @hide-sticker-edit-window-custom-event="onHideStickerEditWindow"
         >
         </work-sticker-edit-window>
+        <work-sticker-individual-number-change-window
+            v-bind:show-sticker-individual-number-change-window-props="showStickerIndividualNumberChangeWindowParam"
+            @hide-sticker-individual-number-change-window-custom-event="onHideStickerIndividualNumberChangeWindow"
+        >
+        </work-sticker-individual-number-change-window>
         <work-sticker-color-change-window
             v-bind:show-sticker-color-change-window-props="showStickerColorChangeWindowParam"
             @hide-sticker-color-change-window-custom-event="onHideStickerColorChangeWindow"
@@ -131,6 +136,16 @@
                     isShow: false,
                     idNo: null,  // 要素のidの文字列から抽出した数値
                     stickerParam: null,
+                },
+
+                //
+                // ふせんの個別番号を変更するウィンドウに渡すパラメータ
+                //
+                showStickerIndividualNumberChangeWindowParam: {
+                    isShow: false,
+                    idNo: null,  // 要素のidの文字列から抽出した数値
+                    mainNumber: null,
+                    subNumber:  null,
                 },
                 
                 //
@@ -403,6 +418,8 @@
                     // データ更新
                     const stickerParam = {
         				'id'       : response.eventParam.id,
+        				'individual_main_number' : response.eventParam.individual_main_number,
+        				'individual_sub_number'  : response.eventParam.individual_sub_number,
         				'pos_top'  : response.eventParam.pos_top,
         				'pos_left' : response.eventParam.pos_left,
         				'depth'    : response.eventParam.depth,
@@ -558,6 +575,34 @@
                             
                             // 見た目更新
                             updateElem.style.zIndex = depth;  // z-index
+                        }
+                    }
+                });
+                
+            window.Echo.private('all-sticker-info-item-individual-number-update-channel.' + window.laravel.user['id'])
+                .listen('AllStickerInfoItemIndividualNumberUpdate', response => {
+                    console.log('window.Echo.private all-sticker-info-item-individual-number-update-channel listen');
+                    
+                    const stickerIndividualNumbers = response.eventParam.sticker_individual_numbers;
+
+                    const individualNumberIdBaseName = this.getIndividualNumberIdBaseName();
+                    
+                    for (let stickerIndividualNumber of stickerIndividualNumbers) {
+                        const idNo = stickerIndividualNumber.id;
+                        const updateId = `${individualNumberIdBaseName}${idNo}`;
+
+                        const updateElem = document.getElementById(updateId);
+                        
+                        if (updateElem) {
+                            // データ更新
+                            const index = this.getStickerParamIndex(idNo);
+                            if (index !== null) {
+                                this.stickerParams[index]['individual_main_number'] = stickerIndividualNumber.individual_main_number;
+                                this.stickerParams[index]['individual_sub_number']  = stickerIndividualNumber.individual_sub_number;
+                            }
+                            
+                            // 見た目更新
+                            commonScript.addIndividualNumber(updateElem, stickerIndividualNumber.individual_main_number, stickerIndividualNumber.individual_sub_number);
                         }
                     }
                 });
@@ -851,6 +896,19 @@
                     const divStickerInnerElems = el.getElementsByClassName('sticker-inner-class');
                     const divStickerInnerElem = divStickerInnerElems[0];
                     
+                    // individualNumber
+                    {
+                        // const individualNumberIdBaseName = this.getIndividualNumberIdBaseName();
+                        const individualNumberIdBaseName = 'individual-number-id-';  // 直書き
+                        
+                        const divItemElem = document.createElement('div');
+                        divItemElem.id = `${individualNumberIdBaseName}${stickerParam['id']}`;  // sticker1つにつき1つだけなので、stickerのidでいい。
+                        divStickerInnerElem.appendChild(divItemElem);
+                        
+                        divItemElem.classList.add('sticker-info-item-individual-number-outer-class');
+                        commonScript.addIndividualNumber(divItemElem, stickerParam['individual_main_number'], stickerParam['individual_sub_number']);
+                    }
+                    
                     // const contentLinkIdBaseName = this.getContentLinkIdBaseName();
                     const contentLinkIdBaseName = 'content-link-id-';  // 直書き
                             
@@ -1054,8 +1112,16 @@
                 this.showStickerEditWindowParam.isShow = false;
                 this.showStickerEditWindowParam.idNo = null;
                 this.showStickerEditWindowParam.stickerParam = null;
-
+                
                 if (emitParam.result != 'none') {
+                    // stickerParamを取得しておく
+                    let stickerParam = null;
+                    const index = this.getStickerParamIndex(idNo);
+                    if (index !== null) {
+                        stickerParam = this.stickerParams[index];
+                    }
+                    
+                    // emitParam.resultで分岐
                     if (emitParam.result == 'removeText') {
                         // ここに来る前にテキストを削除しているので、ここでは何もしない
                     } else if (emitParam.result == 'removeImage') {
@@ -1064,6 +1130,16 @@
                         // ここに来る前に動画を削除しているので、ここでは何もしない
                     } else if (emitParam.result == 'removeTaskTime') {
                         // ここに来る前に時刻を削除しているので、ここでは何もしない
+                    } else if (emitParam.result == 'openStickerIndividualNumberChangeWindow') {
+                        this.showStickerIndividualNumberChangeWindowParam.isShow = true;
+                        this.showStickerIndividualNumberChangeWindowParam.idNo = idNo;
+                        
+                        this.showStickerIndividualNumberChangeWindowParam.mainNumber = null;
+                        this.showStickerIndividualNumberChangeWindowParam.subNumber  = null;
+                        if (stickerParam) {
+                            this.showStickerIndividualNumberChangeWindowParam.mainNumber = stickerParam.individual_main_number;
+                            this.showStickerIndividualNumberChangeWindowParam.subNumber  = stickerParam.individual_sub_number;
+                        }
                     } else if (emitParam.result == 'openStickerColorChangeWindow') {
                         this.showStickerColorChangeWindowParam.isShow = true;
                         this.showStickerColorChangeWindowParam.idNo = idNo;
@@ -1084,6 +1160,21 @@
                         this.showStickerTaskTimeAddWindowParam.isShow = true;
                         this.showStickerTaskTimeAddWindowParam.idNo = idNo;
                         this.showStickerTaskTimeAddWindowParam.taskTimeType = 'taskEndTime';                        
+                    }
+                }
+            },
+
+            onHideStickerIndividualNumberChangeWindow: function (emitParam) {
+                console.log('onHideStickerIndividualNumberChangeWindow', emitParam.event);
+                
+                this.showStickerIndividualNumberChangeWindowParam.isShow = false;
+                this.showStickerIndividualNumberChangeWindowParam.idNo = null;
+                this.showStickerIndividualNumberChangeWindowParam.mainNumber = null;
+                this.showStickerIndividualNumberChangeWindowParam.subNumber  = null;
+
+                if (emitParam.result != 'none') {
+                    if (emitParam.result == 'changeIndividualNumber') {
+                        // ここに来る前に個別番号を変更しているので、ここでは何もしない
                     }
                 }
             },
@@ -1375,6 +1466,10 @@
                 return 'sticker-id-';
             },
             
+            getIndividualNumberIdBaseName: function () {
+                return 'individual-number-id-'  
+            },
+            
             getContentLinkIdBaseName: function () {
                 return 'content-link-id-';
             },
@@ -1402,6 +1497,8 @@
                 if (src) {
                     dst = {
                         id       : src.id,
+                        individual_main_number : src.individual_main_number,
+                        individual_sub_number  : src.individual_sub_number,
                         pos_top  : src.pos_top,
                         pos_left : src.pos_left,
                         depth    : src.depth,
@@ -1556,5 +1653,18 @@
         width:  280px;
         margin: 0;
         padding: 0;
+    }
+    
+    /*
+     * 個別番号
+     */
+    .sticker-info-item-individual-number-outer-class {
+        position: relative;
+        width:  280px;
+        margin: 0;
+        padding: 0;
+        text-align: right;
+        font-size: small;
+        color: rgba(0, 0, 0, 0.5);
     }
 </style>

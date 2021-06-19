@@ -30,6 +30,7 @@ Vue.component('work-menu-bar', require('./components/WorkMenuBarComponent.vue').
 Vue.component('work-mount', require('./components/WorkMountComponent.vue').default);
 Vue.component('work-sticker-context-menu', require('./components/WorkStickerContextMenuComponent.vue').default);
 Vue.component('work-sticker-edit-window', require('./components/WorkStickerEditWindowComponent.vue').default);
+Vue.component('work-sticker-individual-number-change-window', require('./components/WorkStickerIndividualNumberChangeWindowComponent.vue').default);
 Vue.component('work-sticker-color-change-window', require('./components/WorkStickerColorChangeWindowComponent.vue').default);
 Vue.component('work-sticker-text-add-window', require('./components/WorkStickerTextAddWindowComponent.vue').default);
 Vue.component('work-sticker-image-add-window', require('./components/WorkStickerImageAddWindowComponent.vue').default);

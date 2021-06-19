@@ -109,8 +109,20 @@ function addTaskTimeText(parentElem, content) {
         // TODO(kawadakoujisun): html構文をそのまま出力して！    
 }
 
+/*
+ * 個別番号追加
+ */
+function addIndividualNumber(parentElem, individualMainNumber, individualSubNumber) {
+    let individualNumber = individualMainNumber;
+    if (individualSubNumber != 0) {
+        individualNumber = individualNumber + '-' + individualSubNumber;
+    }
+    parentElem.textContent = 'ID: ' + individualNumber;
+}
+
 export default {
     addImageElement,
     addVideoElement,
     addTaskTimeText,
+    addIndividualNumber,
 };

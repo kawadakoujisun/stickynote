@@ -26,6 +26,20 @@
                         class="sticker-edit-sticker-inner-class"
                     >
                         <div
+                            v-sticker-info-custom-directive="{ stickerParam: stickerParam }"
+                        >
+                            <!-- こことv-sticker-content-custom-directiveの幅を揃えたいので同じクラスを指定しておく -->
+                            <div
+                                class="sticker-edit-sticker-content-item-outer-class"
+                            >
+                            </div>
+                            <div
+                                class="sticker-edit-sticker-content-remove-button-outer-class"
+                            >
+                                <!-- ボタンはナシ -->
+                            </div>
+                        </div>
+                        <div
                             v-for="(content, index) in stickerParam.contents"
                             v-bind:key="index"
                             v-sticker-content-custom-directive="{ content: content, index: index }"
@@ -49,6 +63,7 @@
             <div
                 class="sticker-edit-buttons-outer-class"
             >
+                <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickChangeIndividualNumber">個別番号を変更</button></p></div>
                 <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickChangeColor">色を変更</button></p></div>
                 <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickAddText">テキストを追加</button></p></div>
                 <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickAddImage">画像を追加</button></p></div>
@@ -117,6 +132,29 @@
                     el.style.backgroundColor = '#'+colorHex;  // background-color
                 },
             },
+            
+            'sticker-info-custom-directive': {
+                bind: function (el, binding) {
+                    console.log('sticker-info-custom-directive bind');
+                    
+                    const stickerParam = binding.value.stickerParam;
+
+                    // individualNumber
+                    {
+                        const idBaseName = 'individual-number-id-';
+                        el.id = `${idBaseName}${stickerParam['id']}`;
+                      
+                        const divItemOuterElems = el.getElementsByClassName('sticker-edit-sticker-content-item-outer-class');
+                        
+                        const divItemElem = document.createElement('div');
+                        divItemOuterElems[0].appendChild(divItemElem);                        
+                        
+                        divItemElem.classList.add('sticker-edit-sticker-info-item-individual-number-outer-class');
+                        commonScript.addIndividualNumber(divItemElem, stickerParam['individual_main_number'], stickerParam['individual_sub_number']);
+                    }
+                }, 
+            },
+            
             'sticker-content-custom-directive': {
                 bind: function (el, binding) {
                     console.log('sticker-content-custom-directive bind');
@@ -292,6 +330,15 @@
                     result: 'none',
                 };
                 this.backToMount(emitParam);
+            },
+            
+            onClickChangeIndividualNumber: function (e) {
+                console.log('onClickChangeIndividualNumber');
+                const emitParam = {
+                    event: e,
+                    result: 'openStickerIndividualNumberChangeWindow',
+                };
+                this.backToMount(emitParam);                
             },
             
             onClickChangeColor: function (e) {
@@ -483,5 +530,18 @@
         width:  280px;
         margin: 0;
         padding: 0;
+    }
+    
+    /*
+     * 個別番号
+     */
+    .sticker-edit-sticker-info-item-individual-number-outer-class {
+        position: relative;
+        width:  280px;
+        margin: 0;
+        padding: 0;
+        text-align: right;
+        font-size: small;
+        color: rgba(0, 0, 0, 0.5);
     }
 </style>

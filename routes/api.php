@@ -161,6 +161,8 @@ Route::post('/work-sticky-note-import', function(Request $request) {
 		
 		$dstStickerParam = [
 			'id' => $sticker->id,
+			// 'individual_main_number' => ,
+			// 'individual_sub_number'  => ,
 			// 'pos_top'  => ,
 			// 'pos_left' => ,
 			// 'depth'    => ,
@@ -169,6 +171,18 @@ Route::post('/work-sticky-note-import', function(Request $request) {
 		];
 		
 		if ($sticker) {
+			// infoItemIndividualNumber
+			$stickerInfoItemIndividualNumber = $sticker->infoItemIndividualNumber;
+			if ($stickerInfoItemIndividualNumber) {
+				$stickerInfoItemIndividualNumber->main_number = $srcStickerParam['individual_main_number'];
+				$stickerInfoItemIndividualNumber->sub_number  = $srcStickerParam['individual_sub_number'];
+				// データベースに保存する
+		    	$stickerInfoItemIndividualNumber->save();
+		    	
+		    	$dstStickerParam['individual_main_number']  = $stickerInfoItemIndividualNumber->main_number;
+		    	$dstStickerParam['individual_sub_number']   = $stickerInfoItemIndividualNumber->sub_number;
+			}
+			
 			// infoItemPos
 			$stickerInfoItemPos = $sticker->infoItemPos;
 			if ($stickerInfoItemPos) {
@@ -341,6 +355,15 @@ Route::post('/work-sticky-note-import-start', function(Request $request) {
 		
 		// ふせんにinfoItemを設定する
 		if ($sticker) {
+			// infoItemIndividualNumber
+			$stickerInfoItemIndividualNumber = $sticker->infoItemIndividualNumber;
+			if ($stickerInfoItemIndividualNumber) {
+				$stickerInfoItemIndividualNumber->main_number = $srcStickerParam['individual_main_number'];
+				$stickerInfoItemIndividualNumber->sub_number  = $srcStickerParam['individual_sub_number'];
+				// データベースに保存する
+		    	$stickerInfoItemIndividualNumber->save();
+			}
+			
 			// infoItemPos
 			$stickerInfoItemPos = $sticker->infoItemPos;
 			if ($stickerInfoItemPos) {
@@ -474,6 +497,7 @@ Route::post('/work-sticker-create', function(Request $request) {
 	// ふせんを作成し、データベースに保存する
 	$sticker = \App\Sticker::createSticker();
 	
+	$stickerInfoItemIndividualNumber = $sticker->infoItemIndividualNumber;
 	$stickerInfoItemPos   = $sticker->infoItemPos;
 	$stickerInfoItemDepth = $sticker->infoItemDepth;
 	$stickerInfoItemColor = $sticker->infoItemColor;
@@ -481,6 +505,8 @@ Route::post('/work-sticker-create', function(Request $request) {
 	// イベント
 	$eventParam = [
 		'id'       => $sticker->id,
+		'individual_main_number' => $stickerInfoItemIndividualNumber->main_number,
+		'individual_sub_number'  => $stickerInfoItemIndividualNumber->sub_number,
 	    'pos_top'  => $stickerInfoItemPos->pos_top,
 	    'pos_left' => $stickerInfoItemPos->pos_left,
 	    'depth'    => $stickerInfoItemDepth->depth,
@@ -679,6 +705,122 @@ Route::put('/work-all-sticker-info-item-depth-update', function(Request $request
 	    ];
 	    
 	    event((new \App\Events\AllStickerInfoItemDepthUpdate($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
+	}
+});
+
+Route::put('/work-all-sticker-info-item-individual-number-update', function(Request $request) {
+	$dstStickerIndividualNumbers = array();
+	
+	$sticker = \App\Sticker::find($request->reqParam['id']);
+
+	if ($sticker) {
+		$stickerInfoItemIndividualNumberId = $sticker->infoItemIndividualNumber->id;
+		
+		$newMainNumber = $request->reqParam['mainNumber'];
+		
+		// TODO(kawadakoujisun): ここではロックしては外し・・・を3回行っているが、
+		//     1回だけ全体をロックし全処理済ませてロックを外すというふうにはできないだろうか？
+		
+		// main_number更新
+		$oldMainNumber = null;
+		{
+			// 複数個所から同時更新されるのを防ぐためロックしておく
+			$stickerInfoItemIndividualNumber = \App\StickerInfoItemIndividualNumber::where('id', $stickerInfoItemIndividualNumberId)->lockForUpdate()->first();
+			$oldMainNumber = $stickerInfoItemIndividualNumber->main_number;
+			$stickerInfoItemIndividualNumber->main_number = $newMainNumber;
+			// データベースに保存する
+	    	$stickerInfoItemIndividualNumber->save();
+	    	
+	    	// $dstStickerIndividualNumbersへの追加は、後で
+	    	// \App\StickerInfoItemIndividualNumber::where('main_number', $newMainNumber)
+	    	// を処理するので、そこで行われる。
+		}
+
+		// 古いmain_numberと同じ値を持つものについて、sub_numberを更新する
+		{
+			// 複数個所から同時更新されるのを防ぐためロックしておく
+			$stickerInfoItemIndividualNumbers
+				= \App\StickerInfoItemIndividualNumber::where('main_number', $oldMainNumber)
+				->orderBy('sticker_id', 'asc')
+				->lockForUpdate()
+				->get();
+			$stickerInfoItemIndividualNumberCount = $stickerInfoItemIndividualNumbers->count();
+			
+			if ($stickerInfoItemIndividualNumberCount >= 2) {
+				foreach ($stickerInfoItemIndividualNumbers as $index => $stickerInfoItemIndividualNumber) {
+					$stickerInfoItemIndividualNumber->sub_number = $index + 1;
+					// データベースに保存する
+		    		$stickerInfoItemIndividualNumber->save();
+		    		
+			    	$dstStickerIndividualNumber = [
+			    		'id'                     => $stickerInfoItemIndividualNumber->sticker_id,
+			    		'individual_main_number' => $stickerInfoItemIndividualNumber->main_number,
+			    		'individual_sub_number'  => $stickerInfoItemIndividualNumber->sub_number,
+			    	];
+			    	array_push($dstStickerIndividualNumbers, $dstStickerIndividualNumber);
+				}
+			} else if ($stickerInfoItemIndividualNumberCount >= 1) {
+				$stickerInfoItemIndividualNumber = $stickerInfoItemIndividualNumbers->first();
+				$stickerInfoItemIndividualNumber->sub_number = 0;
+				// データベースに保存する
+		    	$stickerInfoItemIndividualNumber->save();
+		    	
+		    	$dstStickerIndividualNumber = [
+		    		'id'                     => $stickerInfoItemIndividualNumber->sticker_id,
+		    		'individual_main_number' => $stickerInfoItemIndividualNumber->main_number,
+		    		'individual_sub_number'  => $stickerInfoItemIndividualNumber->sub_number,
+		    	];
+		    	array_push($dstStickerIndividualNumbers, $dstStickerIndividualNumber);		    	
+			}
+		}
+	
+		// 新しいmain_numberと同じ値を持つものについて、sub_numberを更新する
+		{
+			// 複数個所から同時更新されるのを防ぐためロックしておく
+			$stickerInfoItemIndividualNumbers
+				= \App\StickerInfoItemIndividualNumber::where('main_number', $newMainNumber)
+				->orderBy('sticker_id', 'asc')
+				->lockForUpdate()
+				->get();
+			$stickerInfoItemIndividualNumberCount = $stickerInfoItemIndividualNumbers->count();
+			
+			if ($stickerInfoItemIndividualNumberCount >= 2) {
+				foreach ($stickerInfoItemIndividualNumbers as $index => $stickerInfoItemIndividualNumber) {
+					$stickerInfoItemIndividualNumber->sub_number = $index + 1;
+					// データベースに保存する
+		    		$stickerInfoItemIndividualNumber->save();
+		    		
+			    	$dstStickerIndividualNumber = [
+			    		'id'                     => $stickerInfoItemIndividualNumber->sticker_id,
+			    		'individual_main_number' => $stickerInfoItemIndividualNumber->main_number,
+			    		'individual_sub_number'  => $stickerInfoItemIndividualNumber->sub_number,
+			    	];
+			    	array_push($dstStickerIndividualNumbers, $dstStickerIndividualNumber);
+				}
+			} else if ($stickerInfoItemIndividualNumberCount >= 1) {
+				$stickerInfoItemIndividualNumber = $stickerInfoItemIndividualNumbers->first();
+				$stickerInfoItemIndividualNumber->sub_number = 0;
+				// データベースに保存する
+		    	$stickerInfoItemIndividualNumber->save();
+		    	
+			    $dstStickerIndividualNumber = [
+			    	'id'                     => $stickerInfoItemIndividualNumber->sticker_id,
+			    	'individual_main_number' => $stickerInfoItemIndividualNumber->main_number,
+			    	'individual_sub_number'  => $stickerInfoItemIndividualNumber->sub_number,
+			    ];
+			    array_push($dstStickerIndividualNumbers, $dstStickerIndividualNumber);
+			}
+		}
+	}
+	
+	if (count($dstStickerIndividualNumbers) > 0) {
+		// イベント
+	    $eventParam = [
+	    	'sticker_individual_numbers' => $dstStickerIndividualNumbers,
+	    	'user_id'                    => $request->user_id,
+	    ];
+	    
+	    event((new \App\Events\AllStickerInfoItemIndividualNumberUpdate($eventParam)));  // 自分にも送信したいのでdontBroadcastToCurrentUserは付けない
 	}
 });
 

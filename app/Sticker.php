@@ -27,6 +27,18 @@ class Sticker extends Model
     public static $infoItemDepthMin     = 200;
     public static $infoItemDepthMax     = 600;
     
+    public static $infoItemIndividualMainNumberMin = 1;
+    public static $infoItemIndividualMainNumberMax = 1000000;
+    
+    /**
+     * このStickerが所有するStickerInfoItemIndividualNumber。（StickerInfoItemIndividualNumberモデルとの関係を定義）
+     * ※StickerInfoItemIndividualNumberを生成するときはcreateStickerを使用して下さい。
+     */
+    public function infoItemIndividualNumber()
+    {
+        return $this->hasOne(StickerInfoItemIndividualNumber::class);
+    }    
+    
     /**
      * このStickerが所有するStickerInfoItemPos。（StickerInfoItemPosモデルとの関係を定義）
      * ※StickerInfoItemPosを生成するときはcreateStickerを使用して下さい。
@@ -38,7 +50,7 @@ class Sticker extends Model
 
     /**
      * このStickerが所有するStickerInfoItemDepth。（StickerInfoItemDepthモデルとの関係を定義）
-     * ※StickerInfoItemDepth生成するときはcreateStickerを使用して下さい。
+     * ※StickerInfoItemDepthを生成するときはcreateStickerを使用して下さい。
      */
     public function infoItemDepth()
     {
@@ -102,6 +114,7 @@ class Sticker extends Model
     /**
      * Stickerを新規作成する。
      * Stickerが所有するStickerInfo〇〇（
+     * StickerInfoItemIndividualNumber、
      * StickerInfoItemPos、
      * StickerInfoItemDepth、
      * StickerInfoItemColor
@@ -111,7 +124,17 @@ class Sticker extends Model
     {
         $stickerNumBeforeCreate = self::count();
         
+        $individualMainNumberLastBeforeCreate = self::$infoItemIndividualMainNumberMin -1;  // 後で+1するので
+        if (\App\StickerInfoItemIndividualNumber::count() > 0) {
+            $individualMainNumberLastBeforeCreate = \App\StickerInfoItemIndividualNumber::max('main_number');
+                // TODO(kawadakoujisun): 割り込まれて番号被りが起きると困るのでロックすべきか？ depthも被らせたくないし。
+        }
+        
         $sticker = self::create();
+        $sticker->infoItemIndividualNumber()->create([
+            'main_number' => $individualMainNumberLastBeforeCreate +1,  // TODO(kawadakoujisun): Maxを越えないかチェック
+            'sub_number'  => 0,
+        ]);
         $sticker->infoItemPos()->create([
             'pos_top'  => 0,
             'pos_left' => 0,
@@ -271,6 +294,7 @@ class Sticker extends Model
     
         $stickers = self::all();
         foreach ($stickers as $sticker) {
+            $stickerInfoItemIndividualNumber = $sticker->infoItemIndividualNumber;
     		$stickerInfoItemPos       = $sticker->infoItemPos;
     		$stickerInfoItemDepth     = $sticker->infoItemDepth;
     		$stickerInfoItemColor     = $sticker->infoItemColor;
@@ -280,9 +304,11 @@ class Sticker extends Model
     		$stickerContentItemVideos = $sticker->contentItemVideos;
     		$stickerContentItemTaskTimes = $sticker->contentItemTaskTimes;
     		
-    		if ($stickerInfoItemPos && $stickerInfoItemDepth && $stickerInfoItemColor) {
+    		if ($stickerInfoItemIndividualNumber && $stickerInfoItemPos && $stickerInfoItemDepth && $stickerInfoItemColor) {
     			$stickerParam = [
     				'id'       => $sticker->id,
+    				'individual_main_number' => $stickerInfoItemIndividualNumber->main_number,
+    				'individual_sub_number'  => $stickerInfoItemIndividualNumber->sub_number,
     				'pos_top'  => $stickerInfoItemPos->pos_top,
     				'pos_left' => $stickerInfoItemPos->pos_left,
     				'depth'    => $stickerInfoItemDepth->depth,

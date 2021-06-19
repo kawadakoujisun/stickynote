@@ -114,6 +114,19 @@
                     const divStickerInnerElems = el.getElementsByClassName('sticker-inner-class');
                     const divStickerInnerElem = divStickerInnerElems[0];
                     
+                    // individualNumber
+                    {
+                        // const individualNumberIdBaseName = this.getIndividualNumberIdBaseName();
+                        const individualNumberIdBaseName = 'individual-number-id-';  // 直書き
+                        
+                        const divItemElem = document.createElement('div');
+                        divItemElem.id = `${individualNumberIdBaseName}${stickerParam['id']}`;  // sticker1つにつき1つだけなので、stickerのidでいい。
+                        divStickerInnerElem.appendChild(divItemElem);
+                        
+                        divItemElem.classList.add('sticker-info-item-individual-number-outer-class');
+                        commonScript.addIndividualNumber(divItemElem, stickerParam['individual_main_number'], stickerParam['individual_sub_number']);
+                    }                    
+                    
                     // const contentLinkIdBaseName = this.getContentLinkIdBaseName();
                     const contentLinkIdBaseName = 'content-link-id-';  // 直書き
                             
@@ -275,5 +288,18 @@
         width:  280px;
         margin: 0;
         padding: 0;
+    }
+    
+    /*
+     * 個別番号
+     */
+    .sticker-inner-class ::v-deep .sticker-info-item-individual-number-outer-class {
+        position: relative;
+        width:  280px;
+        margin: 0;
+        padding: 0;
+        text-align: right;
+        font-size: small;
+        color: rgba(0, 0, 0, 0.5);
     }
 </style>

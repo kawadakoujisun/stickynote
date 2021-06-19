@@ -2510,7 +2510,19 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
         el.id = "".concat(idBaseName).concat(stickerParam['id']);
         var divStickerInnerElems = el.getElementsByClassName('sticker-inner-class');
-        var divStickerInnerElem = divStickerInnerElems[0]; // const contentLinkIdBaseName = this.getContentLinkIdBaseName();
+        var divStickerInnerElem = divStickerInnerElems[0]; // individualNumber
+
+        {
+          // const individualNumberIdBaseName = this.getIndividualNumberIdBaseName();
+          var individualNumberIdBaseName = 'individual-number-id-'; // 直書き
+
+          var divItemElem = document.createElement('div');
+          divItemElem.id = "".concat(individualNumberIdBaseName).concat(stickerParam['id']); // sticker1つにつき1つだけなので、stickerのidでいい。
+
+          divStickerInnerElem.appendChild(divItemElem);
+          divItemElem.classList.add('sticker-info-item-individual-number-outer-class');
+          _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addIndividualNumber(divItemElem, stickerParam['individual_main_number'], stickerParam['individual_sub_number']);
+        } // const contentLinkIdBaseName = this.getContentLinkIdBaseName();
 
         var contentLinkIdBaseName = 'content-link-id-'; // 直書き
 
@@ -2518,33 +2530,39 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
         for (var i = 0; i < contents.length; ++i) {
           var content = contents[i];
-          var divItemElem = document.createElement('div');
-          divItemElem.id = "".concat(contentLinkIdBaseName).concat(content['link'].id);
-          divStickerInnerElem.appendChild(divItemElem);
+
+          var _divItemElem = document.createElement('div');
+
+          _divItemElem.id = "".concat(contentLinkIdBaseName).concat(content['link'].id);
+          divStickerInnerElem.appendChild(_divItemElem);
 
           if (content['link'].item_type == 1) {
             // app/Sticker.phpで値を定義している
-            divItemElem.classList.add('sticker-content-item-text-outer-class');
+            _divItemElem.classList.add('sticker-content-item-text-outer-class');
+
             var text = content['item']['text'];
-            divItemElem.innerText = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
+            _divItemElem.innerText = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
           } else if (content['link'].item_type == 2) {
             // app/Sticker.phpで値を定義している
-            divItemElem.classList.add('sticker-content-item-image-outer-class');
+            _divItemElem.classList.add('sticker-content-item-image-outer-class');
+
             var imageURL = content['item']['image_url']; // divItemElem.innerHTML = `<img class="sticker-content-item-image-inner-class" src="${imageURL}">`;
             // img要素追加
 
-            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addImageElement(divItemElem, imageURL, 1);
+            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addImageElement(_divItemElem, imageURL, 1);
           } else if (content['link'].item_type == 3) {
             // app/Sticker.phpで値を定義している
-            divItemElem.classList.add('sticker-content-item-image-outer-class');
+            _divItemElem.classList.add('sticker-content-item-image-outer-class');
+
             var videoURL = content['item']['video_url']; // divItemElem.innerHTML = `<video class="sticker-content-item-image-inner-class" src="${videoURL}" controls autoplay loop></video>`;
             // video要素追加
 
-            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addVideoElement(divItemElem, videoURL, 1);
+            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addVideoElement(_divItemElem, videoURL, 1);
           } else if (content['link'].item_type == 4 || content['link'].item_type == 5) {
             // app/Sticker.phpで値を定義している
-            divItemElem.classList.add('sticker-content-item-text-outer-class');
-            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addTaskTimeText(divItemElem, content);
+            _divItemElem.classList.add('sticker-content-item-text-outer-class');
+
+            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addTaskTimeText(_divItemElem, content);
           }
         }
       },
@@ -4054,6 +4072,11 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 //
 //
 //
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
@@ -4138,6 +4161,16 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         idNo: null,
         // 要素のidの文字列から抽出した数値
         stickerParam: null
+      },
+      //
+      // ふせんの個別番号を変更するウィンドウに渡すパラメータ
+      //
+      showStickerIndividualNumberChangeWindowParam: {
+        isShow: false,
+        idNo: null,
+        // 要素のidの文字列から抽出した数値
+        mainNumber: null,
+        subNumber: null
       },
       //
       // ふせんの色変更するウィンドウに渡すパラメータ
@@ -4473,6 +4506,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
       var stickerParam = {
         'id': response.eventParam.id,
+        'individual_main_number': response.eventParam.individual_main_number,
+        'individual_sub_number': response.eventParam.individual_sub_number,
         'pos_top': response.eventParam.pos_top,
         'pos_left': response.eventParam.pos_left,
         'depth': response.eventParam.depth,
@@ -4630,6 +4665,41 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         _iterator9.e(err);
       } finally {
         _iterator9.f();
+      }
+    });
+    window.Echo["private"]('all-sticker-info-item-individual-number-update-channel.' + window.laravel.user['id']).listen('AllStickerInfoItemIndividualNumberUpdate', function (response) {
+      console.log('window.Echo.private all-sticker-info-item-individual-number-update-channel listen');
+      var stickerIndividualNumbers = response.eventParam.sticker_individual_numbers;
+
+      var individualNumberIdBaseName = _this.getIndividualNumberIdBaseName();
+
+      var _iterator10 = _createForOfIteratorHelper(stickerIndividualNumbers),
+          _step10;
+
+      try {
+        for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
+          var stickerIndividualNumber = _step10.value;
+          var idNo = stickerIndividualNumber.id;
+          var updateId = "".concat(individualNumberIdBaseName).concat(idNo);
+          var updateElem = document.getElementById(updateId);
+
+          if (updateElem) {
+            // データ更新
+            var index = _this.getStickerParamIndex(idNo);
+
+            if (index !== null) {
+              _this.stickerParams[index]['individual_main_number'] = stickerIndividualNumber.individual_main_number;
+              _this.stickerParams[index]['individual_sub_number'] = stickerIndividualNumber.individual_sub_number;
+            } // 見た目更新
+
+
+            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addIndividualNumber(updateElem, stickerIndividualNumber.individual_main_number, stickerIndividualNumber.individual_sub_number);
+          }
+        }
+      } catch (err) {
+        _iterator10.e(err);
+      } finally {
+        _iterator10.f();
       }
     });
     window.Echo["private"]('sticker-info-item-color-update-channel.' + window.laravel.user['id']).listen('StickerInfoItemColorUpdate', function (response) {
@@ -4886,7 +4956,19 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
         el.id = "".concat(idBaseName).concat(stickerParam['id']);
         var divStickerInnerElems = el.getElementsByClassName('sticker-inner-class');
-        var divStickerInnerElem = divStickerInnerElems[0]; // const contentLinkIdBaseName = this.getContentLinkIdBaseName();
+        var divStickerInnerElem = divStickerInnerElems[0]; // individualNumber
+
+        {
+          // const individualNumberIdBaseName = this.getIndividualNumberIdBaseName();
+          var individualNumberIdBaseName = 'individual-number-id-'; // 直書き
+
+          var divItemElem = document.createElement('div');
+          divItemElem.id = "".concat(individualNumberIdBaseName).concat(stickerParam['id']); // sticker1つにつき1つだけなので、stickerのidでいい。
+
+          divStickerInnerElem.appendChild(divItemElem);
+          divItemElem.classList.add('sticker-info-item-individual-number-outer-class');
+          _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addIndividualNumber(divItemElem, stickerParam['individual_main_number'], stickerParam['individual_sub_number']);
+        } // const contentLinkIdBaseName = this.getContentLinkIdBaseName();
 
         var contentLinkIdBaseName = 'content-link-id-'; // 直書き
 
@@ -4894,33 +4976,39 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
         for (var i = 0; i < contents.length; ++i) {
           var content = contents[i];
-          var divItemElem = document.createElement('div');
-          divItemElem.id = "".concat(contentLinkIdBaseName).concat(content['link'].id);
-          divStickerInnerElem.appendChild(divItemElem);
+
+          var _divItemElem = document.createElement('div');
+
+          _divItemElem.id = "".concat(contentLinkIdBaseName).concat(content['link'].id);
+          divStickerInnerElem.appendChild(_divItemElem);
 
           if (content['link'].item_type == 1) {
             // app/Sticker.phpで値を定義している
-            divItemElem.classList.add('sticker-content-item-text-outer-class');
+            _divItemElem.classList.add('sticker-content-item-text-outer-class');
+
             var text = content['item']['text'];
-            divItemElem.innerText = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
+            _divItemElem.innerText = text; // TODO(kawadakoujisun): html構文をそのまま出力して！
           } else if (content['link'].item_type == 2) {
             // app/Sticker.phpで値を定義している
-            divItemElem.classList.add('sticker-content-item-image-outer-class');
+            _divItemElem.classList.add('sticker-content-item-image-outer-class');
+
             var imageURL = content['item']['image_url']; // divItemElem.innerHTML = `<img class="sticker-content-item-image-inner-class" src="${imageURL}">`;
             // img要素追加
 
-            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addImageElement(divItemElem, imageURL, 1);
+            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addImageElement(_divItemElem, imageURL, 1);
           } else if (content['link'].item_type == 3) {
             // app/Sticker.phpで値を定義している
-            divItemElem.classList.add('sticker-content-item-image-outer-class');
+            _divItemElem.classList.add('sticker-content-item-image-outer-class');
+
             var videoURL = content['item']['video_url']; // divItemElem.innerHTML = `<video class="sticker-content-item-image-inner-class" src="${videoURL}" controls autoplay loop></video>`;
             // video要素追加
 
-            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addVideoElement(divItemElem, videoURL, 1);
+            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addVideoElement(_divItemElem, videoURL, 1);
           } else if (content['link'].item_type == 4 || content['link'].item_type == 5) {
             // app/Sticker.phpで値を定義している
-            divItemElem.classList.add('sticker-content-item-text-outer-class');
-            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addTaskTimeText(divItemElem, content);
+            _divItemElem.classList.add('sticker-content-item-text-outer-class');
+
+            _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addTaskTimeText(_divItemElem, content);
           }
         }
       },
@@ -5073,10 +5161,29 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       this.showStickerEditWindowParam.stickerParam = null;
 
       if (emitParam.result != 'none') {
+        // stickerParamを取得しておく
+        var stickerParam = null;
+        var index = this.getStickerParamIndex(idNo);
+
+        if (index !== null) {
+          stickerParam = this.stickerParams[index];
+        } // emitParam.resultで分岐
+
+
         if (emitParam.result == 'removeText') {// ここに来る前にテキストを削除しているので、ここでは何もしない
         } else if (emitParam.result == 'removeImage') {// ここに来る前に画像を削除しているので、ここでは何もしない
         } else if (emitParam.result == 'removeVideo') {// ここに来る前に動画を削除しているので、ここでは何もしない
         } else if (emitParam.result == 'removeTaskTime') {// ここに来る前に時刻を削除しているので、ここでは何もしない
+        } else if (emitParam.result == 'openStickerIndividualNumberChangeWindow') {
+          this.showStickerIndividualNumberChangeWindowParam.isShow = true;
+          this.showStickerIndividualNumberChangeWindowParam.idNo = idNo;
+          this.showStickerIndividualNumberChangeWindowParam.mainNumber = null;
+          this.showStickerIndividualNumberChangeWindowParam.subNumber = null;
+
+          if (stickerParam) {
+            this.showStickerIndividualNumberChangeWindowParam.mainNumber = stickerParam.individual_main_number;
+            this.showStickerIndividualNumberChangeWindowParam.subNumber = stickerParam.individual_sub_number;
+          }
         } else if (emitParam.result == 'openStickerColorChangeWindow') {
           this.showStickerColorChangeWindowParam.isShow = true;
           this.showStickerColorChangeWindowParam.idNo = idNo;
@@ -5097,6 +5204,18 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
           this.showStickerTaskTimeAddWindowParam.isShow = true;
           this.showStickerTaskTimeAddWindowParam.idNo = idNo;
           this.showStickerTaskTimeAddWindowParam.taskTimeType = 'taskEndTime';
+        }
+      }
+    },
+    onHideStickerIndividualNumberChangeWindow: function onHideStickerIndividualNumberChangeWindow(emitParam) {
+      console.log('onHideStickerIndividualNumberChangeWindow', emitParam.event);
+      this.showStickerIndividualNumberChangeWindowParam.isShow = false;
+      this.showStickerIndividualNumberChangeWindowParam.idNo = null;
+      this.showStickerIndividualNumberChangeWindowParam.mainNumber = null;
+      this.showStickerIndividualNumberChangeWindowParam.subNumber = null;
+
+      if (emitParam.result != 'none') {
+        if (emitParam.result == 'changeIndividualNumber') {// ここに来る前に個別番号を変更しているので、ここでは何もしない
         }
       }
     },
@@ -5345,6 +5464,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
     getStickerIdBaseName: function getStickerIdBaseName() {
       return 'sticker-id-';
     },
+    getIndividualNumberIdBaseName: function getIndividualNumberIdBaseName() {
+      return 'individual-number-id-';
+    },
     getContentLinkIdBaseName: function getContentLinkIdBaseName() {
       return 'content-link-id-';
     },
@@ -5371,6 +5493,8 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       if (src) {
         dst = {
           id: src.id,
+          individual_main_number: src.individual_main_number,
+          individual_sub_number: src.individual_sub_number,
           pos_top: src.pos_top,
           pos_left: src.pos_left,
           depth: src.depth,
@@ -5856,6 +5980,21 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   components: {
@@ -5899,6 +6038,22 @@ __webpack_require__.r(__webpack_exports__);
         var colorHex = '000000' + stickerParam['color'].toString(16);
         colorHex = colorHex.substr(colorHex.length - 6);
         el.style.backgroundColor = '#' + colorHex; // background-color
+      }
+    },
+    'sticker-info-custom-directive': {
+      bind: function bind(el, binding) {
+        console.log('sticker-info-custom-directive bind');
+        var stickerParam = binding.value.stickerParam; // individualNumber
+
+        {
+          var idBaseName = 'individual-number-id-';
+          el.id = "".concat(idBaseName).concat(stickerParam['id']);
+          var divItemOuterElems = el.getElementsByClassName('sticker-edit-sticker-content-item-outer-class');
+          var divItemElem = document.createElement('div');
+          divItemOuterElems[0].appendChild(divItemElem);
+          divItemElem.classList.add('sticker-edit-sticker-info-item-individual-number-outer-class');
+          _ProjectWorkCommonScript_js__WEBPACK_IMPORTED_MODULE_0__["default"].addIndividualNumber(divItemElem, stickerParam['individual_main_number'], stickerParam['individual_sub_number']);
+        }
       }
     },
     'sticker-content-custom-directive': {
@@ -6054,6 +6209,14 @@ __webpack_require__.r(__webpack_exports__);
       var emitParam = {
         event: e,
         result: 'none'
+      };
+      this.backToMount(emitParam);
+    },
+    onClickChangeIndividualNumber: function onClickChangeIndividualNumber(e) {
+      console.log('onClickChangeIndividualNumber');
+      var emitParam = {
+        event: e,
+        result: 'openStickerIndividualNumberChangeWindow'
       };
       this.backToMount(emitParam);
     },
@@ -6298,6 +6461,150 @@ __webpack_require__.r(__webpack_exports__);
       imageElem.src = '';
       this.isImageFileEnabled = false;
       this.selectImageFileInfo = null;
+    }
+  }
+});
+
+/***/ }),
+
+/***/ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=script&lang=js&":
+/*!***********************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/babel-loader/lib??ref--4-0!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=script&lang=js& ***!
+  \***********************************************************************************************************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+//
+/* harmony default export */ __webpack_exports__["default"] = ({
+  props: {
+    showStickerIndividualNumberChangeWindowProps: Object
+  },
+  data: function data() {
+    return {
+      isShow: this.showStickerIndividualNumberChangeWindowProps.isShow,
+      mainNumber: '',
+      subNumber: '',
+      stickerIndividualNumberChangeWindowTimeoutId: null
+    };
+  },
+  watch: {
+    'showStickerIndividualNumberChangeWindowProps.isShow': function showStickerIndividualNumberChangeWindowPropsIsShow(newValue, oldValue) {
+      this.isShow = this.showStickerIndividualNumberChangeWindowProps.isShow;
+
+      if (this.isShow) {
+        // 現在の個別番号を表示する。
+        this.mainNumber = this.showStickerIndividualNumberChangeWindowProps.mainNumber;
+        this.subNumber = this.showStickerIndividualNumberChangeWindowProps.subNumber;
+        var windowElem = document.getElementById("sticker-individual-number-change-window-id"); // いったん表示しないとサイズを取得できないので、最初は見えないところにおいておく。
+
+        windowElem.style.left = '-10000px';
+        windowElem.style.top = 0;
+        this.stickerIndividualNumberChangeWindowTimeoutId = setTimeout(function () {
+          var windowElemRect = windowElem.getBoundingClientRect();
+          windowElem.style.left = '50%';
+          windowElem.style.top = '50%';
+          windowElem.style.marginLeft = "".concat(-windowElemRect.width / 2, "px"); // margin-left
+
+          windowElem.style.marginTop = "".concat(-windowElemRect.height / 2, "px"); // margin-top
+        }, 10); // TODO(kawadakoujisun): setTimeoutの代わりにthis.$nextTick(() => {});を使ってもいいかも。
+      }
+    }
+  },
+  methods: {
+    onClickStickerIndividualNumberChangeWindowOverlay: function onClickStickerIndividualNumberChangeWindowOverlay(e) {
+      console.log('onClickStickerIndividualNumberChangeWindowOverlay');
+      var emitParam = {
+        event: e,
+        result: 'none'
+      };
+      this.backToMount(emitParam);
+    },
+    onClickStickerIndividualNumberChangeWindow: function onClickStickerIndividualNumberChangeWindow(e) {
+      console.log('onClickStickerIndividualNumberChangeWindow'); // 何もしない
+    },
+    onClickClose: function onClickClose(e) {
+      var emitParam = {
+        event: e,
+        result: 'none'
+      };
+      this.backToMount(emitParam);
+    },
+    onClickChangeIndividualNumber: function onClickChangeIndividualNumber(e) {
+      // 個別番号を変更する
+      var mainNumberValue = parseInt(this.mainNumber, 10); // 入力が適切かどうかチェックする
+
+      var inputOK = false;
+
+      if (Number.isInteger(mainNumberValue)) {
+        if (1 <= mainNumberValue && mainNumberValue <= 10000) {
+          if (this.showStickerIndividualNumberChangeWindowProps.mainNumber != mainNumberValue) {
+            // 値が変更されていたら
+            inputOK = true;
+          }
+        }
+      }
+
+      if (inputOK) {
+        console.log('axios.put');
+        var reqParam = {
+          id: this.showStickerIndividualNumberChangeWindowProps.idNo,
+          mainNumber: mainNumberValue
+        };
+        axios.put(window.laravel.asset + '/api/work-all-sticker-info-item-individual-number-update', {
+          reqParam: reqParam,
+          user_id: window.laravel.user['id']
+        }).then(function (response) {// 特にすることなし
+        }); // 親に戻る
+
+        var emitParam = {
+          event: e,
+          result: 'changeIndividualNumber'
+        };
+        this.backToMount(emitParam);
+      }
+    },
+    backToMount: function backToMount(emitParam) {
+      if (this.stickerIndividualNumberChangeWindowTimeoutId !== null) {
+        clearTimeout(this.stickerIndividualNumberChangeWindowTimeoutId);
+        this.stickerIndividualNumberChangeWindowTimeoutId = null;
+      }
+
+      this.$emit('hide-sticker-individual-number-change-window-custom-event', emitParam);
     }
   }
 });
@@ -11434,7 +11741,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-453180c5] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  100%;\n    height: auto;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px auto 20px;\n    padding: 0;\n}\n@media (min-width: 576px) {\n    /* 画面の横幅が576px以上のとき */\n.mount-class[data-v-453180c5] {\n        position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n        width:  1800px;\n        height: 900px;\n        border: 1px solid #000;\n        background-color: #ffffff;\n        margin: 0px 20px 20px;\n        padding: 0;\n}\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-453180c5] {\n    position: relative;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 10px auto 10px;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n@media (min-width: 576px) {\n    /* 画面の横幅が576px以上のとき */\n.sticker-class[data-v-453180c5] {\n        position: absolute;\n        width:      340px;\n        min-height: 200px;\n        max-height: 430px;\n        border: 1px solid #000;\n        margin: 0;\n        padding: 0;\n        overflow-y: scroll;        \n        \n        /* 外部から変更するもの */\n        top:  0;\n        left: 0;\n        background-color: #000000;\n}\n}\n.sticker-inner-class[data-v-453180c5] {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n\n/*\n * 画像(動画も)\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト(時刻も)\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-453180c5] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  100%;\n    height: auto;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px auto 20px;\n    padding: 0;\n}\n@media (min-width: 576px) {\n    /* 画面の横幅が576px以上のとき */\n.mount-class[data-v-453180c5] {\n        position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n        width:  1800px;\n        height: 900px;\n        border: 1px solid #000;\n        background-color: #ffffff;\n        margin: 0px 20px 20px;\n        padding: 0;\n}\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-453180c5] {\n    position: relative;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 10px auto 10px;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n@media (min-width: 576px) {\n    /* 画面の横幅が576px以上のとき */\n.sticker-class[data-v-453180c5] {\n        position: absolute;\n        width:      340px;\n        min-height: 200px;\n        max-height: 430px;\n        border: 1px solid #000;\n        margin: 0;\n        padding: 0;\n        overflow-y: scroll;        \n        \n        /* 外部から変更するもの */\n        top:  0;\n        left: 0;\n        background-color: #000000;\n}\n}\n.sticker-inner-class[data-v-453180c5] {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n\n/*\n * 画像(動画も)\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト(時刻も)\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n\n/*\n * 個別番号\n */\n.sticker-inner-class[data-v-453180c5]  .sticker-info-item-individual-number-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n    text-align: right;\n    font-size: small;\n    color: rgba(0, 0, 0, 0.5);\n}\n", ""]);
 
 // exports
 
@@ -11510,7 +11817,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px 20px 20px;\n    padding: 0;\n}\n.mount-sorted-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  100%;\n    height: auto;  /* heightをここで指定し直さないと、先に書いてあるmount-classのheightが使われてしまう。 */\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px auto 20px;\n    padding: 0;\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 0;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n\n/* 要素のclass=\"\"に書いた順番ではなく、css内で書いた順番によって優先度が決まるようだ。 */\n.sticker-sorted-class[data-v-652fa580] {\n    position: relative;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 10px auto 10px;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n.sticker-inner-class[data-v-652fa580] {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px 20px 20px;\n    padding: 0;\n}\n.mount-sorted-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  100%;\n    height: auto;  /* heightをここで指定し直さないと、先に書いてあるmount-classのheightが使われてしまう。 */\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px auto 20px;\n    padding: 0;\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 0;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n\n/* 要素のclass=\"\"に書いた順番ではなく、css内で書いた順番によって優先度が決まるようだ。 */\n.sticker-sorted-class[data-v-652fa580] {\n    position: relative;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 10px auto 10px;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n.sticker-inner-class[data-v-652fa580] {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n", ""]);
 
 // exports
 
@@ -11529,7 +11836,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 画像(動画も)\n */\n.sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト(時刻も)\n */\n.sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 画像(動画も)\n */\n.sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト(時刻も)\n */\n.sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n\n/*\n * 個別番号\n */\n.sticker-info-item-individual-number-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n    text-align: right;\n    font-size: small;\n    color: rgba(0, 0, 0, 0.5);\n}\n", ""]);
 
 // exports
 
@@ -11586,7 +11893,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-edit-window-overlay-class[data-v-1ec0eebc] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-edit-window-class[data-v-1ec0eebc] {\n    position: fixed;\n    /*left:   50%;\n    top:    50%;*/\n    left: 10px;\n    top: 10px;\n    min-width: 480px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n\n/*\n * ふせん(+削除ボタン)\n */\n.sticker-edit-sticker-class[data-v-1ec0eebc] {\n    position: relative;\n    width:      440px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin-left:  auto;\n    margin-right: auto;\n    padding: 0;\n    overflow-y: scroll;\n    \n    /* 外部から変更するもの */\n    background-color: #000000;\n}\n.sticker-edit-sticker-inner-class[data-v-1ec0eebc] {\n    width:      380px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n.sticker-edit-sticker-content-item-outer-class[data-v-1ec0eebc] {\n    display: inline-block;\n    width: 280px;\n    padding: 0;\n    vertical-align: middle;\n}\n.sticker-edit-sticker-content-remove-button-outer-class[data-v-1ec0eebc] {\n    display: inline-block;\n    width:  80px;\n    padding: 0;\n    vertical-align: middle;\n    text-align: right;\n}\n\n/*\n * ボタン\n */\n.sticker-edit-buttons-outer-class[data-v-1ec0eebc] {\n    position: relative;\n    width:      440px;\n}\n.sticker-edit-button-space-class[data-v-1ec0eebc] {\n    height: 10px;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-edit-window-overlay-class[data-v-1ec0eebc] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-edit-window-class[data-v-1ec0eebc] {\n    position: fixed;\n    /*left:   50%;\n    top:    50%;*/\n    left: 10px;\n    top: 10px;\n    min-width: 480px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n\n/*\n * ふせん(+削除ボタン)\n */\n.sticker-edit-sticker-class[data-v-1ec0eebc] {\n    position: relative;\n    width:      440px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin-left:  auto;\n    margin-right: auto;\n    padding: 0;\n    overflow-y: scroll;\n    \n    /* 外部から変更するもの */\n    background-color: #000000;\n}\n.sticker-edit-sticker-inner-class[data-v-1ec0eebc] {\n    width:      380px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n.sticker-edit-sticker-content-item-outer-class[data-v-1ec0eebc] {\n    display: inline-block;\n    width: 280px;\n    padding: 0;\n    vertical-align: middle;\n}\n.sticker-edit-sticker-content-remove-button-outer-class[data-v-1ec0eebc] {\n    display: inline-block;\n    width:  80px;\n    padding: 0;\n    vertical-align: middle;\n    text-align: right;\n}\n\n/*\n * ボタン\n */\n.sticker-edit-buttons-outer-class[data-v-1ec0eebc] {\n    position: relative;\n    width:      440px;\n}\n.sticker-edit-button-space-class[data-v-1ec0eebc] {\n    height: 10px;\n}\n", ""]);
 
 // exports
 
@@ -11605,7 +11912,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* TODO(kawadakoujisun): ::v-deepを試してみたい */\n\n/*\n * 画像(動画も)\n */\n.sticker-edit-sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-edit-sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト(時刻も)\n */\n.sticker-edit-sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/* TODO(kawadakoujisun): ::v-deepを試してみたい */\n\n/*\n * 画像(動画も)\n */\n.sticker-edit-sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-edit-sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト(時刻も)\n */\n.sticker-edit-sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n\n/*\n * 個別番号\n */\n.sticker-edit-sticker-info-item-individual-number-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n    text-align: right;\n    font-size: small;\n    color: rgba(0, 0, 0, 0.5);\n}\n", ""]);
 
 // exports
 
@@ -11625,6 +11932,25 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 // module
 exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-image-add-window-overlay-class[data-v-744f6466] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-image-add-window-class[data-v-744f6466] {\n    position: fixed;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:  400px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n}\n.sticker-image-add-window-image-outer-class[data-v-744f6466] {\n    position: relative;\n    width:  200px;\n    height: 200px;\n    border: 1px solid #000;\n    background-color: #cccccc;\n    margin-left:  auto;\n    margin-right: auto;\n    padding: 0;\n}\n.sticker-image-add-window-image-inner-class[data-v-744f6466] {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n.sticker-image-add-window-space-class[data-v-744f6466] {\n    height: 10px;\n}\n", ""]);
+
+// exports
+
+
+/***/ }),
+
+/***/ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=style&index=0&id=29e04c5a&scoped=true&lang=css&":
+/*!******************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=style&index=0&id=29e04c5a&scoped=true&lang=css& ***!
+  \******************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loader/lib/css-base.js */ "./node_modules/css-loader/lib/css-base.js")(false);
+// imports
+
+
+// module
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-individual-number-change-window-overlay-class[data-v-29e04c5a] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-individual-number-change-window-class[data-v-29e04c5a] {\n    position: fixed;\n    left:   50%;\n    top:    50%;\n    min-width: 150px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n.sticker-individual-number-change-window-space-class[data-v-29e04c5a] {\n    height: 10px;\n}\n\n/*\n * 入力欄\n */\n.sticker-individual-number-change-input-5-digits-class[data-v-29e04c5a] {\n    width: 155px;  /* 125 + 30 */\n}\n", ""]);
 
 // exports
 
@@ -50170,6 +50496,36 @@ if(false) {}
 
 /***/ }),
 
+/***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=style&index=0&id=29e04c5a&scoped=true&lang=css&":
+/*!**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=style&index=0&id=29e04c5a&scoped=true&lang=css& ***!
+  \**********************************************************************************************************************************************************************************************************************************************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+var content = __webpack_require__(/*! !../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=style&index=0&id=29e04c5a&scoped=true&lang=css& */ "./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=style&index=0&id=29e04c5a&scoped=true&lang=css&");
+
+if(typeof content === 'string') content = [[module.i, content, '']];
+
+var transform;
+var insertInto;
+
+
+
+var options = {"hmr":true}
+
+options.transform = transform
+options.insertInto = undefined;
+
+var update = __webpack_require__(/*! ../../../node_modules/style-loader/lib/addStyles.js */ "./node_modules/style-loader/lib/addStyles.js")(content, options);
+
+if(content.locals) module.exports = content.locals;
+
+if(false) {}
+
+/***/ }),
+
 /***/ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=style&index=0&id=57774f4f&scoped=true&lang=css&":
 /*!***********************************************************************************************************************************************************************************************************************************************************************************************************************************************************!*\
   !*** ./node_modules/style-loader!./node_modules/css-loader??ref--6-1!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src??ref--6-2!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerTaskTimeAddWindowComponent.vue?vue&type=style&index=0&id=57774f4f&scoped=true&lang=css& ***!
@@ -51949,6 +52305,17 @@ var render = function() {
         }
       }),
       _vm._v(" "),
+      _c("work-sticker-individual-number-change-window", {
+        attrs: {
+          "show-sticker-individual-number-change-window-props":
+            _vm.showStickerIndividualNumberChangeWindowParam
+        },
+        on: {
+          "hide-sticker-individual-number-change-window-custom-event":
+            _vm.onHideStickerIndividualNumberChangeWindow
+        }
+      }),
+      _vm._v(" "),
       _c("work-sticker-color-change-window", {
         attrs: {
           "show-sticker-color-change-window-props":
@@ -52444,22 +52811,18 @@ var render = function() {
                     _c(
                       "div",
                       { staticClass: "sticker-edit-sticker-inner-class" },
-                      _vm._l(_vm.stickerParam.contents, function(
-                        content,
-                        index
-                      ) {
-                        return _c(
+                      [
+                        _c(
                           "div",
                           {
                             directives: [
                               {
-                                name: "sticker-content-custom-directive",
-                                rawName: "v-sticker-content-custom-directive",
-                                value: { content: content, index: index },
-                                expression: "{ content: content, index: index }"
+                                name: "sticker-info-custom-directive",
+                                rawName: "v-sticker-info-custom-directive",
+                                value: { stickerParam: _vm.stickerParam },
+                                expression: "{ stickerParam: stickerParam }"
                               }
-                            ],
-                            key: index
+                            ]
                           },
                           [
                             _c("div", {
@@ -52467,34 +52830,66 @@ var render = function() {
                                 "sticker-edit-sticker-content-item-outer-class"
                             }),
                             _vm._v(" "),
-                            _c(
-                              "div",
-                              {
-                                staticClass:
-                                  "sticker-edit-sticker-content-remove-button-outer-class"
-                              },
-                              [
-                                _c(
-                                  "button",
-                                  {
-                                    staticClass: "btn btn-secondary",
-                                    on: {
-                                      click: function($event) {
-                                        $event.preventDefault()
-                                        return _vm.onClickStickerContentRemove(
-                                          $event
-                                        )
-                                      }
-                                    }
-                                  },
-                                  [_vm._v("削除")]
-                                )
-                              ]
-                            )
+                            _c("div", {
+                              staticClass:
+                                "sticker-edit-sticker-content-remove-button-outer-class"
+                            })
                           ]
-                        )
-                      }),
-                      0
+                        ),
+                        _vm._v(" "),
+                        _vm._l(_vm.stickerParam.contents, function(
+                          content,
+                          index
+                        ) {
+                          return _c(
+                            "div",
+                            {
+                              directives: [
+                                {
+                                  name: "sticker-content-custom-directive",
+                                  rawName: "v-sticker-content-custom-directive",
+                                  value: { content: content, index: index },
+                                  expression:
+                                    "{ content: content, index: index }"
+                                }
+                              ],
+                              key: index
+                            },
+                            [
+                              _c("div", {
+                                staticClass:
+                                  "sticker-edit-sticker-content-item-outer-class"
+                              }),
+                              _vm._v(" "),
+                              _c(
+                                "div",
+                                {
+                                  staticClass:
+                                    "sticker-edit-sticker-content-remove-button-outer-class"
+                                },
+                                [
+                                  _c(
+                                    "button",
+                                    {
+                                      staticClass: "btn btn-secondary",
+                                      on: {
+                                        click: function($event) {
+                                          $event.preventDefault()
+                                          return _vm.onClickStickerContentRemove(
+                                            $event
+                                          )
+                                        }
+                                      }
+                                    },
+                                    [_vm._v("削除")]
+                                  )
+                                ]
+                              )
+                            ]
+                          )
+                        })
+                      ],
+                      2
                     )
                   ]
                 )
@@ -52504,6 +52899,24 @@ var render = function() {
           _c("div", { staticClass: "sticker-edit-button-space-class" }),
           _vm._v(" "),
           _c("div", { staticClass: "sticker-edit-buttons-outer-class" }, [
+            _c("div", [
+              _c("p", [
+                _c(
+                  "button",
+                  {
+                    staticClass: "btn btn-secondary btn-block",
+                    on: {
+                      click: function($event) {
+                        $event.preventDefault()
+                        return _vm.onClickChangeIndividualNumber($event)
+                      }
+                    }
+                  },
+                  [_vm._v("個別番号を変更")]
+                )
+              ])
+            ]),
+            _vm._v(" "),
             _c("div", [
               _c("p", [
                 _c(
@@ -52801,6 +53214,168 @@ var render = function() {
   )
 }
 var staticRenderFns = []
+render._withStripped = true
+
+
+
+/***/ }),
+
+/***/ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=template&id=29e04c5a&scoped=true&":
+/*!***************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** ./node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!./node_modules/vue-loader/lib??vue-loader-options!./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=template&id=29e04c5a&scoped=true& ***!
+  \***************************************************************************************************************************************************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "render", function() { return render; });
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return staticRenderFns; });
+var render = function() {
+  var _vm = this
+  var _h = _vm.$createElement
+  var _c = _vm._self._c || _h
+  return _c(
+    "div",
+    {
+      directives: [
+        {
+          name: "show",
+          rawName: "v-show",
+          value: _vm.isShow,
+          expression: "isShow"
+        }
+      ]
+    },
+    [
+      _c("div", {
+        staticClass: "sticker-individual-number-change-window-overlay-class",
+        on: {
+          click: function($event) {
+            if ($event.target !== $event.currentTarget) {
+              return null
+            }
+            $event.preventDefault()
+            return _vm.onClickStickerIndividualNumberChangeWindowOverlay($event)
+          },
+          contextmenu: function($event) {
+            if ($event.target !== $event.currentTarget) {
+              return null
+            }
+            $event.preventDefault()
+            return _vm.onClickStickerIndividualNumberChangeWindowOverlay($event)
+          }
+        }
+      }),
+      _vm._v(" "),
+      _c(
+        "div",
+        {
+          staticClass: "sticker-individual-number-change-window-class",
+          attrs: { id: "sticker-individual-number-change-window-id" },
+          on: {
+            click: function($event) {
+              if ($event.target !== $event.currentTarget) {
+                return null
+              }
+              $event.preventDefault()
+              return _vm.onClickStickerIndividualNumberChangeWindow($event)
+            }
+          }
+        },
+        [
+          _c(
+            "form",
+            {
+              on: {
+                submit: function($event) {
+                  $event.preventDefault()
+                  return _vm.onClickChangeIndividualNumber($event)
+                }
+              }
+            },
+            [
+              _c("div", [
+                _c("input", {
+                  directives: [
+                    {
+                      name: "model",
+                      rawName: "v-model",
+                      value: _vm.mainNumber,
+                      expression: "mainNumber"
+                    }
+                  ],
+                  staticClass:
+                    "sticker-individual-number-change-input-5-digits-class",
+                  attrs: { type: "number" },
+                  domProps: { value: _vm.mainNumber },
+                  on: {
+                    input: function($event) {
+                      if ($event.target.composing) {
+                        return
+                      }
+                      _vm.mainNumber = $event.target.value
+                    }
+                  }
+                })
+              ]),
+              _vm._v(" "),
+              _c("div", { staticClass: "text-muted text-center" }, [
+                _vm._v("（1～10000）")
+              ]),
+              _vm._v(" "),
+              _c("div", {
+                staticClass:
+                  "sticker-individual-number-change-window-space-class"
+              }),
+              _vm._v(" "),
+              _vm._m(0)
+            ]
+          ),
+          _vm._v(" "),
+          _c("div", {
+            staticClass: "sticker-individual-number-change-window-space-class"
+          }),
+          _vm._v(" "),
+          _c("div", { staticClass: "text-center" }, [
+            _c(
+              "button",
+              {
+                staticClass: "btn btn-secondary",
+                on: {
+                  click: function($event) {
+                    $event.preventDefault()
+                    return _vm.onClickClose($event)
+                  }
+                }
+              },
+              [_vm._v("戻る")]
+            )
+          ])
+        ]
+      )
+    ]
+  )
+}
+var staticRenderFns = [
+  function() {
+    var _vm = this
+    var _h = _vm.$createElement
+    var _c = _vm._self._c || _h
+    return _c("div", [
+      _c("p", [
+        _c(
+          "button",
+          {
+            staticClass: "btn btn-secondary btn-block",
+            attrs: { type: "submit" }
+          },
+          [_vm._v("変更")]
+        )
+      ])
+    ])
+  }
+]
 render._withStripped = true
 
 
@@ -65775,11 +66350,26 @@ function addTaskTimeText(parentElem, content) {
   parentElem.innerHTML = taskTimeText; // &nbsp;を解釈させるにはinnerHTMLにせざるを得なかった。innerTextやtextContentでは&nbsp;のまま表示されてしまった。
   // TODO(kawadakoujisun): html構文をそのまま出力して！    
 }
+/*
+ * 個別番号追加
+ */
+
+
+function addIndividualNumber(parentElem, individualMainNumber, individualSubNumber) {
+  var individualNumber = individualMainNumber;
+
+  if (individualSubNumber != 0) {
+    individualNumber = individualNumber + '-' + individualSubNumber;
+  }
+
+  parentElem.textContent = 'ID: ' + individualNumber;
+}
 
 /* harmony default export */ __webpack_exports__["default"] = ({
   addImageElement: addImageElement,
   addVideoElement: addVideoElement,
-  addTaskTimeText: addTaskTimeText
+  addTaskTimeText: addTaskTimeText,
+  addIndividualNumber: addIndividualNumber
 });
 
 /***/ }),
@@ -65820,6 +66410,7 @@ Vue.component('work-menu-bar', __webpack_require__(/*! ./components/WorkMenuBarC
 Vue.component('work-mount', __webpack_require__(/*! ./components/WorkMountComponent.vue */ "./resources/js/components/WorkMountComponent.vue")["default"]);
 Vue.component('work-sticker-context-menu', __webpack_require__(/*! ./components/WorkStickerContextMenuComponent.vue */ "./resources/js/components/WorkStickerContextMenuComponent.vue")["default"]);
 Vue.component('work-sticker-edit-window', __webpack_require__(/*! ./components/WorkStickerEditWindowComponent.vue */ "./resources/js/components/WorkStickerEditWindowComponent.vue")["default"]);
+Vue.component('work-sticker-individual-number-change-window', __webpack_require__(/*! ./components/WorkStickerIndividualNumberChangeWindowComponent.vue */ "./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue")["default"]);
 Vue.component('work-sticker-color-change-window', __webpack_require__(/*! ./components/WorkStickerColorChangeWindowComponent.vue */ "./resources/js/components/WorkStickerColorChangeWindowComponent.vue")["default"]);
 Vue.component('work-sticker-text-add-window', __webpack_require__(/*! ./components/WorkStickerTextAddWindowComponent.vue */ "./resources/js/components/WorkStickerTextAddWindowComponent.vue")["default"]);
 Vue.component('work-sticker-image-add-window', __webpack_require__(/*! ./components/WorkStickerImageAddWindowComponent.vue */ "./resources/js/components/WorkStickerImageAddWindowComponent.vue")["default"]);
@@ -66945,6 +67536,93 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerImageAddWindowComponent_vue_vue_type_template_id_744f6466_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
 
 /* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerImageAddWindowComponent_vue_vue_type_template_id_744f6466_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
+
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue":
+/*!**************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue ***!
+  \**************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _WorkStickerIndividualNumberChangeWindowComponent_vue_vue_type_template_id_29e04c5a_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=template&id=29e04c5a&scoped=true& */ "./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=template&id=29e04c5a&scoped=true&");
+/* harmony import */ var _WorkStickerIndividualNumberChangeWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=script&lang=js& */ "./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport *//* harmony import */ var _WorkStickerIndividualNumberChangeWindowComponent_vue_vue_type_style_index_0_id_29e04c5a_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=style&index=0&id=29e04c5a&scoped=true&lang=css& */ "./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=style&index=0&id=29e04c5a&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../node_modules/vue-loader/lib/runtime/componentNormalizer.js */ "./node_modules/vue-loader/lib/runtime/componentNormalizer.js");
+
+
+
+
+
+
+/* normalize component */
+
+var component = Object(_node_modules_vue_loader_lib_runtime_componentNormalizer_js__WEBPACK_IMPORTED_MODULE_3__["default"])(
+  _WorkStickerIndividualNumberChangeWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_1__["default"],
+  _WorkStickerIndividualNumberChangeWindowComponent_vue_vue_type_template_id_29e04c5a_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"],
+  _WorkStickerIndividualNumberChangeWindowComponent_vue_vue_type_template_id_29e04c5a_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"],
+  false,
+  null,
+  "29e04c5a",
+  null
+  
+)
+
+/* hot reload */
+if (false) { var api; }
+component.options.__file = "resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue"
+/* harmony default export */ __webpack_exports__["default"] = (component.exports);
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=script&lang=js&":
+/*!***************************************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=script&lang=js& ***!
+  \***************************************************************************************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerIndividualNumberChangeWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/babel-loader/lib??ref--4-0!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=script&lang=js& */ "./node_modules/babel-loader/lib/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=script&lang=js&");
+/* empty/unused harmony star reexport */ /* harmony default export */ __webpack_exports__["default"] = (_node_modules_babel_loader_lib_index_js_ref_4_0_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerIndividualNumberChangeWindowComponent_vue_vue_type_script_lang_js___WEBPACK_IMPORTED_MODULE_0__["default"]); 
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=style&index=0&id=29e04c5a&scoped=true&lang=css&":
+/*!***********************************************************************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=style&index=0&id=29e04c5a&scoped=true&lang=css& ***!
+  \***********************************************************************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerIndividualNumberChangeWindowComponent_vue_vue_type_style_index_0_id_29e04c5a_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/style-loader!../../../node_modules/css-loader??ref--6-1!../../../node_modules/vue-loader/lib/loaders/stylePostLoader.js!../../../node_modules/postcss-loader/src??ref--6-2!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=style&index=0&id=29e04c5a&scoped=true&lang=css& */ "./node_modules/style-loader/index.js!./node_modules/css-loader/index.js?!./node_modules/vue-loader/lib/loaders/stylePostLoader.js!./node_modules/postcss-loader/src/index.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=style&index=0&id=29e04c5a&scoped=true&lang=css&");
+/* harmony import */ var _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerIndividualNumberChangeWindowComponent_vue_vue_type_style_index_0_id_29e04c5a_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerIndividualNumberChangeWindowComponent_vue_vue_type_style_index_0_id_29e04c5a_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__);
+/* harmony reexport (unknown) */ for(var __WEBPACK_IMPORT_KEY__ in _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerIndividualNumberChangeWindowComponent_vue_vue_type_style_index_0_id_29e04c5a_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__) if(["default"].indexOf(__WEBPACK_IMPORT_KEY__) < 0) (function(key) { __webpack_require__.d(__webpack_exports__, key, function() { return _node_modules_style_loader_index_js_node_modules_css_loader_index_js_ref_6_1_node_modules_vue_loader_lib_loaders_stylePostLoader_js_node_modules_postcss_loader_src_index_js_ref_6_2_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerIndividualNumberChangeWindowComponent_vue_vue_type_style_index_0_id_29e04c5a_scoped_true_lang_css___WEBPACK_IMPORTED_MODULE_0__[key]; }) }(__WEBPACK_IMPORT_KEY__));
+
+
+/***/ }),
+
+/***/ "./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=template&id=29e04c5a&scoped=true&":
+/*!*********************************************************************************************************************************!*\
+  !*** ./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=template&id=29e04c5a&scoped=true& ***!
+  \*********************************************************************************************************************************/
+/*! exports provided: render, staticRenderFns */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerIndividualNumberChangeWindowComponent_vue_vue_type_template_id_29e04c5a_scoped_true___WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! -!../../../node_modules/vue-loader/lib/loaders/templateLoader.js??vue-loader-options!../../../node_modules/vue-loader/lib??vue-loader-options!./WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=template&id=29e04c5a&scoped=true& */ "./node_modules/vue-loader/lib/loaders/templateLoader.js?!./node_modules/vue-loader/lib/index.js?!./resources/js/components/WorkStickerIndividualNumberChangeWindowComponent.vue?vue&type=template&id=29e04c5a&scoped=true&");
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "render", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerIndividualNumberChangeWindowComponent_vue_vue_type_template_id_29e04c5a_scoped_true___WEBPACK_IMPORTED_MODULE_0__["render"]; });
+
+/* harmony reexport (safe) */ __webpack_require__.d(__webpack_exports__, "staticRenderFns", function() { return _node_modules_vue_loader_lib_loaders_templateLoader_js_vue_loader_options_node_modules_vue_loader_lib_index_js_vue_loader_options_WorkStickerIndividualNumberChangeWindowComponent_vue_vue_type_template_id_29e04c5a_scoped_true___WEBPACK_IMPORTED_MODULE_0__["staticRenderFns"]; });
 
 
 
