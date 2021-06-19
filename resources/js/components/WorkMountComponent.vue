@@ -386,7 +386,6 @@
                     // ふせんを追加する前に、既存のふせんのdepthを更新しておく
 
                     {
-                    
                         const stickerDepths = response.eventParam.sticker_depths;
                         
                         const idBaseName = this.getStickerIdBaseName();
@@ -602,7 +601,7 @@
                             }
                             
                             // 見た目更新
-                            commonScript.addIndividualNumber(updateElem, stickerIndividualNumber.individual_main_number, stickerIndividualNumber.individual_sub_number);
+                            commonScript.addIndividualNumberText(updateElem, stickerIndividualNumber.individual_main_number, stickerIndividualNumber.individual_sub_number);
                         }
                     }
                 });
@@ -906,7 +905,7 @@
                         divStickerInnerElem.appendChild(divItemElem);
                         
                         divItemElem.classList.add('sticker-info-item-individual-number-outer-class');
-                        commonScript.addIndividualNumber(divItemElem, stickerParam['individual_main_number'], stickerParam['individual_sub_number']);
+                        commonScript.addIndividualNumberText(divItemElem, stickerParam['individual_main_number'], stickerParam['individual_sub_number']);
                     }
                     
                     // const contentLinkIdBaseName = this.getContentLinkIdBaseName();

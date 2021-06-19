@@ -150,7 +150,7 @@
                         divItemOuterElems[0].appendChild(divItemElem);                        
                         
                         divItemElem.classList.add('sticker-edit-sticker-info-item-individual-number-outer-class');
-                        commonScript.addIndividualNumber(divItemElem, stickerParam['individual_main_number'], stickerParam['individual_sub_number']);
+                        commonScript.addIndividualNumberText(divItemElem, stickerParam['individual_main_number'], stickerParam['individual_sub_number']);
                     }
                 }, 
             },

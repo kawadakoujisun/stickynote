@@ -300,7 +300,7 @@
      * 入力欄
      */
     .sticker-task-time-add-input-4-digits-class {
-        width: 140px;  /* 100 + 30 */
+        width: 130px;  /* 100 + 30 */
     }
     
     .sticker-task-time-add-input-2-digits-class {

@@ -89,7 +89,7 @@ function addVideoElement(parentElem, videoURL, retryCount) {
 }
 
 /*
- * 時刻テキスト取得
+ * 時刻テキスト追加
  */
 function addTaskTimeText(parentElem, content) {
     let taskTimeTypeText = '';
@@ -110,9 +110,9 @@ function addTaskTimeText(parentElem, content) {
 }
 
 /*
- * 個別番号追加
+ * 個別番号テキスト追加
  */
-function addIndividualNumber(parentElem, individualMainNumber, individualSubNumber) {
+function addIndividualNumberText(parentElem, individualMainNumber, individualSubNumber) {
     let individualNumber = individualMainNumber;
     if (individualSubNumber != 0) {
         individualNumber = individualNumber + '-' + individualSubNumber;
@@ -124,5 +124,5 @@ export default {
     addImageElement,
     addVideoElement,
     addTaskTimeText,
-    addIndividualNumber,
+    addIndividualNumberText,
 };

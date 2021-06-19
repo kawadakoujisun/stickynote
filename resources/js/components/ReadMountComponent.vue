@@ -124,7 +124,7 @@
                         divStickerInnerElem.appendChild(divItemElem);
                         
                         divItemElem.classList.add('sticker-info-item-individual-number-outer-class');
-                        commonScript.addIndividualNumber(divItemElem, stickerParam['individual_main_number'], stickerParam['individual_sub_number']);
+                        commonScript.addIndividualNumberText(divItemElem, stickerParam['individual_main_number'], stickerParam['individual_sub_number']);
                     }                    
                     
                     // const contentLinkIdBaseName = this.getContentLinkIdBaseName();
