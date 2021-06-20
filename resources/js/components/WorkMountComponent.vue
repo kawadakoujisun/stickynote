@@ -234,95 +234,12 @@
                                 updateElem.classList.remove('sticker-sorted-class');
                             }
                         }
-                    } else if (this.arrangementType == 'sortedByIndividualNumber') {
-                        if (mountElem.classList.contains('mount-sorted-class') == false) {
-                            mountElem.classList.add('mount-sorted-class');
-                        }
-                        
-                        for (let stickerParam of this.stickerParams) {
-                            const updateId = `${idBaseName}${stickerParam.id}`;
-                            const updateElem = document.getElementById(updateId);
-                            
-                            if (updateElem) {
-                                updateElem.style.top  = 0;
-                                updateElem.style.left = 0;
-                                if (updateElem.classList.contains('sticker-sorted-class') == false) {
-                                    updateElem.classList.add('sticker-sorted-class');
-                                }
-                            }
-                        }
-                        
-                        // 並び替え
-                        this.stickerParams.sort((a, b) => {
-                            if (a.individual_main_number == b.individual_main_number) {
-                                return a.individual_sub_number - b.individual_sub_number;
-                            } else {
-                                return a.individual_main_number - b.individual_main_number;
-                            }
-                        });
-                        
-                        console.log(this.stickerParams);
-                    } else if (this.arrangementType == 'sortedByTaskStartTime') {
+                    } else {
                         if (mountElem.classList.contains('mount-sorted-class') == false) {
                             mountElem.classList.add('mount-sorted-class');
                                 // 同じclassを何度addしても1つしか追加されないようなので、
                                 // containsで有無を事前に確認する必要はなさそうだが、念のため。
                         }
-
-                        for (let stickerParam of this.stickerParams) {
-                            const updateId = `${idBaseName}${stickerParam.id}`;
-                            const updateElem = document.getElementById(updateId);
-                            
-                            if (updateElem) {
-                                updateElem.style.top  = 0;
-                                updateElem.style.left = 0;
-                                if (updateElem.classList.contains('sticker-sorted-class') == false) {
-                                    updateElem.classList.add('sticker-sorted-class');
-                                }
-                            }
-                        }
-                        
-                        // 並び替え
-                        for (let stickerParam of this.stickerParams) {
-                            let value0 = 10000;
-                            let value1 = 0;
-                            for (let content of stickerParam.contents) {
-                                if (content.link.item_type == 4) {  // app/Sticker.phpで値を定義している
-                                    value0 = content.item.year_value;
-                                    value1 = content.item.month_value * 1000000
-                                        + content.item.day_value * 10000
-                                        + content.item.hour_value * 100
-                                        + content.item.minute_value;
-                                    break;
-                                }
-                            }
-                            stickerParam.sortValue = {
-                                value0: value0,
-                                value1: value1,
-                            };
-                        }
-                        
-                        this.stickerParams.sort((a, b) => {
-                            if (a.sortValue.value0 == b.sortValue.value0) {
-                                if (a.sortValue.value1 == b.sortValue.value1) {
-                                    if (a.individual_main_number == b.individual_main_number) {
-                                        return a.individual_sub_number - b.individual_sub_number;
-                                    } else {
-                                        return a.individual_main_number - b.individual_main_number;
-                                    }
-                                } else {
-                                    return a.sortValue.value1 - b.sortValue.value1;
-                                }
-                            } else {
-                                return a.sortValue.value0 - b.sortValue.value0;
-                            }
-                        });
-                        
-                        console.log(this.stickerParams);
-                    } else if (this.arrangementType == 'sortedByTaskEndTime') {
-                        if (mountElem.classList.contains('mount-sorted-class') == false) {
-                            mountElem.classList.add('mount-sorted-class');
-                        }
                         
                         for (let stickerParam of this.stickerParams) {
                             const updateId = `${idBaseName}${stickerParam.id}`;
@@ -337,41 +254,88 @@
                             }
                         }
                         
-                        // 並び替え
-                        for (let stickerParam of this.stickerParams) {
-                            let value0 = 10000;
-                            let value1 = 0;
-                            for (let content of stickerParam.contents) {
-                                if (content.link.item_type == 5) {  // app/Sticker.phpで値を定義している
-                                    value0 = content.item.year_value;
-                                    value1 = content.item.month_value * 1000000
-                                        + content.item.day_value * 10000
-                                        + content.item.hour_value * 100
-                                        + content.item.minute_value;
-                                    break;
+                        if (this.arrangementType == 'sortedByIndividualNumber') {
+                            // 並び替え
+                            this.stickerParams.sort((a, b) => {
+                                if (a.individual_main_number == b.individual_main_number) {
+                                    return a.individual_sub_number - b.individual_sub_number;
+                                } else {
+                                    return a.individual_main_number - b.individual_main_number;
                                 }
+                            });
+                        } else if (this.arrangementType == 'sortedByTaskStartTime') {
+                            // 並び替え
+                            for (let stickerParam of this.stickerParams) {
+                                let value0 = 10000;
+                                let value1 = 0;
+                                for (let content of stickerParam.contents) {
+                                    if (content.link.item_type == 4) {  // app/Sticker.phpで値を定義している
+                                        value0 = content.item.year_value;
+                                        value1 = content.item.month_value * 1000000
+                                            + content.item.day_value * 10000
+                                            + content.item.hour_value * 100
+                                            + content.item.minute_value;
+                                        break;
+                                    }
+                                }
+                                stickerParam.sortValue = {
+                                    value0: value0,
+                                    value1: value1,
+                                };
                             }
-                            stickerParam.sortValue = {
-                                value0: value0,
-                                value1: value1,
-                            };
-                        }
-                        
-                        this.stickerParams.sort((a, b) => {
-                            if (a.sortValue.value0 == b.sortValue.value0) {
-                                if (a.sortValue.value1 == b.sortValue.value1) {
-                                    if (a.individual_main_number == b.individual_main_number) {
-                                        return a.individual_sub_number - b.individual_sub_number;
+                            
+                            this.stickerParams.sort((a, b) => {
+                                if (a.sortValue.value0 == b.sortValue.value0) {
+                                    if (a.sortValue.value1 == b.sortValue.value1) {
+                                        if (a.individual_main_number == b.individual_main_number) {
+                                            return a.individual_sub_number - b.individual_sub_number;
+                                        } else {
+                                            return a.individual_main_number - b.individual_main_number;
+                                        }
                                     } else {
-                                        return a.individual_main_number - b.individual_main_number;
+                                        return a.sortValue.value1 - b.sortValue.value1;
                                     }
                                 } else {
-                                    return a.sortValue.value1 - b.sortValue.value1;
+                                    return a.sortValue.value0 - b.sortValue.value0;
                                 }
-                            } else {
-                                return a.sortValue.value0 - b.sortValue.value0;
+                            });
+                        } else if (this.arrangementType == 'sortedByTaskEndTime') {
+                            // 並び替え
+                            for (let stickerParam of this.stickerParams) {
+                                let value0 = 10000;
+                                let value1 = 0;
+                                for (let content of stickerParam.contents) {
+                                    if (content.link.item_type == 5) {  // app/Sticker.phpで値を定義している
+                                        value0 = content.item.year_value;
+                                        value1 = content.item.month_value * 1000000
+                                            + content.item.day_value * 10000
+                                            + content.item.hour_value * 100
+                                            + content.item.minute_value;
+                                        break;
+                                    }
+                                }
+                                stickerParam.sortValue = {
+                                    value0: value0,
+                                    value1: value1,
+                                };
                             }
-                        });
+                            
+                            this.stickerParams.sort((a, b) => {
+                                if (a.sortValue.value0 == b.sortValue.value0) {
+                                    if (a.sortValue.value1 == b.sortValue.value1) {
+                                        if (a.individual_main_number == b.individual_main_number) {
+                                            return a.individual_sub_number - b.individual_sub_number;
+                                        } else {
+                                            return a.individual_main_number - b.individual_main_number;
+                                        }
+                                    } else {
+                                        return a.sortValue.value1 - b.sortValue.value1;
+                                    }
+                                } else {
+                                    return a.sortValue.value0 - b.sortValue.value0;
+                                }
+                            });
+                        }
                         
                         console.log(this.stickerParams);
                     }
