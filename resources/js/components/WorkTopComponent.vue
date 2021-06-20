@@ -1,6 +1,7 @@
 <template>
     <div>
         <work-menu-bar
+            v-bind:receive-work-mount-props="receiveWorkMountParam"
             @send-work-menu-bar-state-custom-event="onSendWorkMenuBarState"
         >
         </work-menu-bar>
@@ -17,6 +18,7 @@
             return {
                 //
                 // work-mountに渡すパラメータ
+                // work-menu-barにも渡す（work-mountと同じ動きをさせたいので同じものを渡す）
                 //
                 receiveWorkMountParam: {
                     isArrangementButtonClicked: 0,

@@ -130,6 +130,10 @@
 
 <script>
     export default {
+        props: {
+            receiveWorkMountProps: Object,
+        },
+        
         data() {
             return {
                 activeMainMenu: '',
@@ -138,6 +142,28 @@
                 
                 menuBarNowLoadingIconIntervalCount: 0,
             };
+        },
+        
+        watch: {
+            'receiveWorkMountProps.isArrangementButtonClicked': function(newValue, oldValue) {
+                console.log('receiveWorkMountProps.isArrangementButtonClicked',
+                    this.receiveWorkMountProps.isArrangementButtonClicked,
+                    this.receiveWorkMountProps.arrangementType);
+                
+                {
+                    // ふせんの配置変更が行われるため台紙の形が変わるので、メニューバーもそれに合わせる。
+                    const menuBarElems = document.getElementsByClassName('menu-bar-class');
+                    const menuBarElem = menuBarElems[0];
+                    
+                    if (this.receiveWorkMountProps.arrangementType == 'free') {  // arrangementTypeDefs
+                        menuBarElem.classList.remove('menu-bar-sorted-class');
+                    } else {
+                        if (menuBarElem.classList.contains('menu-bar-sorted-class') == false) {
+                            menuBarElem.classList.add('menu-bar-sorted-class');
+                        }
+                    }
+                }
+            },
         },
         
         methods: {
@@ -1164,6 +1190,16 @@
         /*border: 1px solid #000;*/
         background-color: #ffffff;
         margin: 20px 20px 0px;
+        padding: 0;
+    }
+    
+    .menu-bar-sorted-class {
+        position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */
+        width:  100%;
+        height: 30px;
+        /*border: 1px solid #000;*/
+        background-color: #ffffff;
+        margin: 20px auto 0px;
         padding: 0;
     }
     

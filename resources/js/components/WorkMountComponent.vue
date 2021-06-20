@@ -200,7 +200,7 @@
         
         watch: {
             'receiveWorkMountProps.isArrangementButtonClicked': function(newValue, oldValue) {
-                console.log('receiveWorkMountProps.arrangementType',
+                console.log('receiveWorkMountProps.isArrangementButtonClicked',
                     this.receiveWorkMountProps.isArrangementButtonClicked,
                     this.receiveWorkMountProps.arrangementType);
                 
