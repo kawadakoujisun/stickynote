@@ -2967,6 +2967,11 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 //
 //
 //
+//
+//
+//
+//
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   data: function data() {
     return {
@@ -3612,6 +3617,14 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       };
       this.$emit('send-work-menu-bar-state-custom-event', emitParam);
     },
+    onClickArrangementSubSortedByIndividualNumber: function onClickArrangementSubSortedByIndividualNumber(e) {
+      this.activeMainMenu = '';
+      this.activeSubMenu = '';
+      var emitParam = {
+        result: 'arrangementTypeSortedByIndividualNumber'
+      };
+      this.$emit('send-work-menu-bar-state-custom-event', emitParam);
+    },
     onClickArrangementSubSortedByTaskStartTime: function onClickArrangementSubSortedByTaskStartTime(e) {
       this.activeMainMenu = '';
       this.activeSubMenu = '';
@@ -4095,7 +4108,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
       // 配置
       //
       arrangementType: 'free',
-      // 'free', 'sortedByTaskStartTime', 'sortedByTaskEndTime'
+      // arrangementTypeDefs
+      arrangementTypeDefs: [// TODO(kawadakoujisun): この定義をしているところを1か所だけにしたい
+      'free', 'sortedByIndividualNumber', 'sortedByTaskStartTime', 'sortedByTaskEndTime'],
       //
       // 選んだふせん
       //
@@ -4257,10 +4272,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
           } finally {
             _iterator.f();
           }
-        } else if (this.arrangementType == 'sortedByTaskStartTime') {
+        } else if (this.arrangementType == 'sortedByIndividualNumber') {
           if (mountElem.classList.contains('mount-sorted-class') == false) {
-            mountElem.classList.add('mount-sorted-class'); // 同じclassを何度addしても1つしか追加されないようなので、
-            // containsで有無を事前に確認する必要はなさそうだが、念のため。
+            mountElem.classList.add('mount-sorted-class');
           }
 
           var _iterator2 = _createForOfIteratorHelper(this.stickerParams),
@@ -4290,21 +4304,62 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
             _iterator2.f();
           }
 
+          this.stickerParams.sort(function (a, b) {
+            if (a.individual_main_number == b.individual_main_number) {
+              return a.individual_sub_number - b.individual_sub_number;
+            } else {
+              return a.individual_main_number - b.individual_main_number;
+            }
+          });
+          console.log(this.stickerParams);
+        } else if (this.arrangementType == 'sortedByTaskStartTime') {
+          if (mountElem.classList.contains('mount-sorted-class') == false) {
+            mountElem.classList.add('mount-sorted-class'); // 同じclassを何度addしても1つしか追加されないようなので、
+            // containsで有無を事前に確認する必要はなさそうだが、念のため。
+          }
+
           var _iterator3 = _createForOfIteratorHelper(this.stickerParams),
               _step3;
 
           try {
             for (_iterator3.s(); !(_step3 = _iterator3.n()).done;) {
               var _stickerParam2 = _step3.value;
+
+              var _updateId2 = "".concat(idBaseName).concat(_stickerParam2.id);
+
+              var _updateElem2 = document.getElementById(_updateId2);
+
+              if (_updateElem2) {
+                _updateElem2.style.top = 0;
+                _updateElem2.style.left = 0;
+
+                if (_updateElem2.classList.contains('sticker-sorted-class') == false) {
+                  _updateElem2.classList.add('sticker-sorted-class');
+                }
+              }
+            } // 並び替え
+
+          } catch (err) {
+            _iterator3.e(err);
+          } finally {
+            _iterator3.f();
+          }
+
+          var _iterator4 = _createForOfIteratorHelper(this.stickerParams),
+              _step4;
+
+          try {
+            for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
+              var _stickerParam3 = _step4.value;
               var value0 = 10000;
               var value1 = 0;
 
-              var _iterator4 = _createForOfIteratorHelper(_stickerParam2.contents),
-                  _step4;
+              var _iterator5 = _createForOfIteratorHelper(_stickerParam3.contents),
+                  _step5;
 
               try {
-                for (_iterator4.s(); !(_step4 = _iterator4.n()).done;) {
-                  var content = _step4.value;
+                for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
+                  var content = _step5.value;
 
                   if (content.link.item_type == 4) {
                     // app/Sticker.phpで値を定義している
@@ -4314,20 +4369,20 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                   }
                 }
               } catch (err) {
-                _iterator4.e(err);
+                _iterator5.e(err);
               } finally {
-                _iterator4.f();
+                _iterator5.f();
               }
 
-              _stickerParam2.sortValue = {
+              _stickerParam3.sortValue = {
                 value0: value0,
                 value1: value1
               };
             }
           } catch (err) {
-            _iterator3.e(err);
+            _iterator4.e(err);
           } finally {
-            _iterator3.f();
+            _iterator4.f();
           }
 
           this.stickerParams.sort(function (a, b) {
@@ -4351,48 +4406,48 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
             mountElem.classList.add('mount-sorted-class');
           }
 
-          var _iterator5 = _createForOfIteratorHelper(this.stickerParams),
-              _step5;
-
-          try {
-            for (_iterator5.s(); !(_step5 = _iterator5.n()).done;) {
-              var _stickerParam3 = _step5.value;
-
-              var _updateId2 = "".concat(idBaseName).concat(_stickerParam3.id);
-
-              var _updateElem2 = document.getElementById(_updateId2);
-
-              if (_updateElem2) {
-                _updateElem2.style.top = 0;
-                _updateElem2.style.left = 0;
-
-                if (_updateElem2.classList.contains('sticker-sorted-class') == false) {
-                  _updateElem2.classList.add('sticker-sorted-class');
-                }
-              }
-            } // 並び替え
-
-          } catch (err) {
-            _iterator5.e(err);
-          } finally {
-            _iterator5.f();
-          }
-
           var _iterator6 = _createForOfIteratorHelper(this.stickerParams),
               _step6;
 
           try {
             for (_iterator6.s(); !(_step6 = _iterator6.n()).done;) {
               var _stickerParam4 = _step6.value;
+
+              var _updateId3 = "".concat(idBaseName).concat(_stickerParam4.id);
+
+              var _updateElem3 = document.getElementById(_updateId3);
+
+              if (_updateElem3) {
+                _updateElem3.style.top = 0;
+                _updateElem3.style.left = 0;
+
+                if (_updateElem3.classList.contains('sticker-sorted-class') == false) {
+                  _updateElem3.classList.add('sticker-sorted-class');
+                }
+              }
+            } // 並び替え
+
+          } catch (err) {
+            _iterator6.e(err);
+          } finally {
+            _iterator6.f();
+          }
+
+          var _iterator7 = _createForOfIteratorHelper(this.stickerParams),
+              _step7;
+
+          try {
+            for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
+              var _stickerParam5 = _step7.value;
               var _value = 10000;
               var _value2 = 0;
 
-              var _iterator7 = _createForOfIteratorHelper(_stickerParam4.contents),
-                  _step7;
+              var _iterator8 = _createForOfIteratorHelper(_stickerParam5.contents),
+                  _step8;
 
               try {
-                for (_iterator7.s(); !(_step7 = _iterator7.n()).done;) {
-                  var _content = _step7.value;
+                for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
+                  var _content = _step8.value;
 
                   if (_content.link.item_type == 5) {
                     // app/Sticker.phpで値を定義している
@@ -4402,20 +4457,20 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
                   }
                 }
               } catch (err) {
-                _iterator7.e(err);
+                _iterator8.e(err);
               } finally {
-                _iterator7.f();
+                _iterator8.f();
               }
 
-              _stickerParam4.sortValue = {
+              _stickerParam5.sortValue = {
                 value0: _value,
                 value1: _value2
               };
             }
           } catch (err) {
-            _iterator6.e(err);
+            _iterator7.e(err);
           } finally {
-            _iterator6.f();
+            _iterator7.f();
           }
 
           this.stickerParams.sort(function (a, b) {
@@ -4481,12 +4536,12 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
         var idBaseName = _this.getStickerIdBaseName();
 
-        var _iterator8 = _createForOfIteratorHelper(stickerDepths),
-            _step8;
+        var _iterator9 = _createForOfIteratorHelper(stickerDepths),
+            _step9;
 
         try {
-          for (_iterator8.s(); !(_step8 = _iterator8.n()).done;) {
-            var stickerDepth = _step8.value;
+          for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
+            var stickerDepth = _step9.value;
             var idNo = stickerDepth.id;
             var updateId = "".concat(idBaseName).concat(idNo);
             var updateElem = document.getElementById(updateId);
@@ -4505,9 +4560,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
             }
           }
         } catch (err) {
-          _iterator8.e(err);
+          _iterator9.e(err);
         } finally {
-          _iterator8.f();
+          _iterator9.f();
         }
       } // ふせんを追加する
       // データ更新
@@ -4538,16 +4593,16 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
         if (_this.arrangementType != 'free') {
           var _idBaseName = _this.getStickerIdBaseName();
 
-          var _updateId3 = "".concat(_idBaseName).concat(stickerParam.id);
+          var _updateId4 = "".concat(_idBaseName).concat(stickerParam.id);
 
-          var _updateElem3 = document.getElementById(_updateId3);
+          var _updateElem4 = document.getElementById(_updateId4);
 
-          if (_updateElem3) {
-            _updateElem3.style.top = 0;
-            _updateElem3.style.left = 0;
+          if (_updateElem4) {
+            _updateElem4.style.top = 0;
+            _updateElem4.style.left = 0;
 
-            if (_updateElem3.classList.contains('sticker-sorted-class') == false) {
-              _updateElem3.classList.add('sticker-sorted-class');
+            if (_updateElem4.classList.contains('sticker-sorted-class') == false) {
+              _updateElem4.classList.add('sticker-sorted-class');
             }
           }
         }
@@ -4646,12 +4701,12 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
       var idBaseName = _this.getStickerIdBaseName();
 
-      var _iterator9 = _createForOfIteratorHelper(stickerDepths),
-          _step9;
+      var _iterator10 = _createForOfIteratorHelper(stickerDepths),
+          _step10;
 
       try {
-        for (_iterator9.s(); !(_step9 = _iterator9.n()).done;) {
-          var stickerDepth = _step9.value;
+        for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
+          var stickerDepth = _step10.value;
           var idNo = stickerDepth.id;
           var updateId = "".concat(idBaseName).concat(idNo);
           var updateElem = document.getElementById(updateId);
@@ -4670,9 +4725,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
           }
         }
       } catch (err) {
-        _iterator9.e(err);
+        _iterator10.e(err);
       } finally {
-        _iterator9.f();
+        _iterator10.f();
       }
     });
     window.Echo["private"]('all-sticker-info-item-individual-number-update-channel.' + window.laravel.user['id']).listen('AllStickerInfoItemIndividualNumberUpdate', function (response) {
@@ -4681,12 +4736,12 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
 
       var individualNumberIdBaseName = _this.getIndividualNumberIdBaseName();
 
-      var _iterator10 = _createForOfIteratorHelper(stickerIndividualNumbers),
-          _step10;
+      var _iterator11 = _createForOfIteratorHelper(stickerIndividualNumbers),
+          _step11;
 
       try {
-        for (_iterator10.s(); !(_step10 = _iterator10.n()).done;) {
-          var stickerIndividualNumber = _step10.value;
+        for (_iterator11.s(); !(_step11 = _iterator11.n()).done;) {
+          var stickerIndividualNumber = _step11.value;
           var idNo = stickerIndividualNumber.id;
           var updateId = "".concat(individualNumberIdBaseName).concat(idNo);
           var updateElem = document.getElementById(updateId);
@@ -4705,9 +4760,9 @@ function _arrayLikeToArray(arr, len) { if (len == null || len > arr.length) len 
           }
         }
       } catch (err) {
-        _iterator10.e(err);
+        _iterator11.e(err);
       } finally {
-        _iterator10.f();
+        _iterator11.f();
       }
     });
     window.Echo["private"]('sticker-info-item-color-update-channel.' + window.laravel.user['id']).listen('StickerInfoItemColorUpdate', function (response) {
@@ -7237,8 +7292,11 @@ __webpack_require__.r(__webpack_exports__);
       receiveWorkMountParam: {
         isArrangementButtonClicked: 0,
         // メニューのボタンを押すたびにwork-mountのwatchに引っかかるようにするための工夫
-        arrangementType: 'free'
-      }
+        arrangementType: 'free' // arrangementTypeDefs
+
+      },
+      arrangementTypeDefs: [// TODO(kawadakoujisun): この定義をしているところを1か所だけにしたい
+      'free', 'sortedByIndividualNumber', 'sortedByTaskStartTime', 'sortedByTaskEndTime']
     };
   },
   methods: {
@@ -7248,6 +7306,9 @@ __webpack_require__.r(__webpack_exports__);
       if (emitParam.result != 'none') {
         if (emitParam.result == 'arrangementTypeFree') {
           this.receiveWorkMountParam.arrangementType = 'free';
+          this.updateIsArrangementButtonClicked();
+        } else if (emitParam.result == 'arrangementTypeSortedByIndividualNumber') {
+          this.receiveWorkMountParam.arrangementType = 'sortedByIndividualNumber';
           this.updateIsArrangementButtonClicked();
         } else if (emitParam.result == 'arrangementTypeSortedByTaskStartTime') {
           this.receiveWorkMountParam.arrangementType = 'sortedByTaskStartTime';
@@ -7259,7 +7320,7 @@ __webpack_require__.r(__webpack_exports__);
       }
     },
     updateIsArrangementButtonClicked: function updateIsArrangementButtonClicked() {
-      this.receiveWorkMountParam.isArrangementButtonClicked = (this.receiveWorkMountParam.isArrangementButtonClicked + 1) % 3;
+      this.receiveWorkMountParam.isArrangementButtonClicked = (this.receiveWorkMountParam.isArrangementButtonClicked + 1) % this.arrangementTypeDefs.length;
     }
   }
 });
@@ -11796,7 +11857,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * メニューバーのバーそのもの\n */\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    /*border: 1px solid #000;*/\n    background-color: #ffffff;\n    margin: 20px 20px 0px;\n    padding: 0;\n}\n.menu-bar-mark-class[data-v-76707645] {\n    display: inline-block;\n    vertical-align: middle;\n    padding: 0;\n}    \n\n/*\n * メニューバー上にあるボタン\n */\n.menu-bar-button-outer-class[data-v-76707645] {\n    position: relative;  /* z-indexを指定したいので、positionをデフォルトのstaticからrelativeに変えておく。 */\n    z-index: 2001;\n    margin: 0;\n    display: inline-block;\n}\n.menu-bar-button-inner-class[data-v-76707645] {\n    display: inline-block;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    padding: 0px 10px;\n    line-height: 30px;\n}\n.menu-bar-button-inner-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}    \n\n/*\n * メニューバーに属するウィンドウを表示しているときのオーバーレイ\n */\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    \n    /*left:   0;*/\n    /*top:    30px;*/  /* メニューバーの下の位置 */\n    /*width:  100%;*/  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    /*height: 920px;*/  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    \n    left:   -20px;  /* メニューバーの位置からマージン分左へ */\n    top:    -20px;  /* メニューバーの位置からマージン分上へ */\n    width:  1850px;  /* だいたい『「メニューバーの横幅(=台紙の横幅)」+「ボーダーの太さ」+「左右マージン分」』くらい */\n    height: 980px;  /* だいたい『「メニューバーの高さ」+「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」+「上下マージン分」』くらい */\n    \n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ内のボタン\n */\n.menu-bar-window-button-outer-class[data-v-76707645] {\n    width: 100%;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    line-height: 30px;\n}\n.menu-bar-window-button-outer-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}\n.menu-bar-window-button-inner-space-class[data-v-76707645] {\n    display: inline-block;\n    width: 10px;\n}    \n\n/*\n * メニューバーの上にあるボタンから表示するウィンドウ\n */\n.menu-bar-main-window-class[data-v-76707645] {\n    position: absolute;\n    top:    30px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    left:   0;\n}\n\n/*\n * 「メニューバーの上にあるボタンから表示したウィンドウ」から表示するウィンドウ\n */\n.menu-bar-sub-window-class[data-v-76707645] {\n    position: absolute;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    top:    0;\n    left:   0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * メニューバーのバーそのもの\n */\n.menu-bar-class[data-v-76707645] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 30px;\n    /*border: 1px solid #000;*/\n    background-color: #ffffff;\n    margin: 20px 20px 0px;\n    padding: 0;\n}\n.menu-bar-mark-class[data-v-76707645] {\n    display: inline-block;\n    vertical-align: middle;\n    padding: 0;\n}    \n\n/*\n * メニューバー上にあるボタン\n */\n.menu-bar-button-outer-class[data-v-76707645] {\n    position: relative;  /* z-indexを指定したいので、positionをデフォルトのstaticからrelativeに変えておく。 */\n    z-index: 2001;\n    margin: 0;\n    display: inline-block;\n}\n.menu-bar-button-inner-class[data-v-76707645] {\n    display: inline-block;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    padding: 0px 10px;\n    line-height: 30px;\n}\n.menu-bar-button-inner-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}    \n\n/*\n * メニューバーに属するウィンドウを表示しているときのオーバーレイ\n */\n.menu-bar-window-overlay-class[data-v-76707645] {  /* 「menu-bar-classが付いた要素」の子の要素のクラス */\n    position: absolute;\n    \n    /*left:   0;*/\n    /*top:    30px;*/  /* メニューバーの下の位置 */\n    /*width:  100%;*/  /* メニューバーの横幅は台紙の横幅と合わせてある */\n    /*height: 920px;*/  /* だいたい『「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」』くらい */\n    \n    left:   -20px;  /* メニューバーの位置からマージン分左へ */\n    top:    -20px;  /* メニューバーの位置からマージン分上へ */\n    width:  1850px;  /* だいたい『「メニューバーの横幅(=台紙の横幅)」+「ボーダーの太さ」+「左右マージン分」』くらい */\n    height: 980px;  /* だいたい『「メニューバーの高さ」+「メニューバーと台紙の間の距離」+「台紙の高さ」+「ボーダーの太さ」+「上下マージン分」』くらい */\n    \n    z-index: 2000;  /* 台紙より上に表示される */\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ内のボタン\n */\n.menu-bar-window-button-outer-class[data-v-76707645] {\n    width: 100%;\n    height: 30px;\n    background-color: #ffffff;\n    margin: 0;\n    line-height: 30px;\n}\n.menu-bar-window-button-outer-class[data-v-76707645]:hover {\n    background-color: #eeeeee;\n    cursor: pointer;\n}\n.menu-bar-window-button-inner-space-class[data-v-76707645] {\n    display: inline-block;\n    width: 10px;\n}    \n\n/*\n * メニューバーの上にあるボタンから表示するウィンドウ\n */\n.menu-bar-main-window-class[data-v-76707645] {\n    position: absolute;\n    top:    30px;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    left:   0;\n}\n\n/*\n * 「メニューバーの上にあるボタンから表示したウィンドウ」から表示するウィンドウ\n */\n.menu-bar-sub-window-class[data-v-76707645] {\n    position: absolute;\n    z-index: 2001;\n    border: 1px solid #000;\n    background-color: #aaaaaa;\n    margin: 0;\n    padding: 0;\n    box-shadow: 0 0 3px 2px rgba(0, 0, 0, 0.3);\n    \n    /* 外部から変更するもの */\n    top:    0;\n    left:   0;\n}\n", ""]);
 
 // exports
 
@@ -11815,7 +11876,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * Nowローディング\n */\n.menu-bar-now-loading-class {\n    position: fixed;\n    left: 50%;\n    top:  50%;\n    z-index: 4000;\n    display: none;  /* フェードインするので非表示で開始 */\n}\n.menu-bar-now-loading-overlay-class {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 4001;\n    background: rgba(0, 0, 0, 0.7);\n    margin: 0;\n}\n.menu-bar-now-loading-icon-class {\n    position: absolute;\n    width:  14px;\n    height: 14px;\n    z-index: 4002;\n    border-radius: 50%;\n    background: rgba(255, 255, 255, 1.0);\n    \n    /* 外部から変更するもの */\n    left: 0;\n    top:  0;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * Nowローディング\n */\n.menu-bar-now-loading-class {\n    position: fixed;\n    left: 50%;\n    top:  50%;\n    z-index: 4000;\n    display: none;  /* フェードインするので非表示で開始 */\n}\n.menu-bar-now-loading-overlay-class {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 4001;\n    background: rgba(0, 0, 0, 0.7);\n    margin: 0;\n}\n.menu-bar-now-loading-icon-class {\n    position: absolute;\n    width:  14px;\n    height: 14px;\n    z-index: 4002;\n    border-radius: 50%;\n    background: rgba(255, 255, 255, 1.0);\n    \n    /* 外部から変更するもの */\n    left: 0;\n    top:  0;\n}\n", ""]);
 
 // exports
 
@@ -11834,7 +11895,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px 20px 20px;\n    padding: 0;\n}\n.mount-sorted-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  100%;\n    height: auto;  /* heightをここで指定し直さないと、先に書いてあるmount-classのheightが使われてしまう。 */\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px auto 20px;\n    padding: 0;\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 0;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n\n/* 要素のclass=\"\"に書いた順番ではなく、css内で書いた順番によって優先度が決まるようだ。 */\n.sticker-sorted-class[data-v-652fa580] {\n    position: relative;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 10px auto 10px;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n.sticker-inner-class[data-v-652fa580] {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 台紙\n */\n.mount-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  1800px;\n    height: 900px;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px 20px 20px;\n    padding: 0;\n}\n.mount-sorted-class[data-v-652fa580] {\n    position: relative;  /* 子要素の位置を親基準にしたかったので、親であるこれのpositionはstatic以外を指定しておく。 */\n    width:  100%;\n    height: auto;  /* heightをここで指定し直さないと、先に書いてあるmount-classのheightが使われてしまう。 */\n    border: 1px solid #000;\n    background-color: #ffffff;\n    margin: 0px auto 20px;\n    padding: 0;\n}\n\n/*\n * ふせん\n */\n.sticker-class[data-v-652fa580] {\n    position: absolute;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 0;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n\n/* 要素のclass=\"\"に書いた順番ではなく、css内で書いた順番によって優先度が決まるようだ。 */\n.sticker-sorted-class[data-v-652fa580] {\n    position: relative;\n    width:      340px;\n    min-height: 200px;\n    max-height: 430px;\n    border: 1px solid #000;\n    margin: 10px auto 10px;\n    padding: 0;\n    overflow-y: scroll;        \n    \n    /* 外部から変更するもの */\n    top:  0;\n    left: 0;\n    background-color: #000000;\n}\n.sticker-inner-class[data-v-652fa580] {\n    width:      280px;\n    min-height: 180px;\n    max-height: 400px;\n    margin: 10px auto 10px;\n}\n", ""]);
 
 // exports
 
@@ -11853,7 +11914,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 画像(動画も)\n */\n.sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト(時刻も)\n */\n.sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n\n/*\n * 個別番号\n */\n.sticker-info-item-individual-number-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n    text-align: right;\n    font-size: small;\n    color: rgba(0, 0, 0, 0.5);\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * 画像(動画も)\n */\n.sticker-content-item-image-outer-class {\n    position: relative;\n    width:  280px;\n    height: 200px;\n    margin: 0;\n    padding: 0;\n}\n.sticker-content-item-image-inner-class {\n    position: absolute;\n    left:         50%;\n    top:          50%;\n    margin-right: -50%;\n    transform:    translate(-50%, -50%);\n    width:      auto;\n    height:     auto;\n    max-width:  100%;\n    max-height: 100%;\n}\n\n/*\n * テキスト(時刻も)\n */\n.sticker-content-item-text-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n}\n\n/*\n * 個別番号\n */\n.sticker-info-item-individual-number-outer-class {\n    position: relative;\n    width:  280px;\n    margin: 0;\n    padding: 0;\n    text-align: right;\n    font-size: small;\n    color: rgba(0, 0, 0, 0.5);\n}\n", ""]);
 
 // exports
 
@@ -52087,6 +52148,30 @@ var render = function() {
                   staticClass: "menu-bar-window-button-inner-space-class"
                 }),
                 _vm._v("\n                フリー\n                "),
+                _c("span", {
+                  staticClass: "menu-bar-window-button-inner-space-class"
+                })
+              ]
+            ),
+            _vm._v(" "),
+            _c(
+              "div",
+              {
+                staticClass: "menu-bar-window-button-outer-class",
+                on: {
+                  click: function($event) {
+                    $event.preventDefault()
+                    return _vm.onClickArrangementSubSortedByIndividualNumber(
+                      $event
+                    )
+                  }
+                }
+              },
+              [
+                _c("span", {
+                  staticClass: "menu-bar-window-button-inner-space-class"
+                }),
+                _vm._v("\n                ID順\n                "),
                 _c("span", {
                   staticClass: "menu-bar-window-button-inner-space-class"
                 })

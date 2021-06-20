@@ -21,8 +21,15 @@
                 receiveWorkMountParam: {
                     isArrangementButtonClicked: 0,
                         // メニューのボタンを押すたびにwork-mountのwatchに引っかかるようにするための工夫
-                    arrangementType: 'free',
+                    arrangementType: 'free',  // arrangementTypeDefs
                 },
+                
+                arrangementTypeDefs: [  // TODO(kawadakoujisun): この定義をしているところを1か所だけにしたい
+                    'free',
+                    'sortedByIndividualNumber',
+                    'sortedByTaskStartTime',
+                    'sortedByTaskEndTime',
+                ],
             };
         },
         
@@ -34,6 +41,9 @@
                     if (emitParam.result == 'arrangementTypeFree') {
                         this.receiveWorkMountParam.arrangementType = 'free';
                         this.updateIsArrangementButtonClicked();
+                    } else if (emitParam.result == 'arrangementTypeSortedByIndividualNumber') {
+                        this.receiveWorkMountParam.arrangementType = 'sortedByIndividualNumber';
+                        this.updateIsArrangementButtonClicked();                        
                     } else if (emitParam.result == 'arrangementTypeSortedByTaskStartTime') {
                         this.receiveWorkMountParam.arrangementType = 'sortedByTaskStartTime';
                         this.updateIsArrangementButtonClicked();
@@ -46,7 +56,7 @@
             
             updateIsArrangementButtonClicked: function () {
                 this.receiveWorkMountParam.isArrangementButtonClicked =
-                    (this.receiveWorkMountParam.isArrangementButtonClicked + 1) % 3;
+                    (this.receiveWorkMountParam.isArrangementButtonClicked + 1) % this.arrangementTypeDefs.length;
             },
         },
     };

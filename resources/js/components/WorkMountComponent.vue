@@ -83,7 +83,14 @@
                 //
                 // 配置
                 //
-                arrangementType: 'free',  // 'free', 'sortedByTaskStartTime', 'sortedByTaskEndTime'
+                arrangementType: 'free',  // arrangementTypeDefs
+                
+                arrangementTypeDefs: [  // TODO(kawadakoujisun): この定義をしているところを1か所だけにしたい
+                    'free',
+                    'sortedByIndividualNumber',
+                    'sortedByTaskStartTime',
+                    'sortedByTaskEndTime',
+                ],
                 
                 //
                 // 選んだふせん
@@ -227,6 +234,34 @@
                                 updateElem.classList.remove('sticker-sorted-class');
                             }
                         }
+                    } else if (this.arrangementType == 'sortedByIndividualNumber') {
+                        if (mountElem.classList.contains('mount-sorted-class') == false) {
+                            mountElem.classList.add('mount-sorted-class');
+                        }
+                        
+                        for (let stickerParam of this.stickerParams) {
+                            const updateId = `${idBaseName}${stickerParam.id}`;
+                            const updateElem = document.getElementById(updateId);
+                            
+                            if (updateElem) {
+                                updateElem.style.top  = 0;
+                                updateElem.style.left = 0;
+                                if (updateElem.classList.contains('sticker-sorted-class') == false) {
+                                    updateElem.classList.add('sticker-sorted-class');
+                                }
+                            }
+                        }
+                        
+                        // 並び替え
+                        this.stickerParams.sort((a, b) => {
+                            if (a.individual_main_number == b.individual_main_number) {
+                                return a.individual_sub_number - b.individual_sub_number;
+                            } else {
+                                return a.individual_main_number - b.individual_main_number;
+                            }
+                        });
+                        
+                        console.log(this.stickerParams);
                     } else if (this.arrangementType == 'sortedByTaskStartTime') {
                         if (mountElem.classList.contains('mount-sorted-class') == false) {
                             mountElem.classList.add('mount-sorted-class');

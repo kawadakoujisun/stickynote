@@ -92,6 +92,11 @@
                     フリー
                     <span class="menu-bar-window-button-inner-space-class"></span>
                 </div>
+                <div class="menu-bar-window-button-outer-class" @click.prevent="onClickArrangementSubSortedByIndividualNumber">
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                    ID順
+                    <span class="menu-bar-window-button-inner-space-class"></span>
+                </div>
                 <div class="menu-bar-window-button-outer-class" @click.prevent="onClickArrangementSubSortedByTaskStartTime">
                     <span class="menu-bar-window-button-inner-space-class"></span>
                     開始時刻順
@@ -739,6 +744,16 @@
                 
                 const emitParam = {
                     result: 'arrangementTypeFree',
+                };
+                this.$emit('send-work-menu-bar-state-custom-event', emitParam);
+            },
+
+            onClickArrangementSubSortedByIndividualNumber: function (e) {
+                this.activeMainMenu = '';
+                this.activeSubMenu = '';
+                
+                const emitParam = {
+                    result: 'arrangementTypeSortedByIndividualNumber',
                 };
                 this.$emit('send-work-menu-bar-state-custom-event', emitParam);
             },
