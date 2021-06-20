@@ -533,6 +533,33 @@
                             // v-bind:keyに設定している値でなくなったものを消してくれているようだ。
                         }
                     }
+                    
+                    // 残っているふせんの個別番号に関して
+                    // 削除したふせんのmain_numberと同じ値を持つものについて、sub_numberを更新する
+                    {
+                        const stickerIndividualNumbers = response.eventParam.sticker_individual_numbers;
+                        
+                        const individualNumberIdBaseName = this.getIndividualNumberIdBaseName();
+                        
+                        for (let stickerIndividualNumber of stickerIndividualNumbers) {
+                            const idNo = stickerIndividualNumber.id;
+                            const updateId = `${individualNumberIdBaseName}${idNo}`;
+                            
+                            const updateElem = document.getElementById(updateId);
+                            
+                            if (updateElem) {
+                                // データ更新
+                                const index = this.getStickerParamIndex(idNo);
+                                if (index !== null) {
+                                    this.stickerParams[index]['individual_main_number'] = stickerIndividualNumber.individual_main_number;
+                                    this.stickerParams[index]['individual_sub_number']  = stickerIndividualNumber.individual_sub_number;
+                                }
+                                
+                                // 見た目更新
+                                commonScript.addIndividualNumberText(updateElem, stickerIndividualNumber.individual_main_number, stickerIndividualNumber.individual_sub_number);
+                            }
+                        }
+                    }
                 });
                 
             window.Echo.private('sticker-info-item-pos-update-channel.' + window.laravel.user['id'])

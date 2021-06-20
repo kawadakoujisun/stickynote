@@ -547,12 +547,22 @@ Route::delete('/work-sticker-destroy', function(Request $request) {
 			}
 		}
 		
+		// 削除するふせんの個別番号を取得しておく
+		$stickerInfoItemIndividualNumber = $sticker->infoItemIndividualNumber;
+		$oldMainNumber = $stickerInfoItemIndividualNumber->main_number;
+		
 		// ふせんを削除し、データベースに保存する
 		$sticker->delete();
-	    
+		
+		// 残っているふせんの個別番号に関して
+		// 削除したふせんのmain_numberと同じ値を持つものについて、sub_numberを更新する
+		// 関数内でロックしている。関数内でデータベースに保存している。
+		$dstStickerIndividualNumbers = \App\Sticker::updateInfoItemIndividualSubNumber($oldMainNumber);		
+		
 	    // イベント
 	    $eventParam = [
 	    	'id'      => $sticker->id,
+	    	'sticker_individual_numbers' => $dstStickerIndividualNumbers,
 	    	'user_id' => $request->user_id,
 	    ];
 	    
@@ -722,7 +732,7 @@ Route::put('/work-all-sticker-info-item-individual-number-update', function(Requ
 		
 		$newMainNumber = $request->reqParam['mainNumber'];
 		
-		// TODO(kawadakoujisun): ここではロックしては外し・・・を3回行っているが、
+		// TODO(kawadakoujisun): この関数内において、ロックしては外しロックしては外し・・・を3回行っているが、
 		//     1回だけ全体をロックし全処理済ませてロックを外すというふうにはできないだろうか？
 		
 		// main_number更新
@@ -736,85 +746,19 @@ Route::put('/work-all-sticker-info-item-individual-number-update', function(Requ
 	    	$stickerInfoItemIndividualNumber->save();
 	    	
 	    	// $dstStickerIndividualNumbersへの追加は、後で
-	    	// \App\StickerInfoItemIndividualNumber::where('main_number', $newMainNumber)
-	    	// を処理するので、そこで行われる。
+	    	// \App\Sticker::updateInfoItemIndividualSubNumber($newMainNumber);
+	    	// の戻り値$newStickerIndividualNumbersを追加することで行われる。
 		}
 
 		// 古いmain_numberと同じ値を持つものについて、sub_numberを更新する
-		{
-			// 複数個所から同時更新されるのを防ぐためロックしておく
-			$stickerInfoItemIndividualNumbers
-				= \App\StickerInfoItemIndividualNumber::where('main_number', $oldMainNumber)
-				->orderBy('sticker_id', 'asc')
-				->lockForUpdate()
-				->get();
-			$stickerInfoItemIndividualNumberCount = $stickerInfoItemIndividualNumbers->count();
-			
-			if ($stickerInfoItemIndividualNumberCount >= 2) {
-				foreach ($stickerInfoItemIndividualNumbers as $index => $stickerInfoItemIndividualNumber) {
-					$stickerInfoItemIndividualNumber->sub_number = $index + 1;
-					// データベースに保存する
-		    		$stickerInfoItemIndividualNumber->save();
-		    		
-			    	$dstStickerIndividualNumber = [
-			    		'id'                     => $stickerInfoItemIndividualNumber->sticker_id,
-			    		'individual_main_number' => $stickerInfoItemIndividualNumber->main_number,
-			    		'individual_sub_number'  => $stickerInfoItemIndividualNumber->sub_number,
-			    	];
-			    	array_push($dstStickerIndividualNumbers, $dstStickerIndividualNumber);
-				}
-			} else if ($stickerInfoItemIndividualNumberCount >= 1) {
-				$stickerInfoItemIndividualNumber = $stickerInfoItemIndividualNumbers->first();
-				$stickerInfoItemIndividualNumber->sub_number = 0;
-				// データベースに保存する
-		    	$stickerInfoItemIndividualNumber->save();
-		    	
-		    	$dstStickerIndividualNumber = [
-		    		'id'                     => $stickerInfoItemIndividualNumber->sticker_id,
-		    		'individual_main_number' => $stickerInfoItemIndividualNumber->main_number,
-		    		'individual_sub_number'  => $stickerInfoItemIndividualNumber->sub_number,
-		    	];
-		    	array_push($dstStickerIndividualNumbers, $dstStickerIndividualNumber);		    	
-			}
-		}
-	
+		// 関数内でロックしている。関数内でデータベースに保存している。
+		$oldStickerIndividualNumbers = \App\Sticker::updateInfoItemIndividualSubNumber($oldMainNumber);
+
 		// 新しいmain_numberと同じ値を持つものについて、sub_numberを更新する
-		{
-			// 複数個所から同時更新されるのを防ぐためロックしておく
-			$stickerInfoItemIndividualNumbers
-				= \App\StickerInfoItemIndividualNumber::where('main_number', $newMainNumber)
-				->orderBy('sticker_id', 'asc')
-				->lockForUpdate()
-				->get();
-			$stickerInfoItemIndividualNumberCount = $stickerInfoItemIndividualNumbers->count();
-			
-			if ($stickerInfoItemIndividualNumberCount >= 2) {
-				foreach ($stickerInfoItemIndividualNumbers as $index => $stickerInfoItemIndividualNumber) {
-					$stickerInfoItemIndividualNumber->sub_number = $index + 1;
-					// データベースに保存する
-		    		$stickerInfoItemIndividualNumber->save();
-		    		
-			    	$dstStickerIndividualNumber = [
-			    		'id'                     => $stickerInfoItemIndividualNumber->sticker_id,
-			    		'individual_main_number' => $stickerInfoItemIndividualNumber->main_number,
-			    		'individual_sub_number'  => $stickerInfoItemIndividualNumber->sub_number,
-			    	];
-			    	array_push($dstStickerIndividualNumbers, $dstStickerIndividualNumber);
-				}
-			} else if ($stickerInfoItemIndividualNumberCount >= 1) {
-				$stickerInfoItemIndividualNumber = $stickerInfoItemIndividualNumbers->first();
-				$stickerInfoItemIndividualNumber->sub_number = 0;
-				// データベースに保存する
-		    	$stickerInfoItemIndividualNumber->save();
-		    	
-			    $dstStickerIndividualNumber = [
-			    	'id'                     => $stickerInfoItemIndividualNumber->sticker_id,
-			    	'individual_main_number' => $stickerInfoItemIndividualNumber->main_number,
-			    	'individual_sub_number'  => $stickerInfoItemIndividualNumber->sub_number,
-			    ];
-			    array_push($dstStickerIndividualNumbers, $dstStickerIndividualNumber);
-			}
-		}
+		// 関数内でロックしている。関数内でデータベースに保存している。
+		$newStickerIndividualNumbers = \App\Sticker::updateInfoItemIndividualSubNumber($newMainNumber);
+		
+		$dstStickerIndividualNumbers = array_merge($oldStickerIndividualNumbers, $newStickerIndividualNumbers);
 	}
 	
 	if (count($dstStickerIndividualNumbers) > 0) {

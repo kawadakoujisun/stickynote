@@ -286,6 +286,54 @@ class Sticker extends Model
     }
     
     /**
+     * 個別番号のサブ番号を振り直してデータベースに保存する
+     * 更新した個別番号に関する情報の配列を返す
+     */    
+    public static function updateInfoItemIndividualSubNumber($individualMainNumber) {
+        $dstStickerIndividualNumbers = array();
+
+		// $individualMainNumberと同じmain_numberを持つものについて、sub_numberを更新する
+		{
+			// 複数個所から同時更新されるのを防ぐためロックしておく
+			$stickerInfoItemIndividualNumbers
+				= \App\StickerInfoItemIndividualNumber::where('main_number', $individualMainNumber)
+				->orderBy('sticker_id', 'asc')
+				->lockForUpdate()
+				->get();
+			$stickerInfoItemIndividualNumberCount = $stickerInfoItemIndividualNumbers->count();
+			
+			if ($stickerInfoItemIndividualNumberCount >= 2) {
+				foreach ($stickerInfoItemIndividualNumbers as $index => $stickerInfoItemIndividualNumber) {
+					$stickerInfoItemIndividualNumber->sub_number = $index + 1;
+					// データベースに保存する
+		    		$stickerInfoItemIndividualNumber->save();
+		    		
+			    	$dstStickerIndividualNumber = [
+			    		'id'                     => $stickerInfoItemIndividualNumber->sticker_id,
+			    		'individual_main_number' => $stickerInfoItemIndividualNumber->main_number,
+			    		'individual_sub_number'  => $stickerInfoItemIndividualNumber->sub_number,
+			    	];
+			    	array_push($dstStickerIndividualNumbers, $dstStickerIndividualNumber);
+				}
+			} else if ($stickerInfoItemIndividualNumberCount >= 1) {
+				$stickerInfoItemIndividualNumber = $stickerInfoItemIndividualNumbers->first();
+				$stickerInfoItemIndividualNumber->sub_number = 0;
+				// データベースに保存する
+		    	$stickerInfoItemIndividualNumber->save();
+		    	
+		    	$dstStickerIndividualNumber = [
+		    		'id'                     => $stickerInfoItemIndividualNumber->sticker_id,
+		    		'individual_main_number' => $stickerInfoItemIndividualNumber->main_number,
+		    		'individual_sub_number'  => $stickerInfoItemIndividualNumber->sub_number,
+		    	];
+		    	array_push($dstStickerIndividualNumbers, $dstStickerIndividualNumber);		    	
+			}
+		}
+
+        return $dstStickerIndividualNumbers;
+    }
+    
+    /**
      * stickerParamsを取得する
      */
     public static function getStickerParams()
