@@ -24,6 +24,7 @@
                     cols="40"
                     rows="2"
                     class="form-control"
+                    id="sticker-text-add-window-textarea-id"
                 >
                 </textarea>
                 <div class="sticker-text-add-window-space-class"></div>
@@ -57,6 +58,9 @@
                 if (this.isShow) {
                     // 前の入力が残っているので、消しておく。
                     this.addText = '';
+                    // textareaの大きさが前にユーザーが変更したものになっているので、戻しておく。
+                    const textareaElem = document.getElementById("sticker-text-add-window-textarea-id");
+                    textareaElem.style.height = '';  // ユーザーが大きさを変更するとheightが追加されていた。
                     
                     const windowElem = document.getElementById("sticker-text-add-window-id");
                     // いったん表示しないとサイズを取得できないので、最初は見えないところにおいておく。

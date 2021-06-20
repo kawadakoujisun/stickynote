@@ -6981,6 +6981,7 @@ __webpack_require__.r(__webpack_exports__);
 //
 //
 //
+//
 /* harmony default export */ __webpack_exports__["default"] = ({
   props: {
     showStickerTextAddWindowProps: Object
@@ -6998,7 +6999,11 @@ __webpack_require__.r(__webpack_exports__);
 
       if (this.isShow) {
         // 前の入力が残っているので、消しておく。
-        this.addText = '';
+        this.addText = ''; // textareaの大きさが前にユーザーが変更したものになっているので、戻しておく。
+
+        var textareaElem = document.getElementById("sticker-text-add-window-textarea-id");
+        textareaElem.style.height = ''; // ユーザーが大きさを変更するとheightが追加されていた。
+
         var windowElem = document.getElementById("sticker-text-add-window-id"); // いったん表示しないとサイズを取得できないので、最初は見えないところにおいておく。
 
         windowElem.style.left = '-10000px';
@@ -12070,7 +12075,7 @@ exports = module.exports = __webpack_require__(/*! ../../../node_modules/css-loa
 
 
 // module
-exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-text-add-window-overlay-class[data-v-d8ba2e6c] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-text-add-window-class[data-v-d8ba2e6c] {\n    position: fixed;\n    left:   50%;\n    top:    50%;\n    min-width: 400px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n.sticker-text-add-window-space-class[data-v-d8ba2e6c] {\n    height: 10px;\n}\n", ""]);
+exports.push([module.i, "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n/*\n * オーバーレイ\n */\n.sticker-text-add-window-overlay-class[data-v-d8ba2e6c] {\n    position: fixed;\n    left:   0;\n    top:    0;\n    width:  100%;\n    height: 100%;\n    z-index: 3000;\n    background: rgba(0, 0, 0, 0.0);\n    margin: 0;\n}\n\n/*\n * ウィンドウ\n */\n.sticker-text-add-window-class[data-v-d8ba2e6c] {\n    position: fixed;\n    left:   50%;\n    top:    50%;\n    min-width: 400px;\n    z-index: 3001;\n    border: 1px solid #000;\n    background-color: #ffffff;\n    padding: 10px;\n    box-shadow: 0 0 5px 3px rgba(0, 0, 0, 0.4);\n    \n    /* 外部から変更するもの */\n    margin-left: 0;\n    margin-top:  0;\n}\n.sticker-text-add-window-space-class[data-v-d8ba2e6c] {\n    height: 10px;\n}\n", ""]);
 
 // exports
 
@@ -53018,7 +53023,7 @@ var render = function() {
                       }
                     }
                   },
-                  [_vm._v("個別番号を変更")]
+                  [_vm._v("IDを変更")]
                 )
               ])
             ]),
@@ -53898,7 +53903,11 @@ var render = function() {
                   }
                 ],
                 staticClass: "form-control",
-                attrs: { cols: "40", rows: "2" },
+                attrs: {
+                  cols: "40",
+                  rows: "2",
+                  id: "sticker-text-add-window-textarea-id"
+                },
                 domProps: { value: _vm.addText },
                 on: {
                   input: function($event) {

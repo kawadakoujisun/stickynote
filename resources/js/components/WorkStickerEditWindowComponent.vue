@@ -63,7 +63,7 @@
             <div
                 class="sticker-edit-buttons-outer-class"
             >
-                <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickChangeIndividualNumber">個別番号を変更</button></p></div>
+                <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickChangeIndividualNumber">IDを変更</button></p></div>
                 <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickChangeColor">色を変更</button></p></div>
                 <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickAddText">テキストを追加</button></p></div>
                 <div><p><button class="btn btn-secondary btn-block" @click.prevent="onClickAddImage">画像を追加</button></p></div>
