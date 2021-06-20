@@ -415,4 +415,24 @@ class Sticker extends Model
     	
     	return $stickerParams;
     }
+   
+    /**
+     * sortStickerParamsで使用する比較関数
+     * $a, $bはstickerParamです。（sortStickerParams関数に渡した$stickerParams配列の要素）
+     */ 
+    public static function compareByIndividualNumber($a, $b) {
+        if ($a['individual_main_number'] == $b['individual_main_number']) {
+             return $a['individual_sub_number'] - $b['individual_sub_number'];
+        } else {
+            return $a['individual_main_number'] - $b['individual_main_number'];
+        }
+    }   
+    
+    /**
+     * stickerParamsをソートする
+     * sortが参照渡し(usortが参照渡し)なので、$stickerParamsは参照渡しにしておく。
+     */    
+    public static function sortStickerParams(&$stickerParams) {
+        usort($stickerParams, array('\App\Sticker', 'compareByIndividualNumber'));
+    }
 }

@@ -329,6 +329,8 @@ Route::post('/work-sticky-note-import', function(Request $request) {
 		}
 	}
 	
+	\App\Sticker::sortStickerParams($dstStickerParams);
+	
 	// イベント
 	$eventParam = [
 		'stickerParams' => $dstStickerParams,
@@ -455,6 +457,7 @@ Route::post('/work-sticky-note-import-content-item', function(Request $request) 
 
 Route::post('/work-sticky-note-import-end', function(Request $request) {
 	$stickerParams = \App\Sticker::getStickerParams();
+	\App\Sticker::sortStickerParams($stickerParams);
 	
 	// イベント
 	$eventParam = [
@@ -559,6 +562,7 @@ Route::delete('/work-sticker-destroy', function(Request $request) {
 
 Route::get('/work-mount', function() {
 	$stickerParams = \App\Sticker::getStickerParams();
+	\App\Sticker::sortStickerParams($stickerParams);
 	return $stickerParams;
 });
 

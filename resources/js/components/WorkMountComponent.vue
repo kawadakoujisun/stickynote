@@ -270,7 +270,11 @@
                         this.stickerParams.sort((a, b) => {
                             if (a.sortValue.value0 == b.sortValue.value0) {
                                 if (a.sortValue.value1 == b.sortValue.value1) {
-                                    return a.id - b.id;
+                                    if (a.individual_main_number == b.individual_main_number) {
+                                        return a.individual_sub_number - b.individual_sub_number;
+                                    } else {
+                                        return a.individual_main_number - b.individual_main_number;
+                                    }
                                 } else {
                                     return a.sortValue.value1 - b.sortValue.value1;
                                 }
@@ -321,7 +325,11 @@
                         this.stickerParams.sort((a, b) => {
                             if (a.sortValue.value0 == b.sortValue.value0) {
                                 if (a.sortValue.value1 == b.sortValue.value1) {
-                                    return a.id - b.id;
+                                    if (a.individual_main_number == b.individual_main_number) {
+                                        return a.individual_sub_number - b.individual_sub_number;
+                                    } else {
+                                        return a.individual_main_number - b.individual_main_number;
+                                    }
                                 } else {
                                     return a.sortValue.value1 - b.sortValue.value1;
                                 }
@@ -1302,6 +1310,14 @@
             // };
             // mountPosは台紙内における座標。            
             updateStickerInfoItemPos: function (reqParam) {
+                // 自分のところのデータ更新をしておく（操作中は見た目更新しかしていなかったので）
+                const index = this.getStickerParamIndex(reqParam.id);
+                if (index !== null) {
+                    const stickerParam = this.stickerParams[index];
+                    stickerParam.pos_left = reqParam.mountPos.x;
+                    stickerParam.pos_top  = reqParam.mountPos.y;
+                }
+
                 console.log('axios.put');
                 
                 axios.put(window.laravel.asset + '/api/work-sticker-info-item-pos-update', {
