@@ -13,8 +13,6 @@
 
 <script>
     export default {
-        name: 'work-top',
-        
         data() {
             return {
                 //

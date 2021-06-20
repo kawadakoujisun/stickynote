@@ -13,7 +13,7 @@
     <body>
         <div id="app">
 
-            <work-top></work-top>
+        <work-top></work-top>
 
         </div>
 
