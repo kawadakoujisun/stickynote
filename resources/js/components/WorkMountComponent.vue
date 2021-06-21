@@ -351,6 +351,8 @@
                     console.log('axios.get');
                     
                     this.stickerParams = response.data;
+                    
+                    console.log(this.stickerParams);
                 });
  
             window.Echo.private('sticky-note-import-channel.' + window.laravel.user['id'])
