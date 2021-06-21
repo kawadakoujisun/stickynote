@@ -333,7 +333,7 @@ Route::post('/work-sticky-note-import', function(Request $request) {
 	
 	// イベント
 	$eventParam = [
-		'stickerParams' => $dstStickerParams,
+		// 'stickerParams' => $dstStickerParams,  // Pusherで大きなデータ送れないのでコメントアウト。
 	    'user_id'       => $request->user_id,
 	];	
 
@@ -461,7 +461,7 @@ Route::post('/work-sticky-note-import-end', function(Request $request) {
 	
 	// イベント
 	$eventParam = [
-		'stickerParams' => $stickerParams,
+		// 'stickerParams' => $stickerParams,  // Pusherで大きなデータ送れないのでコメントアウト。
 	    'user_id'       => $request->user_id,
 	];	
 
