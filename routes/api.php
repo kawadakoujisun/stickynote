@@ -444,12 +444,12 @@ Route::post('/work-sticky-note-import-content-item', function(Request $request) 
 			// 時刻データを作成し、データベースに保存する
 			list($contentLink, $contentItem) = $sticker->createContentItemTaskTime([
 			    'task_time_type' => $taskTimeType,
-			    'time_zone_type' => $request->time_zone_type,
-			    'year_value'     => $request->year_value,
-			    'month_value'    => $request->month_value,
-			    'day_value'      => $request->day_value,
-			    'hour_value'     => $request->hour_value,
-			    'minute_value'   => $request->minute_value,
+			    'time_zone_type' => $request->reqParam['time_zone_type'],
+			    'year_value'     => $request->reqParam['year_value'],
+			    'month_value'    => $request->reqParam['month_value'],
+			    'day_value'      => $request->reqParam['day_value'],
+			    'hour_value'     => $request->reqParam['hour_value'],
+			    'minute_value'   => $request->reqParam['minute_value'],
 			]);
 		}
 	}
